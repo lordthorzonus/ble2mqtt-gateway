@@ -1,4 +1,4 @@
-name: Ruuvitag MQTT Gateway Pipeline
+name: BLE to MQTT Gateway Pipeline
 on:
   push:
     branches:

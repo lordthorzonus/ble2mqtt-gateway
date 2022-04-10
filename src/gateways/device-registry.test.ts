@@ -1,6 +1,6 @@
 import { DeviceRegistry, DeviceSettings } from "./device-registry";
 import { DeviceType } from "../types";
-import { Settings } from "luxon";
+import { DateTime, Settings } from "luxon";
 import { take, toArray } from "rxjs";
 import { Peripheral } from "@abandonware/noble";
 
@@ -23,9 +23,6 @@ function makeDeviceRegistry(settings: DeviceSettings[] = []) {
 }
 
 describe("Device Registry", () => {
-    beforeEach(() => {
-        Settings.defaultZone = "UTC";
-    });
     describe("has()", () => {
         const deviceRegistry = makeDeviceRegistry();
 
@@ -61,7 +58,7 @@ describe("Device Registry", () => {
         const originalNow = Settings.now;
 
         beforeEach(() => {
-            Settings.now = () => new Date(2020, 1, 1).valueOf();
+            Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
         });
 
         afterEach(() => {
@@ -78,7 +75,7 @@ describe("Device Registry", () => {
             expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toEqual("online");
             expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toEqual("offline");
             expect(deviceRegistry.get(defaultRuuviTagId)?.lastSeen?.toUTC().toString()).toEqual(
-                "2020-01-31T22:00:00.000Z"
+                "2019-10-10T00:00:00.000Z"
             );
         });
 
@@ -92,7 +89,7 @@ describe("Device Registry", () => {
         const originalNow = Settings.now;
 
         beforeEach(() => {
-            Settings.now = () => new Date(2020, 1, 1).valueOf();
+            Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
         });
 
         afterEach(() => {
