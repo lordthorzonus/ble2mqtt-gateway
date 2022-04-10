@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RuuviTag Gateway handleBleAdvertisement() should handle unknown ruuvitags normally if unknown ruuvitags are allowed 1`] = `
+Array [
+  Object {
+    "device": Object {
+      "friendlyName": "unknown",
+      "id": "unknown",
+      "macAddress": "unknown",
+      "rssi": null,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": Object {
+      "state": "online",
+    },
+    "time": "2020-02-01T00:00:00.000+02:00",
+    "type": "availability",
+  },
+  Object {
+    "device": Object {
+      "friendlyName": "unknown",
+      "id": undefined,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "rssi": 23,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": Object {
+      "absoluteHumidity": 11.84,
+      "accelerationX": 0.004,
+      "accelerationY": -0.004,
+      "accelerationZ": 1.036,
+      "batteryVoltage": 2.977,
+      "dewPoint": 14.2,
+      "heatIndex": 26,
+      "humidex": 28,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "measurementSequence": 205,
+      "movementCounter": 66,
+      "pressure": 100044,
+      "relativeHumidityPercentage": 53.49,
+      "temperature": 24.3,
+      "txPower": 4,
+    },
+    "time": "2020-02-01T00:00:00.000+02:00",
+    "type": "sensor-data",
+  },
+  Object {
+    "device": Object {
+      "friendlyName": "unknown",
+      "id": undefined,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "rssi": 23,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": Object {
+      "absoluteHumidity": 11.84,
+      "accelerationX": 0.004,
+      "accelerationY": -0.004,
+      "accelerationZ": 1.036,
+      "batteryVoltage": 2.977,
+      "dewPoint": 14.2,
+      "heatIndex": 26,
+      "humidex": 28,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "measurementSequence": 205,
+      "movementCounter": 66,
+      "pressure": 100044,
+      "relativeHumidityPercentage": 53.49,
+      "temperature": 24.3,
+      "txPower": 4,
+    },
+    "time": "2020-02-01T00:00:00.000+02:00",
+    "type": "sensor-data",
+  },
+]
+`;
+
+exports[`RuuviTag Gateway handleBleAdvertisement() should produce a availability and a payload message for a found ruuvitag advertisement 1`] = `
+Array [
+  Object {
+    "device": Object {
+      "friendlyName": "my_ruuvitag",
+      "id": "a1:b2",
+      "macAddress": "a1:b2",
+      "rssi": null,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": Object {
+      "state": "online",
+    },
+    "time": "2020-02-01T00:00:00.000+02:00",
+    "type": "availability",
+  },
+  Object {
+    "device": Object {
+      "friendlyName": "my_ruuvitag",
+      "id": undefined,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "rssi": 23,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": Object {
+      "absoluteHumidity": 11.84,
+      "accelerationX": 0.004,
+      "accelerationY": -0.004,
+      "accelerationZ": 1.036,
+      "batteryVoltage": 2.977,
+      "dewPoint": 14.2,
+      "heatIndex": 26,
+      "humidex": 28,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "measurementSequence": 205,
+      "movementCounter": 66,
+      "pressure": 100044,
+      "relativeHumidityPercentage": 53.49,
+      "temperature": 24.3,
+      "txPower": 4,
+    },
+    "time": "2020-02-01T00:00:00.000+02:00",
+    "type": "sensor-data",
+  },
+]
+`;
+
+exports[`RuuviTag Gateway observeUnavailableDevices() should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
+Object {
+  "device": Object {
+    "friendlyName": "my_ruuvitag",
+    "id": "a1:b2",
+    "macAddress": "a1:b2",
+    "rssi": null,
+    "type": "ruuvitag",
+  },
+  "id": "mock-uuid",
+  "payload": Object {
+    "state": "offline",
+  },
+  "time": Any<DateTime>,
+  "type": "availability",
+}
+`;

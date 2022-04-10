@@ -1,0 +1,88 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Config getConfiguration() should return the proper configuration given in the env variable 1`] = `
+Object {
+  "gateways": Object {
+    "base_topic": "mqtt",
+    "ruuvitag": Object {
+      "allow_unknown": true,
+      "devices": Array [
+        Object {
+          "id": "da21045d81a8",
+          "name": "fridge_ruuvitag",
+        },
+        Object {
+          "id": "641cae0910b5",
+          "name": "balcony_ruuvitag",
+        },
+      ],
+      "timeout": 10000,
+    },
+  },
+  "homeassistant": Object {
+    "discovery_topic": "homeassistant",
+  },
+  "mqtt": Object {
+    "client_id": "c",
+    "host": "mqtt.lan.fi",
+    "password": "b",
+    "port": 8883,
+    "protocol": "mqtt",
+    "username": "a",
+  },
+}
+`;
+
+exports[`Config getConfiguration() should throw errors in case the given configuration is invalid 1`] = `
+"[
+  {
+    \\"code\\": \\"invalid_type\\",
+    \\"expected\\": \\"string\\",
+    \\"received\\": \\"undefined\\",
+    \\"path\\": [
+      \\"mqtt\\",
+      \\"host\\"
+    ],
+    \\"message\\": \\"Required\\"
+  },
+  {
+    \\"code\\": \\"invalid_type\\",
+    \\"expected\\": \\"string\\",
+    \\"received\\": \\"number\\",
+    \\"path\\": [
+      \\"mqtt\\",
+      \\"username\\"
+    ],
+    \\"message\\": \\"Expected string, received number\\"
+  },
+  {
+    \\"code\\": \\"invalid_type\\",
+    \\"expected\\": \\"string\\",
+    \\"received\\": \\"undefined\\",
+    \\"path\\": [
+      \\"mqtt\\",
+      \\"password\\"
+    ],
+    \\"message\\": \\"Required\\"
+  },
+  {
+    \\"code\\": \\"invalid_type\\",
+    \\"expected\\": \\"string\\",
+    \\"received\\": \\"undefined\\",
+    \\"path\\": [
+      \\"mqtt\\",
+      \\"client_id\\"
+    ],
+    \\"message\\": \\"Required\\"
+  },
+  {
+    \\"code\\": \\"invalid_type\\",
+    \\"expected\\": \\"object\\",
+    \\"received\\": \\"undefined\\",
+    \\"path\\": [
+      \\"gateways\\"
+    ],
+    \\"message\\": \\"Required\\"
+  }
+]"
+`;
