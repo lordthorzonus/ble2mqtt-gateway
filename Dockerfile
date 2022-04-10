@@ -3,7 +3,7 @@ ARG NPM_VERSION=8.5.0
 
 FROM node:${NODE_VERSION}-alpine as base
 RUN npm i -g npm@${NPM_VERSION}
-RUN apk add --no-cache --virtual --update \
+RUN apk add --no-cache --update \
     bluez \
     bluez-deprecated
 
@@ -12,7 +12,7 @@ FROM base as development
 
 ENV NODE_ENV=development
 
-RUN apk add --no-cache --virtual --update \
+RUN apk add --no-cache --update \
     python3 \
     make \
     g++
