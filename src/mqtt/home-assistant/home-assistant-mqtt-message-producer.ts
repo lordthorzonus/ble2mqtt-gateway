@@ -50,6 +50,9 @@ const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSen
 const getDeviceName = (deviceMessage: DeviceMessage) =>
     `${deviceMessage.device.type} ${deviceMessage.device.friendlyName}`;
 
+const getEntityName = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSensorConfiguration) =>
+    `${deviceMessage.device.friendlyName} ${configEntry.name}`;
+
 interface HADiscoveryPayload {
     name: string;
     device_class: string;
@@ -75,7 +78,7 @@ const getHaDiscoveryPayload = (
 ): HADiscoveryPayload | null =>
     deviceMessage.payload.state === "online"
         ? {
-              name: configEntry.name,
+              name: getEntityName(deviceMessage, configEntry),
               device_class: configEntry.deviceClass,
               unit_of_measurement: configEntry.unitOfMeasurement,
               object_id: getObjectID(deviceMessage, configEntry),

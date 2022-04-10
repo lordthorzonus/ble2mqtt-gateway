@@ -28,8 +28,11 @@ homeassistant:
 ```yaml
 services:
   ble2mqtt:
-    image: "lordthorzonus/ble2mqtt-gateway:0.1.0"
+    image: "lordthorzonus/ble2mqtt-gateway:edge"
     restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
     volumes:
       - ./configuration.yaml:/home/node/app/config/configuration.yaml
     enviroment:

@@ -26,8 +26,8 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     batteryVoltage: {
-        deviceClass: HomeAssistantDeviceClass.Battery,
-        name: "Battery",
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "Battery Voltage",
         unitOfMeasurement: "mV",
         uniqueId: "battery_voltage",
         device: ruuviTagDeviceConfiguration,
