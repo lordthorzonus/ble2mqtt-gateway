@@ -80,6 +80,11 @@ describe("BLE Gateway", () => {
 
     const handledMessage = "handled message";
 
+    afterEach(() => {
+        mockRuuvitagGateway.mockObserveUnavailableDevices.mockReset();
+        mockRuuvitagGateway.mockHandleBleAdvertisement.mockReset();
+    });
+
     it("should use the correct gateway for ruuvitag ble advertisements", (done) => {
         const gateway = new BleGateway(validGatewayConfiguration);
         mockBleScanner.mockReturnValue(from([ruuviPeripheral, ruuviPeripheral]));

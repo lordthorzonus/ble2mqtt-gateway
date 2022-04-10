@@ -23,6 +23,9 @@ function makeDeviceRegistry(settings: DeviceSettings[] = []) {
 }
 
 describe("Device Registry", () => {
+    beforeEach(() => {
+        Settings.defaultZone = "UTC";
+    });
     describe("has()", () => {
         const deviceRegistry = makeDeviceRegistry();
 

@@ -16,7 +16,7 @@ Object {
           "name": "balcony_ruuvitag",
         },
       ],
-      "timeout": 10000,
+      "timeout": 30000,
     },
   },
   "homeassistant": Object {
@@ -31,58 +31,4 @@ Object {
     "username": "a",
   },
 }
-`;
-
-exports[`Config getConfiguration() should throw errors in case the given configuration is invalid 1`] = `
-"[
-  {
-    \\"code\\": \\"invalid_type\\",
-    \\"expected\\": \\"string\\",
-    \\"received\\": \\"undefined\\",
-    \\"path\\": [
-      \\"mqtt\\",
-      \\"host\\"
-    ],
-    \\"message\\": \\"Required\\"
-  },
-  {
-    \\"code\\": \\"invalid_type\\",
-    \\"expected\\": \\"string\\",
-    \\"received\\": \\"number\\",
-    \\"path\\": [
-      \\"mqtt\\",
-      \\"username\\"
-    ],
-    \\"message\\": \\"Expected string, received number\\"
-  },
-  {
-    \\"code\\": \\"invalid_type\\",
-    \\"expected\\": \\"string\\",
-    \\"received\\": \\"undefined\\",
-    \\"path\\": [
-      \\"mqtt\\",
-      \\"password\\"
-    ],
-    \\"message\\": \\"Required\\"
-  },
-  {
-    \\"code\\": \\"invalid_type\\",
-    \\"expected\\": \\"string\\",
-    \\"received\\": \\"undefined\\",
-    \\"path\\": [
-      \\"mqtt\\",
-      \\"client_id\\"
-    ],
-    \\"message\\": \\"Required\\"
-  },
-  {
-    \\"code\\": \\"invalid_type\\",
-    \\"expected\\": \\"object\\",
-    \\"received\\": \\"undefined\\",
-    \\"path\\": [
-      \\"gateways\\"
-    ],
-    \\"message\\": \\"Required\\"
-  }
-]"
 `;

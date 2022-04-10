@@ -13,14 +13,6 @@ export interface RuuviTag {
     id: string;
     rssi: number;
 }
-
-export type RuuviTagMeasurement = {
-    id: string;
-    peripheral: RuuviTag;
-    time: Date;
-    sensorData: EnhancedRuuviTagSensorData;
-};
-
 const getSensorData = flow(parse, decorateRuuviTagSensorDataWithCalculatedValues);
 
 export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
@@ -34,7 +26,7 @@ export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
         device: {
             macAddress,
             rssi: peripheral.rssi,
-            id: peripheral.id,
+            id: device.id,
             type: DeviceType.Ruuvitag,
             friendlyName: device.friendlyName,
         },

@@ -37,6 +37,7 @@ describe("RuuviTag Gateway", () => {
     describe("handleBleAdvertisement()", () => {
         beforeEach(() => {
             Settings.now = () => new Date(2020, 1, 1).valueOf();
+            Settings.defaultZone = "UTC";
             mockedUuid.mockReturnValue("mock-uuid");
         });
 

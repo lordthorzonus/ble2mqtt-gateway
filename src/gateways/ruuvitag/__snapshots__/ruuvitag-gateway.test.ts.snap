@@ -14,13 +14,13 @@ Array [
     "payload": Object {
       "state": "online",
     },
-    "time": "2020-02-01T00:00:00.000+02:00",
+    "time": "2020-01-31T22:00:00.000Z",
     "type": "availability",
   },
   Object {
     "device": Object {
       "friendlyName": "unknown",
-      "id": undefined,
+      "id": "unknown",
       "macAddress": "CB:B8:33:4C:88:4F",
       "rssi": 23,
       "type": "ruuvitag",
@@ -43,13 +43,13 @@ Array [
       "temperature": 24.3,
       "txPower": 4,
     },
-    "time": "2020-02-01T00:00:00.000+02:00",
+    "time": "2020-01-31T22:00:00.000Z",
     "type": "sensor-data",
   },
   Object {
     "device": Object {
       "friendlyName": "unknown",
-      "id": undefined,
+      "id": "unknown",
       "macAddress": "CB:B8:33:4C:88:4F",
       "rssi": 23,
       "type": "ruuvitag",
@@ -72,7 +72,7 @@ Array [
       "temperature": 24.3,
       "txPower": 4,
     },
-    "time": "2020-02-01T00:00:00.000+02:00",
+    "time": "2020-01-31T22:00:00.000Z",
     "type": "sensor-data",
   },
 ]
@@ -92,13 +92,13 @@ Array [
     "payload": Object {
       "state": "online",
     },
-    "time": "2020-02-01T00:00:00.000+02:00",
+    "time": "2020-01-31T22:00:00.000Z",
     "type": "availability",
   },
   Object {
     "device": Object {
       "friendlyName": "my_ruuvitag",
-      "id": undefined,
+      "id": "a1:b2",
       "macAddress": "CB:B8:33:4C:88:4F",
       "rssi": 23,
       "type": "ruuvitag",
@@ -121,7 +121,7 @@ Array [
       "temperature": 24.3,
       "txPower": 4,
     },
-    "time": "2020-02-01T00:00:00.000+02:00",
+    "time": "2020-01-31T22:00:00.000Z",
     "type": "sensor-data",
   },
 ]

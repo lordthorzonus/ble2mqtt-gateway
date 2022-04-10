@@ -1,16 +1,15 @@
-import { Device, DeviceType } from "../../types";
+import { Device, DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
 import parse from "./ruuvitag-parser";
 import decorateRuuviTagSensorDataWithCalculatedValues, {
     EnhancedRuuviTagSensorData,
 } from "./ruuvitag-sensor-data-decorator";
 import { v4 as uuid } from "uuid";
 import { Peripheral } from "noble";
-import {
-    RuuviTagMeasurement,
-    transformPeripheralAdvertisementToSensorDataDeviceMessage,
-} from "./ruuvitag-measurement-transformer";
+import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
+import { DateTime, Settings } from "luxon";
 
-const mockedTime = new Date("2019-10-10");
+Settings.defaultZone = "UTC";
+const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
 
 jest.mock("./ruuvitag-parser");
 
@@ -25,16 +24,19 @@ jest.mock("uuid");
 const mockedUuid = uuid as jest.Mock;
 
 describe("RuuviTag Measurement Transformer", () => {
+    const originalNow = Settings.now;
+    beforeEach(() => {
+        Settings.now = () => mockedTime.valueOf();
+        Settings.defaultZone = "UTC";
+    });
+
+    afterEach(() => {
+        Settings.now = originalNow;
+
+        jest.clearAllMocks();
+        jest.restoreAllMocks();
+    });
     describe("transformPeripheralToRuuviTagMeasurement()", () => {
-        beforeEach(() => {
-            jest.spyOn(Date, "now").mockImplementation(() => mockedTime.valueOf());
-        });
-
-        afterEach(() => {
-            jest.clearAllMocks();
-            jest.restoreAllMocks();
-        });
-
         const peripheral = {
             advertisement: {
                 manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
@@ -70,15 +72,20 @@ describe("RuuviTag Measurement Transformer", () => {
             macAddress: "cb:b8:33:4c:88:4f",
         };
 
-        const expectedMeasurement: RuuviTagMeasurement = {
+        const expectedMessage: DeviceMessage = {
             id: mockId,
-            peripheral: {
-                id: peripheral.id,
+            type: DeviceMessageType.SensorData,
+            device: {
+                type: DeviceType.Ruuvitag,
+                friendlyName: device.friendlyName,
+                id: device.id,
                 macAddress: sensorData.macAddress as string,
                 rssi: peripheral.rssi,
             },
             time: mockedTime,
-            sensorData,
+            payload: {
+                ...sensorData,
+            },
         };
 
         it("should transform the given peripheral advertisement into RuuviTagMeasurement", () => {
@@ -88,7 +95,7 @@ describe("RuuviTag Measurement Transformer", () => {
             mockedUuid.mockReturnValue(mockId);
 
             expect(transformPeripheralAdvertisementToSensorDataDeviceMessage(peripheral as Peripheral, device)).toEqual(
-                expectedMeasurement
+                expectedMessage
             );
 
             expect(mockedParse).toHaveBeenCalledWith(peripheral.advertisement.manufacturerData);
@@ -106,12 +113,12 @@ describe("RuuviTag Measurement Transformer", () => {
 
             expect(transformPeripheralAdvertisementToSensorDataDeviceMessage(peripheral as Peripheral, device)).toEqual(
                 {
-                    ...expectedMeasurement,
-                    peripheral: {
-                        ...expectedMeasurement.peripheral,
+                    ...expectedMessage,
+                    device: {
+                        ...expectedMessage.device,
                         macAddress: peripheral.address,
                     },
-                    sensorData: sensorDataWithoutMacAddress,
+                    payload: { ...sensorDataWithoutMacAddress },
                 }
             );
         });

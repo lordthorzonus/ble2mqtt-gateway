@@ -5,16 +5,15 @@ jest.mock("./calculators/humidex-calculator");
 
 import { RuuviTagSensorData } from "../ruuvitag-parser";
 import decorateRuuviTagSensorDataWithCalculatedValues from "./index";
-import { mocked } from "ts-jest/utils";
 import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calculator";
 import { calculateDewPoint } from "./calculators/dew-point-calculator";
 import { calculateHeatIndex } from "./calculators/heat-index-calculator";
 import { calculateHumidex } from "./calculators/humidex-calculator";
 
-const calculateAbsoluteHumidityMock = mocked(calculateAbsoluteHumidity);
-const calculateDewPointMock = mocked(calculateDewPoint);
-const calculateHeatIndexMock = mocked(calculateHeatIndex);
-const calculateHumidexMock = mocked(calculateHumidex);
+const calculateAbsoluteHumidityMock = calculateAbsoluteHumidity as jest.Mock;
+const calculateDewPointMock = calculateDewPoint as jest.Mock;
+const calculateHeatIndexMock = calculateHeatIndex as jest.Mock;
+const calculateHumidexMock = calculateHumidex as jest.Mock;
 
 describe("RuuviTag sensor data decorator", () => {
     it("should enhance the given ruuvitag sensor data with calculations", () => {
