@@ -6,12 +6,7 @@ RUN npm i -g npm@${NPM_VERSION}
 RUN apk add --no-cache --update \
     tzdata \
     bluez \
-    bluez-deprecated \
-    bluez-libs \
-    bluez-dev \
-    bluetooth \
-    bluetoothctl \
-    libbluetooth-dev
+    bluez-deprecated
 
 FROM base as development
 
