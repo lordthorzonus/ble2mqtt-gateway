@@ -3,6 +3,7 @@ import {
     DeviceMessage,
     DeviceMessageType,
     DeviceType,
+    HomeAssistantDeviceClass,
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDeviceType,
@@ -55,7 +56,8 @@ const getEntityName = (deviceMessage: DeviceMessage, configEntry: HomeAssistantS
 
 interface HADiscoveryPayload {
     name: string;
-    device_class: string;
+    device_class?: string;
+    expire_after: number;
     unit_of_measurement: string;
     object_id: string;
     unique_id: string;
@@ -79,12 +81,14 @@ const getHaDiscoveryPayload = (
     deviceMessage.payload.state === "online"
         ? {
               name: getEntityName(deviceMessage, configEntry),
-              device_class: configEntry.deviceClass,
+              device_class:
+                  configEntry.deviceClass === HomeAssistantDeviceClass.None ? undefined : configEntry.deviceClass,
               unit_of_measurement: configEntry.unitOfMeasurement,
               object_id: getObjectID(deviceMessage, configEntry),
               unique_id: getObjectID(deviceMessage, configEntry),
               availability_topic: getDeviceAvailabilityTopic(deviceMessage.device),
               availability_template: "{{ value_json.state }}",
+              expire_after: deviceMessage.device.timeout / 1000,
               device: {
                   ...configEntry.device,
                   name: getDeviceName(deviceMessage),

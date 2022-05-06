@@ -23,6 +23,7 @@ export interface DeviceMessage {
         rssi: number | null;
         friendlyName: string;
         type: DeviceType;
+        timeout: number;
     };
     id: string;
     time: DateTime;
@@ -63,6 +64,7 @@ export interface HomeAssistantSensorConfiguration {
     unitOfMeasurement: string;
     valueTemplate?: string;
     uniqueId: string;
+    icon?: string;
     device: {
         manufacturer: string;
         model: string;

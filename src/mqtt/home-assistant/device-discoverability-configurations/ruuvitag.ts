@@ -31,6 +31,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         unitOfMeasurement: "mV",
         uniqueId: "battery_voltage",
         device: ruuviTagDeviceConfiguration,
+        icon: "mdi:battery",
     },
     relativeHumidityPercentage: {
         deviceClass: HomeAssistantDeviceClass.Humidity,
@@ -38,6 +39,8 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         unitOfMeasurement: "%",
         uniqueId: "humidity",
         device: ruuviTagDeviceConfiguration,
+        valueTemplate: "{{ value_json.relativeHumidityPercentage | float(2) }}",
+        icon: "mdi:gauge",
     },
     dewPoint: {
         deviceClass: HomeAssistantDeviceClass.None,
@@ -59,6 +62,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         unitOfMeasurement: "dBm",
         uniqueId: "txPower",
         device: ruuviTagDeviceConfiguration,
+        icon: "mdi:signal",
     },
     accelerationX: {
         deviceClass: HomeAssistantDeviceClass.None,

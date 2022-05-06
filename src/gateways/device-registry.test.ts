@@ -1,6 +1,6 @@
 import { DeviceRegistry, DeviceSettings } from "./device-registry";
 import { DeviceType } from "../types";
-import { DateTime, Settings } from "luxon";
+import { Settings } from "luxon";
 import { take, toArray } from "rxjs";
 import { Peripheral } from "@abandonware/noble";
 
@@ -45,6 +45,7 @@ describe("Device Registry", () => {
                 },
                 lastPublishedAvailability: "offline",
                 lastSeen: null,
+                timeout: 30000,
             });
         });
 

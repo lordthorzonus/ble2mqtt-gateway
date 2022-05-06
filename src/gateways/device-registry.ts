@@ -13,6 +13,7 @@ export interface DeviceRegistryEntry extends DeviceSettings {
     lastSeen: DateTime | null;
     availability: "online" | "offline";
     lastPublishedAvailability: "online" | "offline";
+    timeout: number;
 }
 
 export class DeviceRegistry {
@@ -26,6 +27,7 @@ export class DeviceRegistry {
                 lastSeen: null,
                 availability: "offline",
                 lastPublishedAvailability: "offline",
+                timeout: setting.timeout ?? defaultTimeout,
             })
         );
 
@@ -107,22 +109,21 @@ export class DeviceRegistry {
         };
     }
 
-    private isDeviceUnavailable(device: DeviceRegistryEntry): boolean {
+    private static isDeviceUnavailable(device: DeviceRegistryEntry): boolean {
         if (device.lastSeen === null) {
             return true;
         }
 
         const difference = -device.lastSeen.diffNow().toMillis();
-        const timeout = device.timeout ?? this.defaultTimeout;
 
-        return difference > timeout;
+        return difference > device.timeout;
     }
 
     public observeUnavailableDevices(): Observable<DeviceRegistryEntry> {
         return interval(10000).pipe(
             mergeMap(() => {
                 return from(this.devices.values()).pipe(
-                    filter((device) => this.isDeviceUnavailable(device)),
+                    filter((device) => DeviceRegistry.isDeviceUnavailable(device)),
                     filter((device) => device.availability === "online"),
                     map((device) => {
                         return this.registerDeviceAsUnavailable(device);

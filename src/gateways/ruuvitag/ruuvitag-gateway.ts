@@ -1,6 +1,6 @@
 import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry";
 import { Peripheral } from "@abandonware/noble";
-import { Device, DeviceAvailabilityMessage, DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
+import { DeviceAvailabilityMessage, DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
 import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
 import { map, Observable } from "rxjs";
 import { v4 as uuid } from "uuid";
@@ -62,11 +62,11 @@ export class RuuviTagGateway implements Gateway {
             const device = this.getDeviceRegistryEntry(id);
 
             if (shouldRuuviTagStatusBeBroadcast(device)) {
-                subscriber.next(generateAvailabilityMessage(device.device, "online"));
+                subscriber.next(generateAvailabilityMessage(device, "online"));
                 this.deviceRegistry.registerDeviceStatusPublished(id);
             }
 
-            subscriber.next(transformPeripheralAdvertisementToSensorDataDeviceMessage(peripheral, device.device));
+            subscriber.next(transformPeripheralAdvertisementToSensorDataDeviceMessage(peripheral, device));
             subscriber.complete();
         });
     }
@@ -75,7 +75,7 @@ export class RuuviTagGateway implements Gateway {
         return this.deviceRegistry.observeUnavailableDevices().pipe(
             map((ruuviTag) => {
                 this.deviceRegistry.registerDeviceStatusPublished(ruuviTag.device.id);
-                return generateAvailabilityMessage(ruuviTag.device, "offline");
+                return generateAvailabilityMessage(ruuviTag, "offline");
             })
         );
     }
@@ -86,19 +86,21 @@ export class RuuviTagGateway implements Gateway {
 }
 
 const generateAvailabilityMessage = (
-    device: Device,
+    deviceRegistryEntry: DeviceRegistryEntry,
     state: "online" | "offline",
     peripheral?: Peripheral
 ): DeviceAvailabilityMessage => {
+    const { id, friendlyName } = deviceRegistryEntry.device;
     return {
         id: uuid(),
         type: DeviceMessageType.Availability,
         device: {
-            macAddress: device.id,
-            id: device.id,
-            friendlyName: device.friendlyName,
+            macAddress: id,
+            id: id,
+            friendlyName: friendlyName,
             type: DeviceType.Ruuvitag,
             rssi: peripheral?.rssi || null,
+            timeout: deviceRegistryEntry.timeout,
         },
         time: DateTime.now(),
         payload: {

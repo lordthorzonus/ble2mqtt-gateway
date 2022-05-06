@@ -31,6 +31,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 friendlyName: "fridge",
                 rssi: 23,
                 type: DeviceType.Ruuvitag,
+                timeout: 10000,
             },
         };
 
@@ -62,6 +63,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                     friendlyName: "fridge",
                     rssi: 23,
                     type: DeviceType.Ruuvitag,
+                    timeout: 10000,
                 },
             },
         ],
@@ -78,6 +80,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                     friendlyName: "fridge",
                     rssi: 23,
                     type: DeviceType.Ruuvitag,
+                    timeout: 30000,
                 },
             },
         ],

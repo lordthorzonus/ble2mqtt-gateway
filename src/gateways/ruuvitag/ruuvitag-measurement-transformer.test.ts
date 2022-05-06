@@ -1,4 +1,4 @@
-import { Device, DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
+import { DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
 import parse from "./ruuvitag-parser";
 import decorateRuuviTagSensorDataWithCalculatedValues, {
     EnhancedRuuviTagSensorData,
@@ -7,6 +7,7 @@ import { v4 as uuid } from "uuid";
 import { Peripheral } from "noble";
 import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
 import { DateTime, Settings } from "luxon";
+import { DeviceRegistryEntry } from "../device-registry";
 
 Settings.defaultZone = "UTC";
 const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
@@ -46,10 +47,16 @@ describe("RuuviTag Measurement Transformer", () => {
             id: "id",
         };
 
-        const device: Device = {
-            id: "1234a",
-            type: DeviceType.Ruuvitag,
-            friendlyName: "friendly_name",
+        const device: DeviceRegistryEntry = {
+            device: {
+                id: "1234a",
+                type: DeviceType.Ruuvitag,
+                friendlyName: "friendly_name",
+            },
+            timeout: 10000,
+            availability: "offline",
+            lastPublishedAvailability: "offline",
+            lastSeen: null,
         };
 
         const mockId = "id-1";
@@ -77,10 +84,11 @@ describe("RuuviTag Measurement Transformer", () => {
             type: DeviceMessageType.SensorData,
             device: {
                 type: DeviceType.Ruuvitag,
-                friendlyName: device.friendlyName,
-                id: device.id,
+                friendlyName: device.device.friendlyName,
+                id: device.device.id,
                 macAddress: sensorData.macAddress as string,
                 rssi: peripheral.rssi,
+                timeout: 10000,
             },
             time: mockedTime,
             payload: {
