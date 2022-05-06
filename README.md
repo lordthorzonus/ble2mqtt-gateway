@@ -35,7 +35,7 @@ services:
     network_mode: host
     volumes:
       - ./configuration.yaml:/home/node/app/config/configuration.yaml
-    enviroment:
-      - CONFIG_FILE_LOCATION: "/home/node/app/config/configuration.yaml"
-      - TZ: "Europe/Helsinki" 
+    environment:
+      - CONFIG_FILE_LOCATION="/home/node/app/config/configuration.yaml"
+      - TZ="Europe/Helsinki"
 ```
