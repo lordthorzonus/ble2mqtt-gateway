@@ -7,7 +7,6 @@ RUN apk add --no-cache --update \
     bluez \
     bluez-deprecated
 
-
 FROM base as development
 
 ENV NODE_ENV=development
@@ -38,7 +37,7 @@ WORKDIR /home/node/app
 
 COPY --from=development --chown=node:node /home/node/app/ ./
 
-RUN npm build
+RUN npm run build
 RUN npm prune
 
 CMD [ "npm", "run", "start" ]
