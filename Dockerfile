@@ -4,8 +4,14 @@ ARG NPM_VERSION=8.5.0
 FROM node:${NODE_VERSION}-alpine as base
 RUN npm i -g npm@${NPM_VERSION}
 RUN apk add --no-cache --update \
+    tzdata \
     bluez \
-    bluez-deprecated
+    bluez-deprecated \
+    bluez-libs \
+    bluez-dev \
+    bluetooth \
+    bluetoothctl \
+    libbluetooth-dev
 
 FROM base as development
 
