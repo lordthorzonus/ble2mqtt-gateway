@@ -38,6 +38,7 @@ WORKDIR /home/node/app
 
 COPY --from=development --chown=node:node /home/node/app/ ./
 
+RUN npm build
 RUN npm prune
 
 CMD [ "npm", "run", "start" ]
