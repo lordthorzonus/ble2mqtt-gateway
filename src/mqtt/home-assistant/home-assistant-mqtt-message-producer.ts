@@ -65,6 +65,7 @@ interface HADiscoveryPayload {
     availability_template: string;
     value_template: string;
     state_topic: string;
+    icon?: string;
     device: {
         name: string;
         manufacturer: string;
@@ -89,6 +90,7 @@ const getHaDiscoveryPayload = (
               availability_topic: getDeviceAvailabilityTopic(deviceMessage.device),
               availability_template: "{{ value_json.state }}",
               expire_after: deviceMessage.device.timeout / 1000,
+              icon: configEntry.icon,
               device: {
                   ...configEntry.device,
                   name: getDeviceName(deviceMessage),

@@ -13,12 +13,12 @@ Array [
     "topic": "homeassistant/sensor/fridge_temperature/config",
   },
   Object {
-    "payload": "{\\"name\\":\\"fridge Battery Voltage\\",\\"unit_of_measurement\\":\\"mV\\",\\"object_id\\":\\"fridge_battery_voltage\\",\\"unique_id\\":\\"fridge_battery_voltage\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.batteryVoltage }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
+    "payload": "{\\"name\\":\\"fridge Battery Voltage\\",\\"unit_of_measurement\\":\\"mV\\",\\"object_id\\":\\"fridge_battery_voltage\\",\\"unique_id\\":\\"fridge_battery_voltage\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:battery\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.batteryVoltage }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
     "retain": true,
     "topic": "homeassistant/sensor/fridge_battery_voltage/config",
   },
   Object {
-    "payload": "{\\"name\\":\\"fridge Humidity\\",\\"device_class\\":\\"humidity\\",\\"unit_of_measurement\\":\\"%\\",\\"object_id\\":\\"fridge_humidity\\",\\"unique_id\\":\\"fridge_humidity\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.relativeHumidityPercentage | float(2) }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
+    "payload": "{\\"name\\":\\"fridge Humidity\\",\\"device_class\\":\\"humidity\\",\\"unit_of_measurement\\":\\"%\\",\\"object_id\\":\\"fridge_humidity\\",\\"unique_id\\":\\"fridge_humidity\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:gauge\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.relativeHumidityPercentage | float(2) }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
     "retain": true,
     "topic": "homeassistant/sensor/fridge_humidity/config",
   },
@@ -33,7 +33,7 @@ Array [
     "topic": "homeassistant/sensor/fridge_pressure/config",
   },
   Object {
-    "payload": "{\\"name\\":\\"fridge TX Power\\",\\"unit_of_measurement\\":\\"dBm\\",\\"object_id\\":\\"fridge_txPower\\",\\"unique_id\\":\\"fridge_txPower\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.txPower }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
+    "payload": "{\\"name\\":\\"fridge TX Power\\",\\"unit_of_measurement\\":\\"dBm\\",\\"object_id\\":\\"fridge_txPower\\",\\"unique_id\\":\\"fridge_txPower\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:signal\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.txPower }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
     "retain": true,
     "topic": "homeassistant/sensor/fridge_txPower/config",
   },

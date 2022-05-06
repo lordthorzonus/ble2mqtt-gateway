@@ -31,8 +31,6 @@ FROM base as production
 ENV NODE_ENV=production
 RUN rm -rf /opt/yarn*
 
-USER node
-
 RUN mkdir -p /home/node/app && chown node:node /home/node/app
 WORKDIR /home/node/app
 
@@ -41,4 +39,4 @@ COPY --from=development --chown=node:node /home/node/app/ ./
 RUN npm run build
 RUN npm prune
 
-CMD [ "npm", "run", "start" ]
+CMD [ "node", "dist/index.js" ]
