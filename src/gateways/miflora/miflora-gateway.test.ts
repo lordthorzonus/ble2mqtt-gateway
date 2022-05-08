@@ -103,7 +103,63 @@ describe("MiFlora Gateway", () => {
             });
         });
     });
-    describe("isMiFloraPeripheral()", () => {});
+    describe("isMiFloraPeripheral()", () => {
+        it.each([
+            [
+                true,
+                {
+                    advertisement: {
+                        localName: "Flower care",
+                    },
+                },
+            ],
+            [
+                true,
+                {
+                    advertisement: {
+                        localName: "Flower Care",
+                    },
+                },
+            ],
+            [
+                true,
+                {
+                    advertisement: {
+                        localName: "Flower mate",
+                    },
+                },
+            ],
+            [
+                true,
+                {
+                    address: "c4:7c:8d:6e:06:9c",
+                    advertisement: {
+                        localName: "",
+                    },
+                },
+            ],
+            [
+                false,
+                {
+                    address: "c6:2c:8d:6e:06:9c",
+                    advertisement: {
+                        localName: "",
+                    },
+                },
+            ],
+            [
+                false,
+                {
+                    address: "",
+                    advertisement: {
+                        localName: "Bro mate",
+                    },
+                },
+            ],
+        ])("should return %s for peripheral %j", (expectedValue, peripheral) => {
+            expect(MiFloraGateway.isMiFloraPeripheral(peripheral as Peripheral)).toEqual(expectedValue);
+        });
+    });
     describe("observeUnavailableDevices()", () => {
         beforeEach(() => {
             jest.useFakeTimers();

@@ -6,8 +6,8 @@ Array [
     "device": Object {
       "friendlyName": "flower",
       "id": "a",
-      "macAddress": "a",
-      "rssi": null,
+      "macAddress": "aa:bb",
+      "rssi": 43,
       "timeout": 30000,
       "type": "miflora",
     },
@@ -27,8 +27,8 @@ Array [
     "device": Object {
       "friendlyName": "flower",
       "id": "a",
-      "macAddress": "a",
-      "rssi": null,
+      "macAddress": "aa:bb",
+      "rssi": 43,
       "timeout": 30000,
       "type": "miflora",
     },
@@ -48,8 +48,8 @@ Array [
     "device": Object {
       "friendlyName": "flower",
       "id": "a",
-      "macAddress": "a",
-      "rssi": null,
+      "macAddress": "aa:bb",
+      "rssi": 43,
       "timeout": 30000,
       "type": "miflora",
     },
@@ -69,8 +69,8 @@ Array [
     "device": Object {
       "friendlyName": "flower",
       "id": "a",
-      "macAddress": "a",
-      "rssi": null,
+      "macAddress": "aa:bb",
+      "rssi": 43,
       "timeout": 30000,
       "type": "miflora",
     },

@@ -27,7 +27,7 @@ export abstract class AbstractGateway implements Gateway {
             const device = this.getDeviceRegistryEntry(id);
 
             if (AbstractGateway.shouldDeviceAvailabilityBeBroadcast(device)) {
-                subscriber.next(generateAvailabilityMessage(device, "online"));
+                subscriber.next(generateAvailabilityMessage(device, "online", peripheral));
                 this.deviceRegistry.registerDeviceStatusPublished(id);
             }
 
