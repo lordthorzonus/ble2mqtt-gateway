@@ -61,7 +61,7 @@ export abstract class AbstractGateway implements Gateway {
         return EMPTY;
     }
 
-    abstract handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage>;
+    protected abstract handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage>;
 
     public observeUnavailableDevices(): Observable<DeviceAvailabilityMessage> {
         return this.deviceRegistry.observeUnavailableDevices().pipe(

@@ -17,6 +17,7 @@ export interface Gateway {
 export class BleGateway {
     private readonly configuredGateways: Map<number, Gateway>;
     private readonly defaultGateway: Gateway = new UnknownGateway();
+    private miFloraManufacturerId?: number;
 
     constructor(config: Config["gateways"]) {
         this.configuredGateways = new Map();
@@ -35,6 +36,7 @@ export class BleGateway {
 
         if (config.miflora !== undefined) {
             const miFloraGateway = new MiFloraGateway(config.miflora.devices, config.miflora.timeout);
+            this.miFloraManufacturerId = miFloraGateway.getManufacturerId();
             this.configuredGateways.set(miFloraGateway.getManufacturerId(), miFloraGateway);
         }
     }
@@ -43,7 +45,7 @@ export class BleGateway {
         const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
 
         if (!manufacturerId && MiFloraGateway.isMiFloraPeripheral(peripheral)) {
-            return MiFloraGateway.manufacturerId;
+            return this.miFloraManufacturerId;
         }
 
         return manufacturerId;
@@ -51,6 +53,10 @@ export class BleGateway {
 
     private resolveGateway(peripheral: Peripheral) {
         const manufacturerId = this.getManufacturerId(peripheral);
+
+        if (!manufacturerId) {
+            return this.defaultGateway;
+        }
 
         const gateway = this.configuredGateways.get(manufacturerId);
 

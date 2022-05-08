@@ -28,7 +28,7 @@ export class RuuviTagGateway extends AbstractGateway implements Gateway {
         return ruuviTagManufacturerId;
     }
 
-    public handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage> {
+    protected handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage> {
         const id = peripheral.uuid;
         return new Observable((subscriber) => {
             const device = this.getDeviceRegistryEntry(id);

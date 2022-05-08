@@ -10,10 +10,9 @@ import { parseMiFloraPeripheralAdvertisement } from "./miflora-parser";
 import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer";
 
 export type ConfiguredMiFloraSensors = Required<Config["gateways"]>["miflora"]["devices"];
-
+const xiaomiManufacturerid = 0x95fe;
 export class MiFloraGateway extends AbstractGateway implements Gateway {
     private readonly sensorEventBuffer: MiFloraEventBuffer;
-    public static readonly manufacturerId: number = 0x95fe;
 
     constructor(miFloraSettings: ConfiguredMiFloraSensors, defaultTimeout: number) {
         const deviceSettings = miFloraSettings.map((sensor) => ({
@@ -40,10 +39,10 @@ export class MiFloraGateway extends AbstractGateway implements Gateway {
     };
 
     public getManufacturerId(): number {
-        return MiFloraGateway.manufacturerId;
+        return xiaomiManufacturerid;
     }
 
-    public handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage> {
+    protected handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage> {
         const id = peripheral.uuid;
 
         return new Observable<DeviceMessage>((subscriber) => {

@@ -5,8 +5,11 @@ import {
 } from "./index";
 import { Peripheral } from "@abandonware/noble";
 
-const getStubPeripheral = (serviceData: string) => {
+export const getStubPeripheral = (serviceData: string, id = "a"): Peripheral => {
     return {
+        uuid: id,
+        address: "aa:bb",
+        rssi: 43,
         advertisement: {
             serviceData: [{ uuid: "fe95", data: Buffer.from(serviceData, "hex") }],
         },
