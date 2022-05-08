@@ -1,5 +1,5 @@
 # BLE2MQTT Gateway
-Currently supports RuuviTags.
+Currently supports RuuviTags and MiFlora Devices.
 
 ## Example Configuration (configuration.yaml)
 ```yaml
@@ -16,10 +16,16 @@ gateways:
   ruuvitag:
     allow_unknown: false
     devices:
-      - name: fridge_ruuvitag
+      - name: Fridge Ruuvitag
         id: da21045d81a8
-      - name: balcony_second
+      - name: Balcony Second
         id: 641cae0910b5
+        timeout: 10000
+  miflora:
+    devices:
+      - name: My super plant
+        id: c47c8d6e07cf
+        timeout: 40000
 homeassistant:
   discovery_topic: homeassistant
 ```
@@ -31,7 +37,7 @@ services:
     image: "lordthorzonus/ble2mqtt-gateway:edge"
     restart: unless-stopped
     cap_add:
-      - NET_ADMIN
+      - NET_RAW
     network_mode: host
     volumes:
       - ./configuration.yaml:/home/node/app/config/configuration.yaml

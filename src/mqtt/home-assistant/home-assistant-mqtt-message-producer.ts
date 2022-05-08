@@ -14,6 +14,7 @@ import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../device-mqtt-
 import { Observable } from "rxjs";
 import { getConfiguration } from "../../config";
 import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora";
+import { snakeCase } from "lodash";
 
 const config = getConfiguration();
 const homeAssistantTopicBase = config.homeassistant.discovery_topic;
@@ -49,7 +50,7 @@ const getHAComponent = (type: DeviceType): HomeAssistantMQTTComponent => {
 };
 
 const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSensorConfiguration) =>
-    `${deviceMessage.device.friendlyName}_${configEntry.uniqueId}`;
+    `${snakeCase(deviceMessage.device.friendlyName)}_${configEntry.uniqueId}`;
 
 const getDeviceName = (deviceMessage: DeviceMessage) =>
     `${deviceMessage.device.type} ${deviceMessage.device.friendlyName}`;

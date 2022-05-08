@@ -8,7 +8,7 @@ Object {
       "devices": Array [
         Object {
           "id": "c47c8d6e07cf",
-          "name": "other_plant",
+          "name": "Other Plant",
         },
         Object {
           "id": "c47c8d6e069c",
@@ -22,7 +22,7 @@ Object {
       "devices": Array [
         Object {
           "id": "da21045d81a8",
-          "name": "fridge_ruuvitag",
+          "name": "Fridge Ruuvitag",
         },
         Object {
           "id": "641cae0910b5",

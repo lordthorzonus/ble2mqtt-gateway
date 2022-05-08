@@ -28,7 +28,7 @@ describe("HomeAssistant MQTT Message producer", () => {
             device: {
                 macAddress: "aa:bb",
                 id: "aa:bb",
-                friendlyName: "fridge",
+                friendlyName: "Fridge friend",
                 rssi: 23,
                 type: DeviceType.Ruuvitag,
                 timeout: 10000,
@@ -60,7 +60,7 @@ describe("HomeAssistant MQTT Message producer", () => {
             device: {
                 macAddress: "aa:bb",
                 id: "aa:bb",
-                friendlyName: "plant",
+                friendlyName: "My Plant",
                 rssi: 44,
                 type: DeviceType.MiFlora,
                 timeout: 10000,
@@ -92,7 +92,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 device: {
                     macAddress: "aa:bb",
                     id: "aa:bb",
-                    friendlyName: "fridge",
+                    friendlyName: "My Fridge",
                     rssi: 23,
                     type: DeviceType.Ruuvitag,
                     timeout: 10000,
@@ -126,7 +126,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 device: {
                     macAddress: "aa:bb",
                     id: "aa:bb",
-                    friendlyName: "plant",
+                    friendlyName: "Super Plant",
                     rssi: 23,
                     type: DeviceType.MiFlora,
                     timeout: 30000,
