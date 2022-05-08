@@ -53,7 +53,7 @@ export class MiFloraGateway extends AbstractGateway implements Gateway {
             if (this.sensorEventBuffer.isBufferReady(buffer)) {
                 const deviceRegistryEntry = this.getDeviceRegistryEntry(id);
                 subscriber.next(transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer));
-                this.sensorEventBuffer.emptyBuffer(id);
+                this.sensorEventBuffer.clearBuffer(id);
             }
 
             subscriber.complete();

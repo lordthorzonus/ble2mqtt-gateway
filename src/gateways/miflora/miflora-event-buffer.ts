@@ -21,11 +21,11 @@ const emptySensorMeasurementBuffer: MiFloraSensorMeasurementBuffer = {
 };
 
 export class MiFloraEventBuffer {
-    private sensorBuffer = new Map<string, MiFloraSensorMeasurementBuffer>();
+    private readonly sensorBuffer = new Map<string, MiFloraSensorMeasurementBuffer>();
 
     public constructor(devices: ConfiguredMiFloraSensors) {
         devices.forEach((device) => {
-            this.emptyBuffer(device.id);
+            this.clearBuffer(device.id);
         });
     }
 
@@ -52,6 +52,8 @@ export class MiFloraEventBuffer {
             case MifloraMeasurementEventType.Temperature:
                 return { ...buffer, temperatureEvent: measurement };
         }
+
+        throw Error(`Cannot buffer unsupported measurement ${measurement}`);
     }
 
     public bufferMeasurementEvent(
@@ -80,7 +82,7 @@ export class MiFloraEventBuffer {
         return buffer;
     }
 
-    public emptyBuffer(deviceId: string): void {
+    public clearBuffer(deviceId: string): void {
         this.sensorBuffer.set(deviceId, emptySensorMeasurementBuffer);
     }
 }

@@ -2,6 +2,7 @@ import { RuuviTagSensorData } from "../index";
 import DataFormat5ParsingStrategy from "./data-format-5-parsing-strategy";
 
 describe("Data Format 5 Parsing Strategy", () => {
+    const macAddress = "CB:B8:33:4C:88:4F";
     const testCases: Array<[string, RuuviTagSensorData]> = [
         [
             "99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F",
@@ -16,7 +17,7 @@ describe("Data Format 5 Parsing Strategy", () => {
                 txPower: 4,
                 movementCounter: 66,
                 measurementSequence: 205,
-                macAddress: "CB:B8:33:4C:88:4F",
+                macAddress,
             },
         ],
         [
@@ -32,7 +33,7 @@ describe("Data Format 5 Parsing Strategy", () => {
                 txPower: 20,
                 movementCounter: 254,
                 measurementSequence: 65534,
-                macAddress: "CB:B8:33:4C:88:4F",
+                macAddress,
             },
         ],
         [
@@ -48,7 +49,7 @@ describe("Data Format 5 Parsing Strategy", () => {
                 txPower: -40,
                 movementCounter: 0,
                 measurementSequence: 0,
-                macAddress: "CB:B8:33:4C:88:4F",
+                macAddress,
             },
         ],
         [

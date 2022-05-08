@@ -127,10 +127,10 @@ describe("Device Registry", () => {
             deviceRegistry.registerFoundAdvertisement(defaultRuuviTagId);
             expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toEqual("online");
 
-            unavailableObservable.pipe(take(1)).subscribe((deviceRegistry) => {
-                expect(deviceRegistry.device.id).toEqual(defaultRuuviTagId);
-                expect(deviceRegistry.lastPublishedAvailability).toEqual("offline");
-                expect(deviceRegistry.availability).toEqual("offline");
+            unavailableObservable.pipe(take(1)).subscribe((deviceRegistryEntry) => {
+                expect(deviceRegistryEntry.device.id).toEqual(defaultRuuviTagId);
+                expect(deviceRegistryEntry.lastPublishedAvailability).toEqual("offline");
+                expect(deviceRegistryEntry.availability).toEqual("offline");
                 done();
             });
             jest.advanceTimersByTime(defaultTimeout + 10000);

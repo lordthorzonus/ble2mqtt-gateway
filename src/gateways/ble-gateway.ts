@@ -15,8 +15,8 @@ export interface Gateway {
 }
 
 export class BleGateway {
-    private configuredGateways: Map<number, Gateway>;
-    private defaultGateway: Gateway = new UnknownGateway();
+    private readonly configuredGateways: Map<number, Gateway>;
+    private readonly defaultGateway: Gateway = new UnknownGateway();
 
     constructor(config: Config["gateways"]) {
         this.configuredGateways = new Map();

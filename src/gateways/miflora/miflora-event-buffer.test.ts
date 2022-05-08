@@ -3,13 +3,12 @@ import { MifloraMeasurementEventType } from "./miflora-parser";
 import { MiFloraMeasurement } from "./miflora-parser/parsing-strategies";
 
 function getEventBufferWithConfiguredDeviceId(deviceId: string) {
-    const eventBuffer = new MiFloraEventBuffer([
+    return new MiFloraEventBuffer([
         {
             id: deviceId,
             name: "a",
         },
     ]);
-    return eventBuffer;
 }
 
 describe("MiFlora Event Buffer", () => {
@@ -112,7 +111,7 @@ describe("MiFlora Event Buffer", () => {
         });
     });
 
-    describe("emptyBuffer()", () => {
+    describe("clearBuffer()", () => {
         it("should empty the buffer for the given device id", () => {
             const deviceId = "a";
             const eventBuffer = getEventBufferWithConfiguredDeviceId(deviceId);
@@ -122,13 +121,13 @@ describe("MiFlora Event Buffer", () => {
             eventBuffer.bufferMeasurementEvent(deviceId, soilConductivityEvent);
             eventBuffer.bufferMeasurementEvent(deviceId, illuminanceEvent);
 
-            eventBuffer.emptyBuffer(deviceId);
+            eventBuffer.clearBuffer(deviceId);
             expect(eventBuffer.bufferMeasurementEvent(deviceId, moistureEvent)).toEqual({
                 ...emptyBuffer,
                 moistureEvent,
             });
 
-            eventBuffer.emptyBuffer(deviceId);
+            eventBuffer.clearBuffer(deviceId);
             expect(eventBuffer.bufferMeasurementEvent(deviceId, temperatureEvent)).toEqual({
                 ...emptyBuffer,
                 temperatureEvent,
