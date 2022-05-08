@@ -6,6 +6,7 @@ import { DeviceAvailabilityMessage, DeviceMessage } from "../types";
 import { UnknownGateway } from "./unknown-gateway";
 import { scan } from "../infra/ble-scanner";
 import { filter, mergeWith } from "rxjs/operators";
+import { MiFloraGateway } from "./miflora/miflora-gateway";
 
 export interface Gateway {
     handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceMessage | DeviceAvailabilityMessage | null>;
@@ -31,10 +32,26 @@ export class BleGateway {
             );
             this.configuredGateways.set(ruuviGateway.getManufacturerId(), ruuviGateway);
         }
+
+        if (config.miflora !== undefined) {
+            const miFloraGateway = new MiFloraGateway(config.miflora.devices, config.miflora.timeout);
+            this.configuredGateways.set(miFloraGateway.getManufacturerId(), miFloraGateway);
+        }
+    }
+
+    private getManufacturerId(peripheral: Peripheral) {
+        const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+
+        if (!manufacturerId && MiFloraGateway.isMiFloraPeripheral(peripheral)) {
+            return MiFloraGateway.manufacturerId;
+        }
+
+        return manufacturerId;
     }
 
     private resolveGateway(peripheral: Peripheral) {
-        const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+        const manufacturerId = this.getManufacturerId(peripheral);
+
         const gateway = this.configuredGateways.get(manufacturerId);
 
         if (!gateway) {

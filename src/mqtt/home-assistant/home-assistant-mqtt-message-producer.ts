@@ -13,16 +13,19 @@ import { ruuviTagSensorConfiguration } from "./device-discoverability-configurat
 import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../device-mqtt-topic-factory";
 import { Observable } from "rxjs";
 import { getConfiguration } from "../../config";
+import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora";
 
 const config = getConfiguration();
 const homeAssistantTopicBase = config.homeassistant.discovery_topic;
 
 const bleDeviceHAConfigurationMap = new Map<DeviceType, HomeAssistantSensorConfigurationForDeviceType<DeviceType>>([
     [DeviceType.Ruuvitag, ruuviTagSensorConfiguration],
+    [DeviceType.MiFlora, miFloraSensorConfiguration],
 ]);
 
 const bleDeviceHAComponentMap = new Map<DeviceType, HomeAssistantMQTTComponent>([
     [DeviceType.Ruuvitag, HomeAssistantMQTTComponent.Sensor],
+    [DeviceType.MiFlora, HomeAssistantMQTTComponent.Sensor],
 ]);
 
 const getHASensorConfiguration = <T extends DeviceType>(type: T): HomeAssistantSensorConfigurationForDeviceType<T> => {

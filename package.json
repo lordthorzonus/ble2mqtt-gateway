@@ -7,7 +7,6 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "start:dev": "ts-node src/index.ts",
-    "start:test": "ts-node src/noble-test.ts",
     "lint": "eslint src/"
   },
   "keywords": [
@@ -16,7 +15,10 @@
     "bluetooth",
     "ble",
     "low",
-    "energy"
+    "energy",
+    "miflora",
+    "mqtt",
+    "homeassistant"
   ],
   "author": "Juuso Leinonen",
   "license": "MIT",
@@ -35,13 +37,13 @@
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
-    "@types/ws": "^8.5.3",
     "@types/js-yaml": "^4.0.5",
     "@types/lodash": "^4.14.179",
     "@types/luxon": "^2.3.0",
     "@types/noble": "0.0.40",
     "@types/node": "^16.11.25",
     "@types/uuid": "^8.3.1",
+    "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
     "eslint": "^8.10.0",

@@ -4,6 +4,19 @@ exports[`Config getConfiguration() should return the proper configuration given 
 Object {
   "gateways": Object {
     "base_topic": "mqtt",
+    "miflora": Object {
+      "devices": Array [
+        Object {
+          "id": "c47c8d6e07cf",
+          "name": "other_plant",
+        },
+        Object {
+          "id": "c47c8d6e069c",
+          "name": "some_plant",
+        },
+      ],
+      "timeout": 60000,
+    },
     "ruuvitag": Object {
       "allow_unknown": true,
       "devices": Array [

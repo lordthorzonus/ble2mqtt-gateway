@@ -21,6 +21,12 @@ gateways:
         id: da21045d81a8
       - name: balcony_ruuvitag
         id: 641cae0910b5
+  miflora:
+    devices:
+      - name: other_plant
+        id: c47c8d6e07cf
+      - name: some_plant
+        id: c47c8d6e069c
 
 homeassistant:
   discovery_topic: homeassistant

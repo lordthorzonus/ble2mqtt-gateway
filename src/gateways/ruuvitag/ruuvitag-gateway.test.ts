@@ -4,6 +4,7 @@ import { take, toArray } from "rxjs";
 import { DeviceAvailabilityMessage, DeviceMessage, DeviceMessageType } from "../../types";
 import { DateTime, Settings } from "luxon";
 import { v4 as uuid } from "uuid";
+import { TestScheduler } from "rxjs/testing";
 
 const ruuviTagUuid = "a1:b2";
 const defaultTimeout = 30000;
@@ -58,15 +59,20 @@ describe("RuuviTag Gateway", () => {
                 });
         });
 
-        it("should return null if unknown ruuvitags arent allowed and the ruuvitag that is advertising is not configured", (done) => {
+        it("should complete if unknown ruuvitags arent allowed and the ruuvitag that is advertising is not configured", (done) => {
             const gateway = makeRuuviTagGateway();
+            const testScheduler = new TestScheduler((actual, expected) => {
+                expect(actual).toEqual(expected);
+            });
 
-            gateway
-                .handleBleAdvertisement({ ...peripheral, uuid: "no-such-ruuvitag" } as Peripheral)
-                .subscribe((message) => {
-                    expect(message).toEqual(null);
-                    done();
-                });
+            return testScheduler.run((helpers) => {
+                helpers
+                    .expectObservable(
+                        gateway.handleBleAdvertisement({ ...peripheral, uuid: "no-such-ruuvitag" } as Peripheral)
+                    )
+                    .toBe("|");
+                done();
+            });
         });
 
         it("should not produce the availability message twice if the ruuvitag availability has not changed", () => {

@@ -27,11 +27,27 @@ const ruuvitagSchema = z
     })
     .optional();
 
+const miFloraSchema = z
+    .object({
+        timeout: z.number().int().default(60000),
+        devices: z
+            .array(
+                z.object({
+                    name: z.string(),
+                    id: z.string(),
+                    timeout: z.number().int().optional(),
+                })
+            )
+            .min(0),
+    })
+    .optional();
+
 const configSchema = z.object({
     mqtt: mqttSchema,
     gateways: z.object({
         base_topic: z.string().default("ble2mqtt"),
         ruuvitag: ruuvitagSchema,
+        miflora: miFloraSchema,
     }),
     homeassistant: z
         .object({
