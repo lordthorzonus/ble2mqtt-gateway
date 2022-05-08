@@ -1,8 +1,10 @@
 import { EnhancedRuuviTagSensorData } from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { DateTime } from "luxon";
+import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer";
 
 export enum DeviceType {
     Ruuvitag = "ruuvitag",
+    MiFlora = "miflora",
 }
 
 export enum DeviceMessageType {
@@ -77,4 +79,6 @@ export type HomeAssistantSensorConfigurationForDevice<T> = {
 
 export type HomeAssistantSensorConfigurationForDeviceType<T> = T extends DeviceType.Ruuvitag
     ? HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagSensorData>
+    : T extends DeviceType.MiFlora
+    ? HomeAssistantSensorConfigurationForDevice<MiFloraSensorData>
     : never;

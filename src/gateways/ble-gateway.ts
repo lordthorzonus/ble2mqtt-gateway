@@ -6,6 +6,7 @@ import { DeviceAvailabilityMessage, DeviceMessage } from "../types";
 import { UnknownGateway } from "./unknown-gateway";
 import { scan } from "../infra/ble-scanner";
 import { filter, mergeWith } from "rxjs/operators";
+import { MiFloraGateway } from "./miflora/miflora-gateway";
 
 export interface Gateway {
     handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceMessage | DeviceAvailabilityMessage | null>;
@@ -14,8 +15,9 @@ export interface Gateway {
 }
 
 export class BleGateway {
-    private configuredGateways: Map<number, Gateway>;
-    private defaultGateway: Gateway = new UnknownGateway();
+    private readonly configuredGateways: Map<number, Gateway>;
+    private readonly defaultGateway: Gateway = new UnknownGateway();
+    private miFloraManufacturerId?: number;
 
     constructor(config: Config["gateways"]) {
         this.configuredGateways = new Map();
@@ -31,10 +33,31 @@ export class BleGateway {
             );
             this.configuredGateways.set(ruuviGateway.getManufacturerId(), ruuviGateway);
         }
+
+        if (config.miflora !== undefined) {
+            const miFloraGateway = new MiFloraGateway(config.miflora.devices, config.miflora.timeout);
+            this.miFloraManufacturerId = miFloraGateway.getManufacturerId();
+            this.configuredGateways.set(miFloraGateway.getManufacturerId(), miFloraGateway);
+        }
+    }
+
+    private getManufacturerId(peripheral: Peripheral) {
+        const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+
+        if (!manufacturerId && MiFloraGateway.isMiFloraPeripheral(peripheral)) {
+            return this.miFloraManufacturerId;
+        }
+
+        return manufacturerId;
     }
 
     private resolveGateway(peripheral: Peripheral) {
-        const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+        const manufacturerId = this.getManufacturerId(peripheral);
+
+        if (!manufacturerId) {
+            return this.defaultGateway;
+        }
+
         const gateway = this.configuredGateways.get(manufacturerId);
 
         if (!gateway) {

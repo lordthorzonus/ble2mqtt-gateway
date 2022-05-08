@@ -66,8 +66,6 @@ export class DeviceRegistry {
 
         const updatedDeviceEntry = DeviceRegistry.markDeviceAvailable(device);
         this.devices.set(deviceId, updatedDeviceEntry);
-
-        return;
     }
 
     public registerDeviceStatusPublished(deviceId: string): void {
@@ -83,8 +81,6 @@ export class DeviceRegistry {
         };
 
         this.devices.set(deviceId, updatedDeviceEntry);
-
-        return;
     }
 
     private registerDeviceAsUnavailable(device: DeviceRegistryEntry): DeviceRegistryEntry {
