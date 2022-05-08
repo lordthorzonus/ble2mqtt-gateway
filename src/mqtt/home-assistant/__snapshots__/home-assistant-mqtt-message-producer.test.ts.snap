@@ -1,5 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`HomeAssistant MQTT Message producer should generate corresponding discovery messages for given device in case of MiFlora Discovered availability message is given 1`] = `
+Array [
+  Object {
+    "payload": "{\\"name\\":\\"plant Temperature\\",\\"device_class\\":\\"temperature\\",\\"unit_of_measurement\\":\\"°C\\",\\"object_id\\":\\"plant_temperature\\",\\"unique_id\\":\\"plant_temperature\\",\\"availability_topic\\":\\"a_base_topic/miflora/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":30,\\"device\\":{\\"manufacturer\\":\\"Xiaomi Inc.\\",\\"model\\":\\"MiFlora Plant Sensor HHCCJCV01\\",\\"name\\":\\"miflora plant\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.temperature }}\\",\\"state_topic\\":\\"a_base_topic/miflora/aa:bb/state\\"}",
+    "retain": true,
+    "topic": "homeassistant/sensor/plant_temperature/config",
+  },
+  Object {
+    "payload": "{\\"name\\":\\"plant Illuminance\\",\\"device_class\\":\\"illuminance\\",\\"unit_of_measurement\\":\\"lx\\",\\"object_id\\":\\"plant_illuminance\\",\\"unique_id\\":\\"plant_illuminance\\",\\"availability_topic\\":\\"a_base_topic/miflora/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":30,\\"device\\":{\\"manufacturer\\":\\"Xiaomi Inc.\\",\\"model\\":\\"MiFlora Plant Sensor HHCCJCV01\\",\\"name\\":\\"miflora plant\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.illuminance }}\\",\\"state_topic\\":\\"a_base_topic/miflora/aa:bb/state\\"}",
+    "retain": true,
+    "topic": "homeassistant/sensor/plant_illuminance/config",
+  },
+  Object {
+    "payload": "{\\"name\\":\\"plant Soil Moisture\\",\\"unit_of_measurement\\":\\"%\\",\\"object_id\\":\\"plant_soil_moisture\\",\\"unique_id\\":\\"plant_soil_moisture\\",\\"availability_topic\\":\\"a_base_topic/miflora/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":30,\\"icon\\":\\"mdi:water-percent\\",\\"device\\":{\\"manufacturer\\":\\"Xiaomi Inc.\\",\\"model\\":\\"MiFlora Plant Sensor HHCCJCV01\\",\\"name\\":\\"miflora plant\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.moisture }}\\",\\"state_topic\\":\\"a_base_topic/miflora/aa:bb/state\\"}",
+    "retain": true,
+    "topic": "homeassistant/sensor/plant_soil_moisture/config",
+  },
+  Object {
+    "payload": "{\\"name\\":\\"plant Soil Conductivity\\",\\"unit_of_measurement\\":\\"µS/cm\\",\\"object_id\\":\\"plant_soil_conductivity\\",\\"unique_id\\":\\"plant_soil_conductivity\\",\\"availability_topic\\":\\"a_base_topic/miflora/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":30,\\"icon\\":\\"mdi:flower\\",\\"device\\":{\\"manufacturer\\":\\"Xiaomi Inc.\\",\\"model\\":\\"MiFlora Plant Sensor HHCCJCV01\\",\\"name\\":\\"miflora plant\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.soilConductivity }}\\",\\"state_topic\\":\\"a_base_topic/miflora/aa:bb/state\\"}",
+    "retain": true,
+    "topic": "homeassistant/sensor/plant_soil_conductivity/config",
+  },
+  Object {
+    "payload": "{\\"state\\":\\"online\\"}",
+    "retain": true,
+    "topic": "a_base_topic/miflora/aa:bb/availability",
+  },
+]
+`;
+
+exports[`HomeAssistant MQTT Message producer should generate corresponding discovery messages for given device in case of MiFlora Offline availability message is given 1`] = `
+Array [
+  Object {
+    "payload": "null",
+    "retain": true,
+    "topic": "homeassistant/sensor/plant_temperature/config",
+  },
+  Object {
+    "payload": "null",
+    "retain": true,
+    "topic": "homeassistant/sensor/plant_illuminance/config",
+  },
+  Object {
+    "payload": "null",
+    "retain": true,
+    "topic": "homeassistant/sensor/plant_soil_moisture/config",
+  },
+  Object {
+    "payload": "null",
+    "retain": true,
+    "topic": "homeassistant/sensor/plant_soil_conductivity/config",
+  },
+  Object {
+    "payload": "{\\"state\\":\\"offline\\"}",
+    "retain": true,
+    "topic": "a_base_topic/miflora/aa:bb/availability",
+  },
+]
+`;
+
 exports[`HomeAssistant MQTT Message producer should generate corresponding discovery messages for given device in case of RuuviTag Discovered availability message is given 1`] = `
 Array [
   Object {

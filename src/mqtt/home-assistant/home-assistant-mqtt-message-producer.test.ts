@@ -49,6 +49,38 @@ describe("HomeAssistant MQTT Message producer", () => {
         });
     });
 
+    it("should vary the state topic based on the device type", (done) => {
+        const deviceMessage: DeviceMessage = {
+            id: "a",
+            payload: {
+                sensor1: "value",
+            },
+            type: DeviceMessageType.SensorData,
+            time: DateTime.now(),
+            device: {
+                macAddress: "aa:bb",
+                id: "aa:bb",
+                friendlyName: "plant",
+                rssi: 44,
+                type: DeviceType.MiFlora,
+                timeout: 10000,
+            },
+        };
+
+        homeAssistantMqttMessageProducer(deviceMessage).subscribe((message) => {
+            expect(message).toEqual({
+                payload: JSON.stringify({
+                    ...deviceMessage.payload,
+                    time: deviceMessage.time,
+                    id: deviceMessage.id,
+                }),
+                retain: false,
+                topic: "a_base_topic/miflora/aa:bb/state",
+            });
+            done();
+        });
+    });
+
     const availabilityTestCases: [string, DeviceAvailabilityMessage][] = [
         [
             "RuuviTag Discovered",
@@ -80,6 +112,40 @@ describe("HomeAssistant MQTT Message producer", () => {
                     friendlyName: "fridge",
                     rssi: 23,
                     type: DeviceType.Ruuvitag,
+                    timeout: 30000,
+                },
+            },
+        ],
+        [
+            "MiFlora Discovered",
+            {
+                id: "abba",
+                time: DateTime.now(),
+                payload: { state: "online" },
+                type: DeviceMessageType.Availability,
+                device: {
+                    macAddress: "aa:bb",
+                    id: "aa:bb",
+                    friendlyName: "plant",
+                    rssi: 23,
+                    type: DeviceType.MiFlora,
+                    timeout: 30000,
+                },
+            },
+        ],
+        [
+            "MiFlora Offline",
+            {
+                id: "abba",
+                time: DateTime.now(),
+                payload: { state: "offline" },
+                type: DeviceMessageType.Availability,
+                device: {
+                    macAddress: "aa:bb",
+                    id: "aa:bb",
+                    friendlyName: "plant",
+                    rssi: 23,
+                    type: DeviceType.MiFlora,
                     timeout: 30000,
                 },
             },
