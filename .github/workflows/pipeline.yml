@@ -1,4 +1,7 @@
 name: BLE to MQTT Gateway Pipeline
+concurrency:
+  group: ${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches:
