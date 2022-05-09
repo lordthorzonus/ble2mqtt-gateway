@@ -28,7 +28,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
     batteryVoltage: {
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Battery Voltage",
-        unitOfMeasurement: "mV",
+        unitOfMeasurement: "V",
         uniqueId: "battery_voltage",
         device: ruuviTagDeviceConfiguration,
         icon: "mdi:battery",
@@ -119,5 +119,20 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         unitOfMeasurement: "",
         uniqueId: "movement_counter",
         device: ruuviTagDeviceConfiguration,
+    },
+    batteryPercentage: {
+        device: ruuviTagDeviceConfiguration,
+        deviceClass: HomeAssistantDeviceClass.Battery,
+        unitOfMeasurement: "%",
+        uniqueId: "battery_percentage",
+        name: "Battery Percentage",
+        valueTemplate: `
+{% set temperature = value_json.temperature | float %}
+{% set batteryVoltage = value_json.batteryVoltage | float %}
+{% set maxBattery = 3 %}
+{% set minBattery = iif(temperature < -20, 2, iif(temperature | float < 0, 2.3, 2.5)) %}
+{{ (((batteryVoltage - minBattery) / (maxBattery - minBattery)) * 100) | round(2) }}
+        `,
+        icon: "mdi:battery",
     },
 };

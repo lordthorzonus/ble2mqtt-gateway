@@ -73,9 +73,13 @@ export interface HomeAssistantSensorConfiguration {
     };
 }
 
-export type HomeAssistantSensorConfigurationForDevice<T> = {
-    [K in keyof T]: HomeAssistantSensorConfiguration;
-};
+export type HomeAssistantSensorConfigurationForDevice<T> =
+    | {
+          [K in keyof T]: HomeAssistantSensorConfiguration;
+      }
+    | {
+          [key: string]: HomeAssistantSensorConfiguration & { valueTemplate: string };
+      };
 
 export type HomeAssistantSensorConfigurationForDeviceType<T> = T extends DeviceType.Ruuvitag
     ? HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagSensorData>

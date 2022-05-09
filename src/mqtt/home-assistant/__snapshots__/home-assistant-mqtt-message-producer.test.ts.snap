@@ -73,7 +73,7 @@ Array [
     "topic": "homeassistant/sensor/my_fridge_temperature/config",
   },
   Object {
-    "payload": "{\\"name\\":\\"My Fridge Battery Voltage\\",\\"unit_of_measurement\\":\\"mV\\",\\"object_id\\":\\"my_fridge_battery_voltage\\",\\"unique_id\\":\\"my_fridge_battery_voltage\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:battery\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag My Fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.batteryVoltage }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
+    "payload": "{\\"name\\":\\"My Fridge Battery Voltage\\",\\"unit_of_measurement\\":\\"V\\",\\"object_id\\":\\"my_fridge_battery_voltage\\",\\"unique_id\\":\\"my_fridge_battery_voltage\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:battery\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag My Fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.batteryVoltage }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
     "retain": true,
     "topic": "homeassistant/sensor/my_fridge_battery_voltage/config",
   },
@@ -136,6 +136,11 @@ Array [
     "payload": "{\\"name\\":\\"My Fridge Movement Counter\\",\\"unit_of_measurement\\":\\"\\",\\"object_id\\":\\"my_fridge_movement_counter\\",\\"unique_id\\":\\"my_fridge_movement_counter\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag My Fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.movementCounter }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
     "retain": true,
     "topic": "homeassistant/sensor/my_fridge_movement_counter/config",
+  },
+  Object {
+    "payload": "{\\"name\\":\\"My Fridge Battery Percentage\\",\\"device_class\\":\\"battery\\",\\"unit_of_measurement\\":\\"%\\",\\"object_id\\":\\"my_fridge_battery_percentage\\",\\"unique_id\\":\\"my_fridge_battery_percentage\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:battery\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag My Fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"\\\\n{% set temperature = value_json.temperature | float %}\\\\n{% set batteryVoltage = value_json.batteryVoltage | float %}\\\\n{% set maxBattery = 3 %}\\\\n{% set minBattery = iif(temperature < -20, 2, iif(temperature | float < 0, 2.3, 2.5)) %}\\\\n{{ (((batteryVoltage - minBattery) / (maxBattery - minBattery)) * 100) | round(2) }}\\\\n        \\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
+    "retain": true,
+    "topic": "homeassistant/sensor/my_fridge_battery_percentage/config",
   },
   Object {
     "payload": "{\\"state\\":\\"online\\"}",

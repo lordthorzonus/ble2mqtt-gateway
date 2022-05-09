@@ -106,7 +106,7 @@ const parseAcceleration = (rawData: Buffer, accelerationOffset: DataFormatV5Offs
 /**
  * Parses the battery voltage from the advertisement.
  *
- * Power info (11+5bit unsigned), first 11 bits is the battery voltage above 1.6V, in millivolts (1.6V to 3.646V range).
+ * Power info (11+5bit unsigned), first 11 bits is the battery voltage above 1.6V, in Volts (1.6V to 3.646V range).
  *
  * @return Returns the value in Volts (V).
  */
