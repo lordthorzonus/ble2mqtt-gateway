@@ -63,7 +63,7 @@ Array [
 exports[`HomeAssistant MQTT Message producer should generate corresponding discovery messages for given device in case of RuuviTag Discovered availability message is given 1`] = `
 Array [
   Object {
-    "payload": "{\\"name\\":\\"My Fridge Absolute Humidity\\",\\"unit_of_measurement\\":\\"g/m^3\\",\\"object_id\\":\\"my_fridge_absolute_humidity\\",\\"unique_id\\":\\"my_fridge_absolute_humidity\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag My Fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.absoluteHumidity }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
+    "payload": "{\\"name\\":\\"My Fridge Absolute Humidity\\",\\"unit_of_measurement\\":\\"g/m^3\\",\\"object_id\\":\\"my_fridge_absolute_humidity\\",\\"unique_id\\":\\"my_fridge_absolute_humidity\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:water-percent\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag My Fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.absoluteHumidity }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
     "retain": true,
     "topic": "homeassistant/sensor/my_fridge_absolute_humidity/config",
   },
@@ -78,7 +78,7 @@ Array [
     "topic": "homeassistant/sensor/my_fridge_battery_voltage/config",
   },
   Object {
-    "payload": "{\\"name\\":\\"My Fridge Humidity\\",\\"device_class\\":\\"humidity\\",\\"unit_of_measurement\\":\\"%\\",\\"object_id\\":\\"my_fridge_humidity\\",\\"unique_id\\":\\"my_fridge_humidity\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:gauge\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag My Fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.relativeHumidityPercentage | float(2) }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
+    "payload": "{\\"name\\":\\"My Fridge Humidity\\",\\"device_class\\":\\"humidity\\",\\"unit_of_measurement\\":\\"%\\",\\"object_id\\":\\"my_fridge_humidity\\",\\"unique_id\\":\\"my_fridge_humidity\\",\\"availability_topic\\":\\"a_base_topic/ruuvitag/aa:bb/availability\\",\\"availability_template\\":\\"{{ value_json.state }}\\",\\"expire_after\\":10,\\"icon\\":\\"mdi:water-percent\\",\\"device\\":{\\"manufacturer\\":\\"Ruuvi Innovations Oy\\",\\"model\\":\\"RuuviTag\\",\\"name\\":\\"ruuvitag My Fridge\\",\\"connections\\":[[\\"mac\\",\\"aa:bb\\"]]},\\"value_template\\":\\"{{ value_json.relativeHumidityPercentage | float(2) }}\\",\\"state_topic\\":\\"a_base_topic/ruuvitag/aa:bb/state\\"}",
     "retain": true,
     "topic": "homeassistant/sensor/my_fridge_humidity/config",
   },
@@ -226,6 +226,11 @@ Array [
     "payload": "null",
     "retain": true,
     "topic": "homeassistant/sensor/fridge_movement_counter/config",
+  },
+  Object {
+    "payload": "null",
+    "retain": true,
+    "topic": "homeassistant/sensor/fridge_battery_percentage/config",
   },
   Object {
     "payload": "{\\"state\\":\\"offline\\"}",
