@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 import { Config } from "../../config";
 import { Gateway } from "../ble-gateway";
 import { ruuviTagManufacturerId } from "./ruuvitag-parser/ruuvitag-validator";
-import { AbstractGateway } from "./abstract-gateway";
+import { AbstractGateway } from "../abstract-gateway";
 
 type ConfiguredRuuviTags = Required<Config["gateways"]>["ruuvitag"]["devices"];
 
@@ -24,7 +24,7 @@ export class RuuviTagGateway extends AbstractGateway implements Gateway {
         super(new DeviceRegistry(deviceSettings, defaultTimeout), unknownRuuviTagsAllowed, DeviceType.Ruuvitag);
     }
 
-    public getManufacturerId(): number {
+    public getGatewayId(): number {
         return ruuviTagManufacturerId;
     }
 

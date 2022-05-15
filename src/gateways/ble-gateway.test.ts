@@ -11,7 +11,7 @@ class MockGateway implements Gateway {
         this.manufacturerId = manufacturerId;
     }
 
-    public getManufacturerId(): number {
+    public getGatewayId(): number {
         return this.manufacturerId;
     }
 

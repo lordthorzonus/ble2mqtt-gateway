@@ -3,14 +3,14 @@ import { Peripheral } from "@abandonware/noble";
 import { DeviceMessage, DeviceType } from "../../types";
 import { Observable } from "rxjs";
 import { Config } from "../../config";
-import { AbstractGateway } from "../ruuvitag/abstract-gateway";
+import { AbstractGateway } from "../abstract-gateway";
 import { DeviceRegistry } from "../device-registry";
 import { MiFloraEventBuffer } from "./miflora-event-buffer";
 import { parseMiFloraPeripheralAdvertisement } from "./miflora-parser";
 import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer";
 
 export type ConfiguredMiFloraSensors = Required<Config["gateways"]>["miflora"]["devices"];
-const xiaomiManufacturerid = 0x95fe;
+const xiaomiId = 0x95fe;
 export class MiFloraGateway extends AbstractGateway implements Gateway {
     private readonly sensorEventBuffer: MiFloraEventBuffer;
 
@@ -38,8 +38,8 @@ export class MiFloraGateway extends AbstractGateway implements Gateway {
         );
     };
 
-    public getManufacturerId(): number {
-        return xiaomiManufacturerid;
+    public getGatewayId(): number {
+        return xiaomiId;
     }
 
     protected handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage> {

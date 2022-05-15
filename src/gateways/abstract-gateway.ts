@@ -1,9 +1,9 @@
 import { Peripheral } from "@abandonware/noble";
 import { concat, EMPTY, map, Observable } from "rxjs";
-import { DeviceAvailabilityMessage, DeviceMessage, DeviceType } from "../../types";
-import { generateAvailabilityMessage } from "../availability-message-generator";
-import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry";
-import { Gateway } from "../ble-gateway";
+import { DeviceAvailabilityMessage, DeviceMessage, DeviceType } from "../types";
+import { generateAvailabilityMessage } from "./availability-message-generator";
+import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry";
+import { Gateway } from "./ble-gateway";
 
 export abstract class AbstractGateway implements Gateway {
     protected readonly deviceRegistry: DeviceRegistry;
@@ -49,7 +49,7 @@ export abstract class AbstractGateway implements Gateway {
         return deviceRegistryEntry.availability !== deviceRegistryEntry.lastPublishedAvailability;
     }
 
-    abstract getManufacturerId(): number;
+    abstract getGatewayId(): number;
 
     public handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceMessage | DeviceAvailabilityMessage> {
         const id = peripheral.uuid;

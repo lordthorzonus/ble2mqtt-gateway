@@ -11,13 +11,13 @@ import { MiFloraGateway } from "./miflora/miflora-gateway";
 export interface Gateway {
     handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceMessage | DeviceAvailabilityMessage | null>;
     observeUnavailableDevices(): Observable<DeviceAvailabilityMessage>;
-    getManufacturerId(): number;
+    getGatewayId(): number;
 }
 
 export class BleGateway {
     private readonly configuredGateways: Map<number, Gateway>;
     private readonly defaultGateway: Gateway = new UnknownGateway();
-    private miFloraManufacturerId?: number;
+    private miFloraGatewayId?: number;
 
     constructor(config: Config["gateways"]) {
         this.configuredGateways = new Map();
@@ -31,34 +31,34 @@ export class BleGateway {
                 config.ruuvitag.timeout,
                 config.ruuvitag.allow_unknown
             );
-            this.configuredGateways.set(ruuviGateway.getManufacturerId(), ruuviGateway);
+            this.configuredGateways.set(ruuviGateway.getGatewayId(), ruuviGateway);
         }
 
         if (config.miflora !== undefined) {
             const miFloraGateway = new MiFloraGateway(config.miflora.devices, config.miflora.timeout);
-            this.miFloraManufacturerId = miFloraGateway.getManufacturerId();
-            this.configuredGateways.set(miFloraGateway.getManufacturerId(), miFloraGateway);
+            this.miFloraGatewayId = miFloraGateway.getGatewayId();
+            this.configuredGateways.set(miFloraGateway.getGatewayId(), miFloraGateway);
         }
     }
 
-    private getManufacturerId(peripheral: Peripheral) {
+    private getGatewayId(peripheral: Peripheral) {
         const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
 
         if (!manufacturerId && MiFloraGateway.isMiFloraPeripheral(peripheral)) {
-            return this.miFloraManufacturerId;
+            return this.miFloraGatewayId;
         }
 
         return manufacturerId;
     }
 
     private resolveGateway(peripheral: Peripheral) {
-        const manufacturerId = this.getManufacturerId(peripheral);
+        const gatewayId = this.getGatewayId(peripheral);
 
-        if (!manufacturerId) {
+        if (!gatewayId) {
             return this.defaultGateway;
         }
 
-        const gateway = this.configuredGateways.get(manufacturerId);
+        const gateway = this.configuredGateways.get(gatewayId);
 
         if (!gateway) {
             return this.defaultGateway;

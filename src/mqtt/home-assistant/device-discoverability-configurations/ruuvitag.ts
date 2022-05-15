@@ -16,6 +16,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         name: "Absolute Humidity",
         unitOfMeasurement: "g/m^3",
         uniqueId: "absolute_humidity",
+        icon: "mdi:water-percent",
         device: ruuviTagDeviceConfiguration,
     },
     temperature: {
@@ -40,7 +41,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         uniqueId: "humidity",
         device: ruuviTagDeviceConfiguration,
         valueTemplate: "{{ value_json.relativeHumidityPercentage | float(2) }}",
-        icon: "mdi:gauge",
+        icon: "mdi:water-percent",
     },
     dewPoint: {
         deviceClass: HomeAssistantDeviceClass.None,

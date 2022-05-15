@@ -11,7 +11,7 @@ export class UnknownGateway implements Gateway {
         return EMPTY;
     }
 
-    public getManufacturerId(): number {
+    public getGatewayId(): number {
         return 0;
     }
 }
