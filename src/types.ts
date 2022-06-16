@@ -1,6 +1,7 @@
 import { EnhancedRuuviTagSensorData } from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { DateTime } from "luxon";
 import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer";
+import { AnalyticsStatistics } from "./gateways/gateway-analytics";
 
 export enum DeviceType {
     Ruuvitag = "ruuvitag",
@@ -39,6 +40,8 @@ export interface DeviceAvailabilityMessage extends DeviceMessage {
         state: "online" | "offline";
     };
 }
+
+export type BleGatewayMessage = DeviceMessage | DeviceAvailabilityMessage | AnalyticsStatistics;
 
 export interface MqttMessage {
     topic: string;
