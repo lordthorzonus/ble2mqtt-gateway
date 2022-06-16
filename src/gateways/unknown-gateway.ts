@@ -1,9 +1,9 @@
 import { Gateway } from "./ble-gateway";
-import { DeviceAvailabilityMessage, DeviceMessage } from "../types";
+import { DeviceAvailabilityMessage, DeviceSensorMessage } from "../types";
 import { EMPTY, from, Observable } from "rxjs";
 
 export class UnknownGateway implements Gateway {
-    public handleBleAdvertisement(): Observable<DeviceMessage | DeviceAvailabilityMessage | null> {
+    public handleBleAdvertisement(): Observable<DeviceSensorMessage | DeviceAvailabilityMessage | null> {
         return from([null]);
     }
 

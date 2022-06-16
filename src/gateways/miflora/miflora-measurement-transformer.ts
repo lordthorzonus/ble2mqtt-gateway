@@ -1,6 +1,6 @@
 import { Peripheral } from "@abandonware/noble";
 import { DeviceRegistryEntry } from "../device-registry";
-import { DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
+import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 import { ReadyMiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
@@ -16,7 +16,7 @@ export const transformMiFloraMeasurementsToDeviceMessage = (
     peripheral: Peripheral,
     deviceRegistryEntry: DeviceRegistryEntry,
     miFloraSensorMeasurementBuffer: ReadyMiFloraSensorMeasurementBuffer
-): DeviceMessage => {
+): DeviceSensorMessage => {
     const sensorData: MiFloraSensorData = {
         temperature: miFloraSensorMeasurementBuffer.temperatureEvent.data,
         moisture: miFloraSensorMeasurementBuffer.moistureEvent.data,
@@ -35,7 +35,7 @@ export const transformMiFloraMeasurementsToDeviceMessage = (
             timeout: deviceRegistryEntry.timeout,
         },
         time: DateTime.now(),
-        type: DeviceMessageType.SensorData,
+        type: MessageType.SensorData,
         payload: sensorData,
     };
 };

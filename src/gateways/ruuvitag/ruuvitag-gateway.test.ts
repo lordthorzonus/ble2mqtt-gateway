@@ -1,7 +1,7 @@
 import { RuuviTagGateway } from "./ruuvitag-gateway";
 import { Peripheral } from "@abandonware/noble";
 import { take, toArray } from "rxjs";
-import { DeviceAvailabilityMessage, DeviceMessage, DeviceMessageType } from "../../types";
+import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType } from "../../types";
 import { DateTime, Settings } from "luxon";
 import { v4 as uuid } from "uuid";
 import { TestScheduler } from "rxjs/testing";
@@ -77,7 +77,7 @@ describe("RuuviTag Gateway", () => {
 
         it("should not produce the availability message twice if the ruuvitag availability has not changed", () => {
             const gateway = makeRuuviTagGateway();
-            const observedMessages: (DeviceMessage | DeviceAvailabilityMessage | null)[] = [];
+            const observedMessages: (DeviceSensorMessage | DeviceAvailabilityMessage | null)[] = [];
 
             gateway.handleBleAdvertisement(peripheral).subscribe((message) => {
                 observedMessages.push(message);
@@ -88,9 +88,9 @@ describe("RuuviTag Gateway", () => {
             });
 
             expect(observedMessages.length).toEqual(3);
-            expect(observedMessages[0]?.type).toEqual(DeviceMessageType.Availability);
-            expect(observedMessages[1]?.type).toEqual(DeviceMessageType.SensorData);
-            expect(observedMessages[2]?.type).toEqual(DeviceMessageType.SensorData);
+            expect(observedMessages[0]?.type).toEqual(MessageType.Availability);
+            expect(observedMessages[1]?.type).toEqual(MessageType.SensorData);
+            expect(observedMessages[2]?.type).toEqual(MessageType.SensorData);
         });
 
         it("should handle unknown ruuvitags normally if unknown ruuvitags are allowed", () => {
@@ -100,7 +100,7 @@ describe("RuuviTag Gateway", () => {
             } as Peripheral;
 
             const gateway = makeRuuviTagGateway(true);
-            const observedMessages: (DeviceMessage | DeviceAvailabilityMessage | null)[] = [];
+            const observedMessages: (DeviceSensorMessage | DeviceAvailabilityMessage | null)[] = [];
 
             gateway.handleBleAdvertisement(unknownPeripheral).subscribe((message) => {
                 observedMessages.push(message);

@@ -21,7 +21,9 @@ const getMiFloraServiceData = (peripheral: Peripheral) => {
 
     if (!xiaomiService) {
         throw new Error(
-            `Not a valid MiFlora device advertisement. Could not find a service with uuid: "${XiaomiServiceId}"`
+            `Not a valid MiFlora device advertisement. Could not find a service with uuid: "${XiaomiServiceId}". Advertisement: ${JSON.stringify(
+                peripheral.advertisement
+            )}`
         );
     }
 
