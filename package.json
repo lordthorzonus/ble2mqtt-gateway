@@ -39,7 +39,7 @@
     "@types/js-yaml": "4.0.5",
     "@types/lodash": "4.14.182",
     "@types/lodash.snakecase": "4.1.7",
-    "@types/luxon": "2.3.2",
+    "@types/luxon": "3.0.0",
     "@types/noble": "0.0.41",
     "@types/node": "16.11.44",
     "@types/uuid": "8.3.4",
