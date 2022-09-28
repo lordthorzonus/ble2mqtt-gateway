@@ -37,7 +37,7 @@
   "devDependencies": {
     "@types/jest": "28.1.8",
     "@types/js-yaml": "4.0.5",
-    "@types/lodash": "4.14.185",
+    "@types/lodash": "4.14.186",
     "@types/lodash.snakecase": "4.1.7",
     "@types/luxon": "3.0.1",
     "@types/noble": "0.0.41",
