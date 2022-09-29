@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@abandonware/noble": "^1.9.2-15",
-    "dotenv": "^16.0.0",
+    "dotenv": "16.0.2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "lodash.snakecase": "^4.1.1",
