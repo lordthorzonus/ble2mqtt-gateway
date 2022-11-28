@@ -2,6 +2,7 @@ import * as mqtt from "mqtt";
 
 import { MqttMessage } from "../types";
 import { getConfiguration } from "../config";
+import { logger } from "./logger";
 
 const config = getConfiguration();
 
@@ -17,6 +18,7 @@ const client = mqtt.connect(config.mqtt.host, {
 
 export const publish = async (message: MqttMessage): Promise<void> => {
     return new Promise((resolve, reject) => {
+        logger.debug("Publishing MQTT Message", { message });
         client.publish(
             message.topic,
             message.payload,
