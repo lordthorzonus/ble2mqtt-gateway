@@ -13,6 +13,8 @@ on:
       - "main"
 jobs:
   pipeline:
+    env:
+      PLATFORMS: linux/amd64${{ github.event_name != 'pull_request' && ', linux/arm64, linux/arm/v7' || '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -71,11 +73,11 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: ${{ env.PLATFORMS }}
           target: production
           builder: ${{ steps.buildx.outputs.name }}
-          cache-from: type=gha, scope=${{ github.workflow }}
-          cache-to: type=gha,mode=max, scope=${{ github.workflow }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
 
 
