@@ -1,16 +1,16 @@
 import {
     DeviceAvailabilityMessage,
     DeviceMessage,
-    DeviceMessageType,
     DeviceType,
     HomeAssistantDeviceClass,
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDeviceType,
+    MessageType,
     MqttMessage,
 } from "../../types";
 import { ruuviTagSensorConfiguration } from "./device-discoverability-configurations/ruuvitag";
-import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../device-mqtt-topic-factory";
+import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../mqtt-topic-factory";
 import { Observable } from "rxjs";
 import { getConfiguration } from "../../config";
 import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora";
@@ -131,7 +131,7 @@ const generateAvailabilityMessage = (deviceMessage: DeviceMessage): MqttMessage 
 });
 
 const isAvailabilityMessage = (deviceMessage: DeviceMessage): deviceMessage is DeviceAvailabilityMessage =>
-    deviceMessage.type === DeviceMessageType.Availability;
+    deviceMessage.type === MessageType.Availability;
 
 const generateStateMessage = (deviceMessage: DeviceMessage): MqttMessage => ({
     retain: false,

@@ -17,7 +17,7 @@ class MockGateway implements Gateway {
 
     public handleBleAdvertisement(
         peripheral: Peripheral
-    ): Observable<DeviceMessage | DeviceAvailabilityMessage | null> {
+    ): Observable<DeviceSensorMessage | DeviceAvailabilityMessage | null> {
         return this.mockHandleBleAdvertisement(peripheral);
     }
 
@@ -52,11 +52,27 @@ jest.mock("../infra/ble-scanner", () => ({
     __esModule: true,
     scan: jest.fn(),
 }));
+
+jest.mock("./analytics/gateway-analytics", () => {
+    return {
+        __esModule: true,
+        GatewayAnalytics: mockGatewayAnalyticsConstructor,
+    };
+});
+
+const mockGatewayAnalytics = {
+    recordBluetoothAdvertisement: jest.fn(),
+    recordDeviceMessage: jest.fn(),
+    observeAnalytics: jest.fn(),
+};
+const mockGatewayAnalyticsConstructor = jest.fn().mockImplementation(() => mockGatewayAnalytics);
+
 import { BleGateway } from "./ble-gateway";
 import { EMPTY, from, Observable, take, toArray } from "rxjs";
-import { DeviceAvailabilityMessage, DeviceMessage } from "../types";
+import { DeviceAvailabilityMessage, DeviceSensorMessage, DeviceType, MessageType } from "../types";
 import { Config } from "../config";
 import { scan } from "../infra/ble-scanner";
+import { TestScheduler } from "rxjs/testing";
 
 const mockBleScanner = scan as jest.Mock;
 
@@ -110,13 +126,24 @@ describe("BLE Gateway", () => {
         },
     } as unknown as Peripheral;
 
-    const handledMessage = "handled message";
+    const handledMessage = {
+        type: MessageType.SensorData,
+        device: {
+            type: DeviceType.Ruuvitag,
+        },
+        payload: {
+            a: "handled message",
+        },
+    };
 
     afterEach(() => {
         mockRuuvitagGateway.mockObserveUnavailableDevices.mockReset();
         mockRuuvitagGateway.mockHandleBleAdvertisement.mockReset();
         mockMiFloraGateway.mockObserveUnavailableDevices.mockReset();
         mockMiFloraGateway.mockHandleBleAdvertisement.mockReset();
+        mockGatewayAnalytics.observeAnalytics.mockReset();
+        mockGatewayAnalytics.recordDeviceMessage.mockReset();
+        mockGatewayAnalytics.recordBluetoothAdvertisement.mockReset();
     });
 
     it("should use the correct gateway for ruuvitag and miflora ble advertisements", (done) => {
@@ -126,6 +153,7 @@ describe("BLE Gateway", () => {
         mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
         mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
         mockMiFloraGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
+        mockGatewayAnalytics.observeAnalytics.mockReturnValue(EMPTY);
 
         gateway
             .observeEvents()
@@ -136,6 +164,9 @@ describe("BLE Gateway", () => {
                 expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(ruuviPeripheral);
                 expect(mockMiFloraGateway.mockHandleBleAdvertisement).toHaveBeenCalledTimes(1);
                 expect(mockMiFloraGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(mifloraPeripheral);
+                expect(mockGatewayAnalytics.recordBluetoothAdvertisement).toHaveBeenCalledTimes(3);
+                expect(mockGatewayAnalytics.recordDeviceMessage).toHaveBeenCalledTimes(3);
+
                 done();
             });
     });
@@ -148,6 +179,7 @@ describe("BLE Gateway", () => {
         mockRuuvitagGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
         mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
         mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
+        mockGatewayAnalytics.observeAnalytics.mockReturnValue(EMPTY);
 
         gateway
             .observeEvents()
@@ -156,25 +188,43 @@ describe("BLE Gateway", () => {
                 expect(messages).toEqual([handledMessage, handledMessage]);
                 expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledTimes(2);
                 expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(ruuviPeripheral);
+                expect(mockGatewayAnalytics.recordBluetoothAdvertisement).toHaveBeenCalledTimes(5);
+                expect(mockGatewayAnalytics.recordDeviceMessage).toHaveBeenCalledTimes(2);
                 done();
             });
     });
 
     it("should also allow to observe unavailable device messages from gateways", (done) => {
-        const gateway = new BleGateway(validGatewayConfiguration);
-        const unavailableDeviceMessages = ["a", "b"];
-
         mockBleScanner.mockReturnValue(from([ruuviPeripheral, ruuviPeripheral]));
-        mockRuuvitagGateway.mockObserveUnavailableDevices.mockReturnValue(from(unavailableDeviceMessages));
+        mockRuuvitagGateway.mockObserveUnavailableDevices.mockReturnValue(from(["ruuvitag1", "ruuvitag2"]));
+        mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(from(["miflora1", "miflora2"]));
         mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
+        mockGatewayAnalytics.observeAnalytics.mockReturnValue(from(["analytics1", "analytics2"]));
 
-        gateway
-            .observeEvents()
-            .pipe(take(4), toArray())
-            .subscribe((messages) => {
-                expect(messages).toEqual([handledMessage, handledMessage, ...unavailableDeviceMessages]);
-                expect(mockRuuvitagGateway.mockObserveUnavailableDevices).toHaveBeenCalledTimes(1);
-                done();
+        const gateway = new BleGateway(validGatewayConfiguration);
+
+        const testScheduler = new TestScheduler((actual, expected) => {
+            expect(actual).toEqual(expected);
+        });
+
+        return testScheduler.run((helpers) => {
+            helpers.expectObservable(gateway.observeEvents().pipe(take(8))).toBe("(abcdefgh|)", {
+                a: handledMessage,
+                b: handledMessage,
+                c: "ruuvitag1",
+                d: "ruuvitag2",
+                e: "miflora1",
+                f: "miflora2",
+                g: expect.objectContaining({
+                    payload: "analytics1",
+                    type: "analytics",
+                }),
+                h: expect.objectContaining({
+                    payload: "analytics2",
+                    type: "analytics",
+                }),
             });
+            done();
+        });
     });
 });

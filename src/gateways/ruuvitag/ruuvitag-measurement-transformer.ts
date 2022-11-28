@@ -3,7 +3,7 @@ import { flow } from "lodash";
 import { v4 as uuid } from "uuid";
 import parse from "./ruuvitag-parser";
 import decorateRuuviTagSensorDataWithCalculatedValues from "./ruuvitag-sensor-data-decorator";
-import { DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
+import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { DateTime } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
 
@@ -17,7 +17,7 @@ const getSensorData = flow(parse, decorateRuuviTagSensorDataWithCalculatedValues
 export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
     peripheral: Peripheral,
     deviceRegistryEntry: DeviceRegistryEntry
-): DeviceMessage => {
+): DeviceSensorMessage => {
     const sensorData = getSensorData(peripheral.advertisement.manufacturerData);
     const macAddress = sensorData.macAddress || peripheral.address;
     return {
@@ -31,7 +31,7 @@ export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
             timeout: deviceRegistryEntry.timeout,
         },
         time: DateTime.now(),
-        type: DeviceMessageType.SensorData,
+        type: MessageType.SensorData,
         payload: sensorData,
     };
 };

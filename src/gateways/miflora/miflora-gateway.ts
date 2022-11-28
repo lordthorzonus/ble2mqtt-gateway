@@ -1,6 +1,6 @@
 import { Gateway } from "../ble-gateway";
 import { Peripheral } from "@abandonware/noble";
-import { DeviceMessage, DeviceType } from "../../types";
+import { DeviceSensorMessage, DeviceType } from "../../types";
 import { Observable } from "rxjs";
 import { Config } from "../../config";
 import { AbstractGateway } from "../abstract-gateway";
@@ -42,10 +42,10 @@ export class MiFloraGateway extends AbstractGateway implements Gateway {
         return xiaomiId;
     }
 
-    protected handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage> {
+    protected handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceSensorMessage> {
         const id = peripheral.uuid;
 
-        return new Observable<DeviceMessage>((subscriber) => {
+        return new Observable<DeviceSensorMessage>((subscriber) => {
             const miFloraMeasurementEvent = parseMiFloraPeripheralAdvertisement(peripheral);
             const buffer = this.sensorEventBuffer.bufferMeasurementEvent(id, miFloraMeasurementEvent);
 

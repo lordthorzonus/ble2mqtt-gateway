@@ -1,4 +1,4 @@
-import { DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
+import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import parse from "./ruuvitag-parser";
 import decorateRuuviTagSensorDataWithCalculatedValues, {
     EnhancedRuuviTagSensorData,
@@ -79,9 +79,9 @@ describe("RuuviTag Measurement Transformer", () => {
             macAddress: "cb:b8:33:4c:88:4f",
         };
 
-        const expectedMessage: DeviceMessage = {
+        const expectedMessage: DeviceSensorMessage = {
             id: mockId,
-            type: DeviceMessageType.SensorData,
+            type: MessageType.SensorData,
             device: {
                 type: DeviceType.Ruuvitag,
                 friendlyName: device.device.friendlyName,

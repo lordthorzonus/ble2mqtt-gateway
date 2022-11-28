@@ -1,3 +1,10 @@
+jest.mock("./logger", () => ({
+    __esModule: true,
+    logger: {
+        info: jest.fn(),
+    },
+}));
+
 import { EventEmitter } from "events";
 const mockNobleEventEmitter = new EventEmitter();
 const mockNobleEventListener = jest.fn().mockImplementation((eventName, callback) => {

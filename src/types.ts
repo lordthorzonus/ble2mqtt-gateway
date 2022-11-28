@@ -1,15 +1,17 @@
 import { EnhancedRuuviTagSensorData } from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { DateTime } from "luxon";
 import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer";
+import { AnalyticsStatistics } from "./gateways/analytics/gateway-analytics";
 
 export enum DeviceType {
     Ruuvitag = "ruuvitag",
     MiFlora = "miflora",
 }
 
-export enum DeviceMessageType {
+export enum MessageType {
     Availability = "availability",
     SensorData = "sensor-data",
+    Analytics = "analytics",
 }
 
 export interface Device {
@@ -18,7 +20,7 @@ export interface Device {
     type: DeviceType;
 }
 
-export interface DeviceMessage {
+export type DeviceSensorMessage = {
     device: {
         macAddress: string;
         id: string;
@@ -29,16 +31,36 @@ export interface DeviceMessage {
     };
     id: string;
     time: DateTime;
-    type: DeviceMessageType;
+    type: MessageType.SensorData;
     payload: Record<string, string | number | boolean | null>;
-}
+};
 
-export interface DeviceAvailabilityMessage extends DeviceMessage {
-    type: DeviceMessageType.Availability;
+export type DeviceAvailabilityMessage = {
+    device: {
+        macAddress: string;
+        id: string;
+        rssi: number | null;
+        friendlyName: string;
+        type: DeviceType;
+        timeout: number;
+    };
+    id: string;
+    time: DateTime;
+    type: MessageType.Availability;
     payload: {
         state: "online" | "offline";
     };
-}
+};
+
+export type AnalyticsMessage = {
+    id: string;
+    time: DateTime;
+    type: MessageType.Analytics;
+    payload: AnalyticsStatistics;
+};
+
+export type DeviceMessage = DeviceAvailabilityMessage | DeviceSensorMessage;
+export type BleGatewayMessage = DeviceSensorMessage | DeviceAvailabilityMessage | AnalyticsMessage;
 
 export interface MqttMessage {
     topic: string;

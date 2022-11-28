@@ -43,6 +43,7 @@ const miFloraSchema = z
     .optional();
 
 const configSchema = z.object({
+    log_level: z.union([z.literal("info"), z.literal("debug"), z.literal("error")]).default("info"),
     mqtt: mqttSchema,
     gateways: z.object({
         base_topic: z.string().default("ble2mqtt"),

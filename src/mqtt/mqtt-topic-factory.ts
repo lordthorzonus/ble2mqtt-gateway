@@ -8,3 +8,4 @@ export const getDeviceStateTopic = (device: Device): string =>
     `${mqttGatewayBaseTopic}/${device.type}/${device.id}/state`;
 export const getDeviceAvailabilityTopic = (device: Device): string =>
     `${mqttGatewayBaseTopic}/${device.type}/${device.id}/availability`;
+export const getAnalyticsTopic = (): string => `${mqttGatewayBaseTopic}/gateway/analytics`;

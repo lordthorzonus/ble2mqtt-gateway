@@ -3,6 +3,7 @@ Currently supports RuuviTags and MiFlora Devices.
 
 ## Example Configuration (configuration.yaml)
 ```yaml
+log_level: info
 mqtt:
   host: mqtt.lan.fi
   port: 1883

@@ -1,7 +1,7 @@
 import { Peripheral } from "@abandonware/noble";
 import { concat, EMPTY, map, Observable } from "rxjs";
-import { DeviceAvailabilityMessage, DeviceMessage, DeviceType } from "../types";
-import { generateAvailabilityMessage } from "./availability-message-generator";
+import { DeviceAvailabilityMessage, DeviceSensorMessage, DeviceType } from "../types";
+import { generateAvailabilityMessage } from "./message-generators";
 import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry";
 import { Gateway } from "./ble-gateway";
 
@@ -51,7 +51,7 @@ export abstract class AbstractGateway implements Gateway {
 
     abstract getGatewayId(): number;
 
-    public handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceMessage | DeviceAvailabilityMessage> {
+    public handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceSensorMessage | DeviceAvailabilityMessage> {
         const id = peripheral.uuid;
 
         if (this.deviceRegistry.has(id) || this.unknownDevicesAllowed) {
@@ -61,7 +61,7 @@ export abstract class AbstractGateway implements Gateway {
         return EMPTY;
     }
 
-    protected abstract handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceMessage>;
+    protected abstract handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceSensorMessage>;
 
     public observeUnavailableDevices(): Observable<DeviceAvailabilityMessage> {
         return this.deviceRegistry.observeUnavailableDevices().pipe(

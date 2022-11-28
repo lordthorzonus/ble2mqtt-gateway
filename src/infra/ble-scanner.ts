@@ -1,6 +1,7 @@
 import * as noble from "@abandonware/noble";
 import { Peripheral } from "@abandonware/noble";
 import { Observable } from "rxjs";
+import { logger } from "./logger";
 
 export const scan = (): Observable<Peripheral> => {
     return new Observable<Peripheral>((subscriber) => {
@@ -10,7 +11,7 @@ export const scan = (): Observable<Peripheral> => {
 
         noble.on("stateChange", (state) => {
             if (state === "poweredOn") {
-                console.log("Starting scanning BLE devices");
+                logger.info("Starting scanning BLE devices");
                 noble.startScanning([], true);
             }
         });

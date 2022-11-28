@@ -12,18 +12,18 @@ jest.mock("../../config", () => ({
     }),
 }));
 
-import { DeviceAvailabilityMessage, DeviceMessage, DeviceMessageType, DeviceType } from "../../types";
+import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { DateTime } from "luxon";
 import { homeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
 
 describe("HomeAssistant MQTT Message producer", () => {
     it("should generate device state mqtt message if device sensor message is given", (done) => {
-        const deviceMessage: DeviceMessage = {
+        const deviceMessage: DeviceSensorMessage = {
             id: "a",
             payload: {
                 sensor1: "value",
             },
-            type: DeviceMessageType.SensorData,
+            type: MessageType.SensorData,
             time: DateTime.now(),
             device: {
                 macAddress: "aa:bb",
@@ -50,12 +50,12 @@ describe("HomeAssistant MQTT Message producer", () => {
     });
 
     it("should vary the state topic based on the device type", (done) => {
-        const deviceMessage: DeviceMessage = {
+        const deviceMessage: DeviceSensorMessage = {
             id: "a",
             payload: {
                 sensor1: "value",
             },
-            type: DeviceMessageType.SensorData,
+            type: MessageType.SensorData,
             time: DateTime.now(),
             device: {
                 macAddress: "aa:bb",
@@ -88,7 +88,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 id: "a",
                 time: DateTime.now(),
                 payload: { state: "online" },
-                type: DeviceMessageType.Availability,
+                type: MessageType.Availability,
                 device: {
                     macAddress: "aa:bb",
                     id: "aa:bb",
@@ -105,7 +105,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 id: "a",
                 time: DateTime.now(),
                 payload: { state: "offline" },
-                type: DeviceMessageType.Availability,
+                type: MessageType.Availability,
                 device: {
                     macAddress: "aa:bb",
                     id: "aa:bb",
@@ -122,7 +122,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 id: "abba",
                 time: DateTime.now(),
                 payload: { state: "online" },
-                type: DeviceMessageType.Availability,
+                type: MessageType.Availability,
                 device: {
                     macAddress: "aa:bb",
                     id: "aa:bb",
@@ -139,7 +139,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 id: "abba",
                 time: DateTime.now(),
                 payload: { state: "offline" },
-                type: DeviceMessageType.Availability,
+                type: MessageType.Availability,
                 device: {
                     macAddress: "aa:bb",
                     id: "aa:bb",
