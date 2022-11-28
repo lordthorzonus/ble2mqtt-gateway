@@ -1,4 +1,4 @@
-import { AnalyticsMessage, Device } from "../types";
+import { Device } from "../types";
 import { getConfiguration } from "../config";
 
 const config = getConfiguration();

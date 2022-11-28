@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { DeviceType } from "../../types";
-import { interval, map,  Observable } from "rxjs";
+import { interval, map, Observable } from "rxjs";
 
 enum AnalyticEventType {
     BLEAdvertisement = "ble-advertisement",

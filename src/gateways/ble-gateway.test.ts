@@ -68,7 +68,7 @@ const mockGatewayAnalytics = {
 const mockGatewayAnalyticsConstructor = jest.fn().mockImplementation(() => mockGatewayAnalytics);
 
 import { BleGateway } from "./ble-gateway";
-import { delay, EMPTY, from, Observable, take, toArray } from "rxjs";
+import { EMPTY, from, Observable, take, toArray } from "rxjs";
 import { DeviceAvailabilityMessage, DeviceSensorMessage, DeviceType, MessageType } from "../types";
 import { Config } from "../config";
 import { scan } from "../infra/ble-scanner";

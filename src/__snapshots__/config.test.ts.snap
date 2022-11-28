@@ -35,6 +35,7 @@ Object {
   "homeassistant": Object {
     "discovery_topic": "homeassistant",
   },
+  "log_level": "info",
   "mqtt": Object {
     "client_id": "c",
     "host": "mqtt.lan.fi",
