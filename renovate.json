@@ -1,5 +1,3 @@
 {
-  "extends": [
-    "config:js-app"
-  ]
+    "extends": ["config:js-app", ":automergeAll", "group:allNonMajor"]
 }
