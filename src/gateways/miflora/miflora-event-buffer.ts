@@ -62,10 +62,6 @@ export class MiFloraEventBuffer {
     ): MiFloraSensorMeasurementBuffer {
         const buffer = this.getBuffer(deviceId);
 
-        if (!buffer) {
-            throw new Error(`No MiFlora sensor configured with id: ${deviceId}`);
-        }
-
         const updatedBuffer = MiFloraEventBuffer.updateBuffer(buffer, measurement);
         this.sensorBuffer.set(deviceId, updatedBuffer);
 

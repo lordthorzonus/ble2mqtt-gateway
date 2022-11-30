@@ -145,7 +145,7 @@ describe("Gateway analytics", () => {
         ],
     ];
 
-    it.each(deviceMessageTestCases)("should record deviceMessage analytics correctly %2 ", (_, duration, expected) => {
+    it.each(deviceMessageTestCases)("should record deviceMessage analytics correctly %2", (_, duration, expected) => {
         const testScheduler = getTestScheduler();
         const analytics = new GatewayAnalytics();
 

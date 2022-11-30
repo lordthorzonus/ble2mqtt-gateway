@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 import { ReadyMiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type MiFloraSensorData = {
     temperature: number;
     moisture: number;

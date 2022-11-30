@@ -19,7 +19,7 @@ export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
     deviceRegistryEntry: DeviceRegistryEntry
 ): DeviceSensorMessage => {
     const sensorData = getSensorData(peripheral.advertisement.manufacturerData);
-    const macAddress = sensorData.macAddress || peripheral.address;
+    const macAddress = sensorData.macAddress ?? peripheral.address;
     return {
         id: uuid(),
         device: {

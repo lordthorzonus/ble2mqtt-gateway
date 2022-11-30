@@ -4,7 +4,7 @@ import decorateRuuviTagSensorDataWithCalculatedValues, {
     EnhancedRuuviTagSensorData,
 } from "./ruuvitag-sensor-data-decorator";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "noble";
+import { Peripheral } from "@abandonware/noble";
 import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
 import { DateTime, Settings } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
@@ -86,7 +86,7 @@ describe("RuuviTag Measurement Transformer", () => {
                 type: DeviceType.Ruuvitag,
                 friendlyName: device.device.friendlyName,
                 id: device.device.id,
-                macAddress: sensorData.macAddress as string,
+                macAddress: sensorData.macAddress ?? "no-mac-address",
                 rssi: peripheral.rssi,
                 timeout: 10000,
             },

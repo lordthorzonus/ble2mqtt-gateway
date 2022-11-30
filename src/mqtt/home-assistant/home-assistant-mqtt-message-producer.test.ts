@@ -38,7 +38,7 @@ describe("HomeAssistant MQTT Message producer", () => {
         homeAssistantMqttMessageProducer(deviceMessage).subscribe((message) => {
             expect(message).toEqual({
                 payload: JSON.stringify({
-                    ...deviceMessage.payload,
+                    sensor1: "value",
                     time: deviceMessage.time,
                     id: deviceMessage.id,
                 }),
@@ -70,7 +70,7 @@ describe("HomeAssistant MQTT Message producer", () => {
         homeAssistantMqttMessageProducer(deviceMessage).subscribe((message) => {
             expect(message).toEqual({
                 payload: JSON.stringify({
-                    ...deviceMessage.payload,
+                    sensor1: "value",
                     time: deviceMessage.time,
                     id: deviceMessage.id,
                 }),

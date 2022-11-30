@@ -2,7 +2,7 @@ import { RuuviTagSensorData } from "../index";
 import DataFormat3ParsingStrategy from "./data-format-3-parsing-strategy";
 
 describe("Data Format 3 Parsing Strategy", () => {
-    const testCases: Array<[string, RuuviTagSensorData]> = [
+    const testCases: [string, RuuviTagSensorData][] = [
         [
             "990403291A1ECE1EFC18F94202CA0B53",
             {

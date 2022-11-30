@@ -33,7 +33,7 @@ export class MiFloraGateway extends AbstractGateway implements Gateway {
         const MiFloraMacPrefix = "c4:7c:8d";
 
         return (
-            knownMiFloraDeviceNames.includes(peripheral.advertisement.localName?.toLowerCase()) ||
+            knownMiFloraDeviceNames.includes(peripheral.advertisement.localName.toLowerCase()) ||
             peripheral.address.startsWith(MiFloraMacPrefix)
         );
     };

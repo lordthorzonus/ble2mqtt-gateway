@@ -6,7 +6,6 @@ const config = getConfiguration();
 export const logger = createLogger({
     level: config.log_level,
     format: format.combine(
-        format.colorize({ all: true }),
         format.timestamp({
             format: "YYYY-MM-DD HH:mm:ss",
         }),

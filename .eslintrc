@@ -1,21 +1,42 @@
 {
-  "root": true,
-  "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint",
-    "prettier"
-  ],
-  "parserOptions": {
-    "ecmaVersion": 2020,
-  },
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-    "prettier",
-    "plugin:prettier/recommended"
-  ],
-  "rules": {
-    "@typescript-eslint/explicit-module-boundary-types": "error"
-  }
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint", "prettier"],
+    "parserOptions": {
+        "ecmaVersion": 2020,
+        "project": "./tsconfig.json"
+    },
+    "env": {
+        "jest/globals": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking",
+        "plugin:@typescript-eslint/strict",
+        "prettier",
+        "plugin:prettier/recommended"
+    ],
+    "rules": {
+        "@typescript-eslint/explicit-module-boundary-types": "error",
+        "@typescript-eslint/restrict-template-expressions": "off",
+        "@typescript-eslint/no-duplicate-enum-values": "off"
+    },
+    "overrides": [
+        {
+            "files": ["**.test.ts"],
+            "plugins": ["jest"],
+            "extends": ["plugin:jest/recommended", "plugin:jest/style"],
+            "rules": {
+                "@typescript-eslint/no-unsafe-call": "off",
+                "@typescript-eslint/no-unsafe-member-access": "off",
+                "@typescript-eslint/no-unsafe-assignment": "off",
+                "@typescript-eslint/no-unsafe-return": "off",
+                "jest/no-done-callback": "off",
+                "jest/expect-expect": "off",
+                "jest/no-export": "off"
+            }
+        }
+    ]
 }

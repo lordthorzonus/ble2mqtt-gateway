@@ -73,7 +73,7 @@ export class BleGateway {
 
     private scanBleAdvertisements(): Observable<DeviceSensorMessage | DeviceAvailabilityMessage> {
         return scan().pipe(
-            tap(async () => this.analytics.recordBluetoothAdvertisement()),
+            tap(() => this.analytics.recordBluetoothAdvertisement()),
             mergeMap((peripheral) => {
                 const gateway = this.resolveGateway(peripheral);
                 return gateway.handleBleAdvertisement(peripheral).pipe(

@@ -1,10 +1,8 @@
 declare module "@abandonware/noble" {
     import {
-        Advertisement,
         Characteristic,
         Descriptor,
         on,
-        Peripheral,
         removeAllListeners,
         removeListener,
         Service,
@@ -12,6 +10,18 @@ declare module "@abandonware/noble" {
         state,
         stopScanning,
     } from "noble";
+
+    interface Advertisement {
+        localName: string;
+        manufacturerData?: Buffer;
+    }
+
+    interface Peripheral {
+        address: string;
+        uuid: string;
+        advertisement: Advertisement;
+    }
+
     export {
         Advertisement,
         Characteristic,

@@ -4,6 +4,7 @@ import { ruuviTagManufacturerId, validateRuuviTag } from "./ruuvitag-validator";
 
 type Nullable<T> = T | null;
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type RuuviTagSensorData = {
     relativeHumidityPercentage: Nullable<number>;
     temperature: Nullable<number>;
