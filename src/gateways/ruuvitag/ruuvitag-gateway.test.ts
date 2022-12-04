@@ -87,7 +87,7 @@ describe("RuuviTag Gateway", () => {
                 observedMessages.push(message);
             });
 
-            expect(observedMessages.length).toEqual(3);
+            expect(observedMessages).toHaveLength(3);
             expect(observedMessages[0]?.type).toEqual(MessageType.Availability);
             expect(observedMessages[1]?.type).toEqual(MessageType.SensorData);
             expect(observedMessages[2]?.type).toEqual(MessageType.SensorData);
@@ -130,7 +130,7 @@ describe("RuuviTag Gateway", () => {
                 .handleBleAdvertisement(peripheral)
                 .pipe(toArray())
                 .subscribe((messages) => {
-                    expect(messages.length).toEqual(2);
+                    expect(messages).toHaveLength(2);
                 });
 
             gateway

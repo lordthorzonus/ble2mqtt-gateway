@@ -59,7 +59,7 @@ describe("MiFlora Gateway", () => {
             }
         );
 
-        it("should complete without emiting messages if unknown miflora advertisement is received ", (done) => {
+        it("should complete without emiting messages if unknown miflora advertisement is received", (done) => {
             const gateway = makeMiFloraGateway();
 
             testScheduler.run((helpers) => {
@@ -177,7 +177,7 @@ describe("MiFlora Gateway", () => {
                 .handleBleAdvertisement(moisturePeripheralAdvertisement)
                 .pipe(toArray())
                 .subscribe((messages) => {
-                    expect(messages.length).toEqual(1);
+                    expect(messages).toHaveLength(1);
                 });
 
             gateway

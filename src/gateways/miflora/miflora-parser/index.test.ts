@@ -5,6 +5,13 @@ import {
 } from "./index";
 import { Peripheral } from "@abandonware/noble";
 
+jest.mock("../../../infra/logger", () => ({
+    __esModule: true,
+    logger: {
+        warn: jest.fn(),
+    },
+}));
+
 export const getStubPeripheral = (serviceData: string, id = "a"): Peripheral => {
     return {
         uuid: id,
@@ -34,6 +41,7 @@ describe("parseMiFloraPeripheralAdvertisement()", () => {
             getStubPeripheral("71209800c3cf076e8d7cc40d071003370000"),
             { measurementType: MifloraMeasurementEventType.Illuminance, data: 55 },
         ],
+        [getStubPeripheral("0000"), { measurementType: MifloraMeasurementEventType.InvalidEvent, data: 0 }],
     ];
 
     it.each(testCases)("should parse %j service data with correct strategy", (peripheral, expectedResult) => {

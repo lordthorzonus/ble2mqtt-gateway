@@ -20,7 +20,7 @@ export interface Device {
     type: DeviceType;
 }
 
-export type DeviceSensorMessage = {
+export interface DeviceSensorMessage {
     device: {
         macAddress: string;
         id: string;
@@ -32,10 +32,10 @@ export type DeviceSensorMessage = {
     id: string;
     time: DateTime;
     type: MessageType.SensorData;
-    payload: Record<string, string | number | boolean | null>;
-};
+    payload: Record<string, unknown>;
+}
 
-export type DeviceAvailabilityMessage = {
+export interface DeviceAvailabilityMessage {
     device: {
         macAddress: string;
         id: string;
@@ -50,14 +50,14 @@ export type DeviceAvailabilityMessage = {
     payload: {
         state: "online" | "offline";
     };
-};
+}
 
-export type AnalyticsMessage = {
+export interface AnalyticsMessage {
     id: string;
     time: DateTime;
     type: MessageType.Analytics;
     payload: AnalyticsStatistics;
-};
+}
 
 export type DeviceMessage = DeviceAvailabilityMessage | DeviceSensorMessage;
 export type BleGatewayMessage = DeviceSensorMessage | DeviceAvailabilityMessage | AnalyticsMessage;
@@ -99,9 +99,7 @@ export type HomeAssistantSensorConfigurationForDevice<T> =
     | {
           [K in keyof T]: HomeAssistantSensorConfiguration;
       }
-    | {
-          [key: string]: HomeAssistantSensorConfiguration & { valueTemplate: string };
-      };
+    | Record<string, HomeAssistantSensorConfiguration & { valueTemplate: string }>;
 
 export type HomeAssistantSensorConfigurationForDeviceType<T> = T extends DeviceType.Ruuvitag
     ? HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagSensorData>

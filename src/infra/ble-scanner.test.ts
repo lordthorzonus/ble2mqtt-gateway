@@ -2,20 +2,25 @@ jest.mock("./logger", () => ({
     __esModule: true,
     logger: {
         info: jest.fn(),
+        debug: jest.fn(),
     },
 }));
 
 import { EventEmitter } from "events";
 const mockNobleEventEmitter = new EventEmitter();
-const mockNobleEventListener = jest.fn().mockImplementation((eventName, callback) => {
-    mockNobleEventEmitter.on(eventName, callback);
-});
+const mockNobleEventListener = jest
+    .fn()
+    .mockImplementation((eventName: string, callback: (event: string) => unknown) => {
+        mockNobleEventEmitter.on(eventName, callback);
+    });
 const mockNobleScanner = jest.fn();
-const mockNobleStopScannning = jest.fn();
+const mockNobleStopScanning = jest.fn();
+const mockRemoveAllListeners = jest.fn();
 jest.mock("@abandonware/noble", () => ({
     on: mockNobleEventListener,
     startScanning: mockNobleScanner,
-    stopScanning: mockNobleStopScannning,
+    stopScanning: mockNobleStopScanning,
+    removeAllListeners: mockRemoveAllListeners,
 }));
 
 import { scan } from "./ble-scanner";
@@ -37,7 +42,8 @@ describe("BLE Scanner", () => {
         expect(mockNobleEventListener).toHaveBeenCalledWith("discover", expect.any(Function));
         expect(mockNobleEventListener).toHaveBeenCalledWith("stateChange", expect.any(Function));
         subscription.unsubscribe();
-        expect(mockNobleStopScannning).toHaveBeenCalledTimes(1);
+        expect(mockNobleStopScanning).toHaveBeenCalledTimes(1);
+        expect(mockRemoveAllListeners).toHaveBeenCalledTimes(1);
     });
 
     it("should call nobles start scanning when noble emits that it is ready to scan", () => {

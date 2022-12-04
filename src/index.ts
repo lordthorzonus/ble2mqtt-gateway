@@ -15,7 +15,7 @@ const config = getConfiguration();
 const gateway = new BleGateway(config.gateways);
 
 const messages = gateway.observeEvents().pipe(
-    catchError((error) => {
+    catchError((error: Error) => {
         logger.error(error);
         return throwError(() => error);
     }),
@@ -29,13 +29,11 @@ const messages = gateway.observeEvents().pipe(
     })
 );
 
-const subscription = messages.subscribe(async (message) => {
-    try {
-        await publish(message);
-    } catch (e) {
+const subscription = messages.subscribe((message) => {
+    publish(message).catch(() => {
         logger.error("Error publishing MQTT message", { message });
-    }
+    });
 });
 
-process.on("SIGINT", subscription.unsubscribe);
-process.on("SIGTERM", subscription.unsubscribe);
+process.on("SIGINT", () => subscription.unsubscribe());
+process.on("SIGTERM", () => subscription.unsubscribe());

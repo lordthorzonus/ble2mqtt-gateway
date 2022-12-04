@@ -30,7 +30,7 @@ const mockRuuvitagGateway = new MockGateway(0x0499);
 const mockMiFloraGateway = new MockGateway(0x95fe);
 const mockMiFloraConstructor = jest.fn().mockImplementation(() => mockMiFloraGateway);
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+// @ts-expect-error
 mockMiFloraConstructor.isMiFloraPeripheral = jest.fn().mockImplementation((peripheral: Peripheral) => {
     return peripheral.uuid === "miflora";
 });

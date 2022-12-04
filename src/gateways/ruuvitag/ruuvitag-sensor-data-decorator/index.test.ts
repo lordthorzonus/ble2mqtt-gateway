@@ -48,18 +48,18 @@ describe("RuuviTag sensor data decorator", () => {
             heatIndex,
         });
 
-        expect(calculateAbsoluteHumidityMock).toBeCalledWith(
+        expect(calculateAbsoluteHumidityMock).toHaveBeenCalledWith(
             ruuviTagSensorData.temperature,
             ruuviTagSensorData.relativeHumidityPercentage
         );
-        expect(calculateDewPointMock).toBeCalledWith(
+        expect(calculateDewPointMock).toHaveBeenCalledWith(
             ruuviTagSensorData.temperature,
             ruuviTagSensorData.relativeHumidityPercentage
         );
-        expect(calculateHeatIndexMock).toBeCalledWith(
+        expect(calculateHeatIndexMock).toHaveBeenCalledWith(
             ruuviTagSensorData.temperature,
             ruuviTagSensorData.relativeHumidityPercentage
         );
-        expect(calculateHumidexMock).toBeCalledWith(ruuviTagSensorData.temperature, dewPoint);
+        expect(calculateHumidexMock).toHaveBeenCalledWith(ruuviTagSensorData.temperature, dewPoint);
     });
 });

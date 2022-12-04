@@ -4,7 +4,7 @@ import decorateRuuviTagSensorDataWithCalculatedValues, {
     EnhancedRuuviTagSensorData,
 } from "./ruuvitag-sensor-data-decorator";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "noble";
+import { PeripheralWithManufacturerData } from "@abandonware/noble";
 import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
 import { DateTime, Settings } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
@@ -41,10 +41,13 @@ describe("RuuviTag Measurement Transformer", () => {
         const peripheral = {
             advertisement: {
                 manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
+                localName: "a",
+                serviceData: [],
             },
             address: "a1:b2",
             rssi: 23,
             id: "id",
+            uuid: "123",
         };
 
         const device: DeviceRegistryEntry = {
@@ -86,7 +89,7 @@ describe("RuuviTag Measurement Transformer", () => {
                 type: DeviceType.Ruuvitag,
                 friendlyName: device.device.friendlyName,
                 id: device.device.id,
-                macAddress: sensorData.macAddress as string,
+                macAddress: sensorData.macAddress ?? "no-mac-address",
                 rssi: peripheral.rssi,
                 timeout: 10000,
             },
@@ -102,9 +105,12 @@ describe("RuuviTag Measurement Transformer", () => {
             mockedRuuviTagDecorator.mockReturnValue(sensorData);
             mockedUuid.mockReturnValue(mockId);
 
-            expect(transformPeripheralAdvertisementToSensorDataDeviceMessage(peripheral as Peripheral, device)).toEqual(
-                expectedMessage
-            );
+            expect(
+                transformPeripheralAdvertisementToSensorDataDeviceMessage(
+                    peripheral as PeripheralWithManufacturerData,
+                    device
+                )
+            ).toEqual(expectedMessage);
 
             expect(mockedParse).toHaveBeenCalledWith(peripheral.advertisement.manufacturerData);
             expect(mockedRuuviTagDecorator).toHaveBeenCalledWith(dummyParsedData);
@@ -119,16 +125,19 @@ describe("RuuviTag Measurement Transformer", () => {
             mockedRuuviTagDecorator.mockReturnValue(sensorDataWithoutMacAddress);
             mockedUuid.mockReturnValue(mockId);
 
-            expect(transformPeripheralAdvertisementToSensorDataDeviceMessage(peripheral as Peripheral, device)).toEqual(
-                {
-                    ...expectedMessage,
-                    device: {
-                        ...expectedMessage.device,
-                        macAddress: peripheral.address,
-                    },
-                    payload: { ...sensorDataWithoutMacAddress },
-                }
-            );
+            expect(
+                transformPeripheralAdvertisementToSensorDataDeviceMessage(
+                    peripheral as PeripheralWithManufacturerData,
+                    device
+                )
+            ).toEqual({
+                ...expectedMessage,
+                device: {
+                    ...expectedMessage.device,
+                    macAddress: peripheral.address,
+                },
+                payload: { ...sensorDataWithoutMacAddress },
+            });
         });
     });
 });

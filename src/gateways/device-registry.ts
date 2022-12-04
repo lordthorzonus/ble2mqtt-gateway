@@ -35,7 +35,7 @@ export class DeviceRegistry {
     }
 
     public get(id: string): DeviceRegistryEntry | null {
-        return this.devices.get(id) || null;
+        return this.devices.get(id) ?? null;
     }
 
     public has(id: string): boolean {

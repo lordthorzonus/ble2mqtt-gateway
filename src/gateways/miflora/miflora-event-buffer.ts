@@ -51,9 +51,11 @@ export class MiFloraEventBuffer {
                 return { ...buffer, soilConductivityEvent: measurement };
             case MifloraMeasurementEventType.Temperature:
                 return { ...buffer, temperatureEvent: measurement };
+            case MifloraMeasurementEventType.InvalidEvent:
+                return { ...buffer };
         }
 
-        throw Error(`Cannot buffer unsupported measurement ${measurement}`);
+        throw Error(`Cannot buffer unsupported measurement ${JSON.stringify(measurement)}`);
     }
 
     public bufferMeasurementEvent(
@@ -61,10 +63,6 @@ export class MiFloraEventBuffer {
         measurement: SupportedMiFloraMeasurements
     ): MiFloraSensorMeasurementBuffer {
         const buffer = this.getBuffer(deviceId);
-
-        if (!buffer) {
-            throw new Error(`No MiFlora sensor configured with id: ${deviceId}`);
-        }
 
         const updatedBuffer = MiFloraEventBuffer.updateBuffer(buffer, measurement);
         this.sensorBuffer.set(deviceId, updatedBuffer);

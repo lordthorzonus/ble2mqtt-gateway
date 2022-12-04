@@ -27,8 +27,8 @@ describe("Device Registry", () => {
         const deviceRegistry = makeDeviceRegistry();
 
         it("should return boolean based on does the device with given id exist", () => {
-            expect(deviceRegistry.has(defaultRuuviTagId)).toEqual(true);
-            expect(deviceRegistry.has("da21045d81a9")).toEqual(false);
+            expect(deviceRegistry.has(defaultRuuviTagId)).toBe(true);
+            expect(deviceRegistry.has("da21045d81a9")).toBe(false);
         });
     });
 
@@ -50,7 +50,7 @@ describe("Device Registry", () => {
         });
 
         it("should return null if the given entry does not exists", () => {
-            expect(deviceRegistry.get("da21045d81a9")).toEqual(null);
+            expect(deviceRegistry.get("da21045d81a9")).toBeNull();
         });
     });
 
@@ -67,21 +67,22 @@ describe("Device Registry", () => {
         });
 
         it("should mark the device online", () => {
-            expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toEqual("offline");
-            expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toEqual("offline");
-            expect(deviceRegistry.get(defaultRuuviTagId)?.lastSeen).toEqual(null);
+            expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toBe("offline");
+            expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toBe("offline");
+            expect(deviceRegistry.get(defaultRuuviTagId)?.lastSeen).toBeNull();
 
             deviceRegistry.registerFoundAdvertisement(defaultRuuviTagId);
 
-            expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toEqual("online");
-            expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toEqual("offline");
-            expect(deviceRegistry.get(defaultRuuviTagId)?.lastSeen?.toUTC().toString()).toEqual(
+            expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toBe("online");
+            expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toBe("offline");
+            expect(deviceRegistry.get(defaultRuuviTagId)?.lastSeen?.toUTC().toString()).toBe(
                 "2019-10-10T00:00:00.000Z"
             );
         });
 
         it("should not do anything for non existing device", () => {
             deviceRegistry.registerFoundAdvertisement("123");
+            expect(deviceRegistry.get("123")).toBeNull();
         });
     });
 
@@ -98,15 +99,16 @@ describe("Device Registry", () => {
         });
 
         it("should mark the devices last status as published", () => {
-            expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toEqual("offline");
+            expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toBe("offline");
             deviceRegistry.registerFoundAdvertisement(defaultRuuviTagId);
             deviceRegistry.registerDeviceStatusPublished(defaultRuuviTagId);
 
-            expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toEqual("online");
+            expect(deviceRegistry.get(defaultRuuviTagId)?.lastPublishedAvailability).toBe("online");
         });
 
         it("should not do anything for non existing device", () => {
             deviceRegistry.registerDeviceStatusPublished("123");
+            expect(deviceRegistry.get("123")).toBeNull();
         });
     });
 
@@ -123,14 +125,14 @@ describe("Device Registry", () => {
             const deviceRegistry = makeDeviceRegistry();
             const unavailableObservable = deviceRegistry.observeUnavailableDevices();
 
-            expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toEqual("offline");
+            expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toBe("offline");
             deviceRegistry.registerFoundAdvertisement(defaultRuuviTagId);
-            expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toEqual("online");
+            expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toBe("online");
 
             unavailableObservable.pipe(take(1)).subscribe((deviceRegistryEntry) => {
                 expect(deviceRegistryEntry.device.id).toEqual(defaultRuuviTagId);
-                expect(deviceRegistryEntry.lastPublishedAvailability).toEqual("offline");
-                expect(deviceRegistryEntry.availability).toEqual("offline");
+                expect(deviceRegistryEntry.lastPublishedAvailability).toBe("offline");
+                expect(deviceRegistryEntry.availability).toBe("offline");
                 done();
             });
             jest.advanceTimersByTime(defaultTimeout + 10000);
@@ -149,17 +151,17 @@ describe("Device Registry", () => {
                 },
             ]);
 
-            expect(deviceRegistryWithIndividualTimeouts.get(customTimeoutDeviceId)?.availability).toEqual("offline");
+            expect(deviceRegistryWithIndividualTimeouts.get(customTimeoutDeviceId)?.availability).toBe("offline");
             deviceRegistryWithIndividualTimeouts.registerFoundAdvertisement(customTimeoutDeviceId);
-            expect(deviceRegistryWithIndividualTimeouts.get(customTimeoutDeviceId)?.availability).toEqual("online");
+            expect(deviceRegistryWithIndividualTimeouts.get(customTimeoutDeviceId)?.availability).toBe("online");
 
             deviceRegistryWithIndividualTimeouts
                 .observeUnavailableDevices()
                 .pipe(take(1))
                 .subscribe((deviceRegistry) => {
                     expect(deviceRegistry.device.id).toEqual(customTimeoutDeviceId);
-                    expect(deviceRegistry.lastPublishedAvailability).toEqual("offline");
-                    expect(deviceRegistry.availability).toEqual("offline");
+                    expect(deviceRegistry.lastPublishedAvailability).toBe("offline");
+                    expect(deviceRegistry.availability).toBe("offline");
                     done();
                 });
             jest.advanceTimersByTime(20000);
@@ -190,8 +192,8 @@ describe("Device Registry", () => {
                 .observeUnavailableDevices()
                 .pipe(take(2), toArray())
                 .subscribe((observedDevices) => {
-                    expect(observedDevices[0].device.id).toEqual("a");
-                    expect(observedDevices[1].device.id).toEqual("b");
+                    expect(observedDevices[0].device.id).toBe("a");
+                    expect(observedDevices[1].device.id).toBe("b");
                     done();
                 });
 
@@ -204,7 +206,7 @@ describe("Device Registry", () => {
             const deviceRegistry = makeDeviceRegistry();
             const id = "my-uuid";
 
-            expect(deviceRegistry.get(id)).toEqual(null);
+            expect(deviceRegistry.get(id)).toBeNull();
             const peripheral = {
                 uuid: id,
             };
@@ -214,9 +216,9 @@ describe("Device Registry", () => {
             expect(deviceRegistry.get(id)?.device.id).toEqual(id);
             expect(deviceRegistry.get(id)?.device.type).toEqual(DeviceType.Ruuvitag);
             expect(deviceRegistry.get(id)?.timeout).toEqual(defaultTimeout);
-            expect(deviceRegistry.get(id)?.availability).toEqual("offline");
-            expect(deviceRegistry.get(id)?.lastPublishedAvailability).toEqual("offline");
-            expect(deviceRegistry.get(id)?.lastSeen).toEqual(null);
+            expect(deviceRegistry.get(id)?.availability).toBe("offline");
+            expect(deviceRegistry.get(id)?.lastPublishedAvailability).toBe("offline");
+            expect(deviceRegistry.get(id)?.lastSeen).toBeNull();
         });
     });
 });
