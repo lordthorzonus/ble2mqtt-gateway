@@ -41,3 +41,10 @@ export const parseIlluminanceEvent = (data: Buffer): MiFloraMeasurement<MifloraM
         data: data.readUintLE(MiFloraDataOffset.Illuminance, 3),
     };
 };
+
+export const parseInvalidEvent = (): MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent> => {
+    return {
+        measurementType: MifloraMeasurementEventType.InvalidEvent,
+        data: 0,
+    };
+};

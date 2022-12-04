@@ -2,6 +2,13 @@ import { MiFloraEventBuffer, MiFloraSensorMeasurementBuffer } from "./miflora-ev
 import { MifloraMeasurementEventType } from "./miflora-parser";
 import { MiFloraMeasurement } from "./miflora-parser/parsing-strategies";
 
+jest.mock("../../infra/logger", () => ({
+    __esModule: true,
+    logger: {
+        warn: jest.fn(),
+    },
+}));
+
 function getEventBufferWithConfiguredDeviceId(deviceId: string) {
     return new MiFloraEventBuffer([
         {

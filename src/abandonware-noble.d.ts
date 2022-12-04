@@ -14,12 +14,21 @@ declare module "@abandonware/noble" {
     interface Advertisement {
         localName: string;
         manufacturerData?: Buffer;
+        serviceData: {
+            uuid: string;
+            data: Buffer;
+        }[];
     }
 
     interface Peripheral {
         address: string;
         uuid: string;
         advertisement: Advertisement;
+        rssi: number;
+    }
+
+    interface PeripheralWithManufacturerData extends Peripheral {
+        advertisement: Required<Advertisement>;
     }
 
     export {
@@ -28,6 +37,7 @@ declare module "@abandonware/noble" {
         Descriptor,
         on,
         Peripheral,
+        PeripheralWithManufacturerData,
         removeAllListeners,
         removeListener,
         Service,

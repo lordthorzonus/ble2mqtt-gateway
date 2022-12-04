@@ -2,10 +2,12 @@ import { Peripheral } from "@abandonware/noble";
 import {
     MiFloraMeasurement,
     parseIlluminanceEvent,
+    parseInvalidEvent,
     parseMoistureEvent,
     parseSoilConductivityEvent,
     parseTemperatureEvent,
 } from "./parsing-strategies";
+import { logger } from "../../../infra/logger";
 
 const XiaomiServiceId = "fe95";
 
@@ -14,6 +16,7 @@ export enum MifloraMeasurementEventType {
     Illuminance = 4103,
     Moisture = 4104,
     SoilConductivity = 4105,
+    InvalidEvent = 9999,
 }
 
 const getMiFloraServiceData = (peripheral: Peripheral) => {
@@ -34,7 +37,8 @@ export type SupportedMiFloraMeasurements =
     | MiFloraMeasurement<MifloraMeasurementEventType.Temperature>
     | MiFloraMeasurement<MifloraMeasurementEventType.Illuminance>
     | MiFloraMeasurement<MifloraMeasurementEventType.SoilConductivity>
-    | MiFloraMeasurement<MifloraMeasurementEventType.Moisture>;
+    | MiFloraMeasurement<MifloraMeasurementEventType.Moisture>
+    | MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent>;
 
 type MiFloraMeasurementEventParsingStrategy = (data: Buffer) => SupportedMiFloraMeasurements;
 
@@ -46,10 +50,25 @@ const MiFloraMeasurementEventParsingStrategyMap = new Map<
     [MifloraMeasurementEventType.Moisture, parseMoistureEvent],
     [MifloraMeasurementEventType.Temperature, parseTemperatureEvent],
     [MifloraMeasurementEventType.SoilConductivity, parseSoilConductivityEvent],
+    [MifloraMeasurementEventType.InvalidEvent, parseInvalidEvent],
 ]);
 
+/**
+ * MiFlora sensors seem to sometimes sent ble events that I'm not yet sure what they are.
+ * They at least don't seem to follow the same structure as the expected sensors.
+ */
+const parseMiFloraEventType = (data: Buffer) => {
+    try {
+        return data.readUInt16LE(12);
+    } catch (e) {
+        logger.warn("MiFlora sent invalid data: %p", data);
+
+        return MifloraMeasurementEventType.InvalidEvent;
+    }
+};
+
 const resolveMiFloraParsingStrategy = (data: Buffer) => {
-    const eventType = data.readUInt16LE(12);
+    const eventType = parseMiFloraEventType(data);
     const parsingStrategy = MiFloraMeasurementEventParsingStrategyMap.get(eventType);
 
     if (!parsingStrategy) {

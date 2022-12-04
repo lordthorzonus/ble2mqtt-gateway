@@ -51,9 +51,11 @@ export class MiFloraEventBuffer {
                 return { ...buffer, soilConductivityEvent: measurement };
             case MifloraMeasurementEventType.Temperature:
                 return { ...buffer, temperatureEvent: measurement };
+            case MifloraMeasurementEventType.InvalidEvent:
+                return { ...buffer };
         }
 
-        throw Error(`Cannot buffer unsupported measurement ${measurement}`);
+        throw Error(`Cannot buffer unsupported measurement ${JSON.stringify(measurement)}`);
     }
 
     public bufferMeasurementEvent(

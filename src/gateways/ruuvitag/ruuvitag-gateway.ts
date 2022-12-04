@@ -1,5 +1,5 @@
 import { DeviceRegistry } from "../device-registry";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral, PeripheralWithManufacturerData } from "@abandonware/noble";
 import { DeviceSensorMessage, DeviceType } from "../../types";
 import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
 import { Observable } from "rxjs";
@@ -28,8 +28,17 @@ export class RuuviTagGateway extends AbstractGateway implements Gateway {
         return ruuviTagManufacturerId;
     }
 
+    private validatePeripheral(peripheral: Peripheral): asserts peripheral is PeripheralWithManufacturerData {
+        if (peripheral.advertisement.manufacturerData === undefined) {
+            throw new Error(
+                `Somehow a peripheral without manufacturingData got into RuuviTagGateway: ${JSON.stringify(peripheral)}`
+            );
+        }
+    }
+
     protected handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceSensorMessage> {
         const id = peripheral.uuid;
+        this.validatePeripheral(peripheral);
         return new Observable((subscriber) => {
             const device = this.getDeviceRegistryEntry(id);
             subscriber.next(transformPeripheralAdvertisementToSensorDataDeviceMessage(peripheral, device));

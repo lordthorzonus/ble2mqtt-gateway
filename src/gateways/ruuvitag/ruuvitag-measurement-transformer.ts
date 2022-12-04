@@ -1,4 +1,4 @@
-import { Peripheral } from "@abandonware/noble";
+import { PeripheralWithManufacturerData } from "@abandonware/noble";
 import { flow } from "lodash";
 import { v4 as uuid } from "uuid";
 import parse from "./ruuvitag-parser";
@@ -15,7 +15,7 @@ export interface RuuviTag {
 const getSensorData = flow(parse, decorateRuuviTagSensorDataWithCalculatedValues);
 
 export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
-    peripheral: Peripheral,
+    peripheral: PeripheralWithManufacturerData,
     deviceRegistryEntry: DeviceRegistryEntry
 ): DeviceSensorMessage => {
     const sensorData = getSensorData(peripheral.advertisement.manufacturerData);
