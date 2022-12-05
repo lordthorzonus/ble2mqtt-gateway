@@ -5,7 +5,6 @@ import { homeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-ass
 import { getConfiguration } from "./config";
 import { BleGateway } from "./gateways/ble-gateway";
 import { publish } from "./infra/mqtt-client";
-import { analyticsMqttMessageProducer } from "./mqtt/analytics-mqtt-message-producer";
 import { logger } from "./infra/logger";
 
 process.stdin.resume();
@@ -21,10 +20,6 @@ const messages = gateway.observeEvents().pipe(
     }),
     retry({ delay: 1000, count: 10, resetOnSuccess: true }),
     mergeMap((message) => {
-        if (message.type === MessageType.Analytics) {
-            return analyticsMqttMessageProducer(message);
-        }
-
         return homeAssistantMqttMessageProducer(message);
     })
 );

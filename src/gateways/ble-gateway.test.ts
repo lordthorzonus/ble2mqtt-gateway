@@ -53,20 +53,6 @@ jest.mock("../infra/ble-scanner", () => ({
     scan: jest.fn(),
 }));
 
-jest.mock("./analytics/gateway-analytics", () => {
-    return {
-        __esModule: true,
-        GatewayAnalytics: mockGatewayAnalyticsConstructor,
-    };
-});
-
-const mockGatewayAnalytics = {
-    recordBluetoothAdvertisement: jest.fn(),
-    recordDeviceMessage: jest.fn(),
-    observeAnalytics: jest.fn(),
-};
-const mockGatewayAnalyticsConstructor = jest.fn().mockImplementation(() => mockGatewayAnalytics);
-
 import { BleGateway } from "./ble-gateway";
 import { EMPTY, from, Observable, take, toArray } from "rxjs";
 import { DeviceAvailabilityMessage, DeviceSensorMessage, DeviceType, MessageType } from "../types";
@@ -141,9 +127,6 @@ describe("BLE Gateway", () => {
         mockRuuvitagGateway.mockHandleBleAdvertisement.mockReset();
         mockMiFloraGateway.mockObserveUnavailableDevices.mockReset();
         mockMiFloraGateway.mockHandleBleAdvertisement.mockReset();
-        mockGatewayAnalytics.observeAnalytics.mockReset();
-        mockGatewayAnalytics.recordDeviceMessage.mockReset();
-        mockGatewayAnalytics.recordBluetoothAdvertisement.mockReset();
     });
 
     it("should use the correct gateway for ruuvitag and miflora ble advertisements", (done) => {
@@ -153,7 +136,6 @@ describe("BLE Gateway", () => {
         mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
         mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
         mockMiFloraGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
-        mockGatewayAnalytics.observeAnalytics.mockReturnValue(EMPTY);
 
         gateway
             .observeEvents()
@@ -164,9 +146,6 @@ describe("BLE Gateway", () => {
                 expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(ruuviPeripheral);
                 expect(mockMiFloraGateway.mockHandleBleAdvertisement).toHaveBeenCalledTimes(1);
                 expect(mockMiFloraGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(mifloraPeripheral);
-                expect(mockGatewayAnalytics.recordBluetoothAdvertisement).toHaveBeenCalledTimes(3);
-                expect(mockGatewayAnalytics.recordDeviceMessage).toHaveBeenCalledTimes(3);
-
                 done();
             });
     });
@@ -179,7 +158,6 @@ describe("BLE Gateway", () => {
         mockRuuvitagGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
         mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
         mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
-        mockGatewayAnalytics.observeAnalytics.mockReturnValue(EMPTY);
 
         gateway
             .observeEvents()
@@ -188,8 +166,6 @@ describe("BLE Gateway", () => {
                 expect(messages).toEqual([handledMessage, handledMessage]);
                 expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledTimes(2);
                 expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(ruuviPeripheral);
-                expect(mockGatewayAnalytics.recordBluetoothAdvertisement).toHaveBeenCalledTimes(5);
-                expect(mockGatewayAnalytics.recordDeviceMessage).toHaveBeenCalledTimes(2);
                 done();
             });
     });
@@ -199,7 +175,6 @@ describe("BLE Gateway", () => {
         mockRuuvitagGateway.mockObserveUnavailableDevices.mockReturnValue(from(["ruuvitag1", "ruuvitag2"]));
         mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(from(["miflora1", "miflora2"]));
         mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
-        mockGatewayAnalytics.observeAnalytics.mockReturnValue(from(["analytics1", "analytics2"]));
 
         const gateway = new BleGateway(validGatewayConfiguration);
 
@@ -208,21 +183,13 @@ describe("BLE Gateway", () => {
         });
 
         return testScheduler.run((helpers) => {
-            helpers.expectObservable(gateway.observeEvents().pipe(take(8))).toBe("(abcdefgh|)", {
+            helpers.expectObservable(gateway.observeEvents().pipe(take(6))).toBe("(abcdef|)", {
                 a: handledMessage,
                 b: handledMessage,
                 c: "ruuvitag1",
                 d: "ruuvitag2",
                 e: "miflora1",
                 f: "miflora2",
-                g: expect.objectContaining({
-                    payload: "analytics1",
-                    type: "analytics",
-                }),
-                h: expect.objectContaining({
-                    payload: "analytics2",
-                    type: "analytics",
-                }),
             });
             done();
         });
