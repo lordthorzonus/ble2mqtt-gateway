@@ -1,18 +1,18 @@
 import { Config } from "../config";
 import { RuuviTagGateway } from "./ruuvitag/ruuvitag-gateway";
 import { Peripheral } from "@abandonware/noble";
-import { map, merge, mergeMap, Observable, tap } from "rxjs";
-import { AnalyticsMessage, BleGatewayMessage, DeviceAvailabilityMessage, DeviceSensorMessage } from "../types";
+import { merge, mergeMap, Observable } from "rxjs";
+import { BleGatewayMessage, DeviceAvailabilityMessage, DeviceSensorMessage } from "../types";
 import { UnknownGateway } from "./unknown-gateway";
 import { scan } from "../infra/ble-scanner";
 import { filter, mergeWith } from "rxjs/operators";
 import { MiFloraGateway } from "./miflora/miflora-gateway";
-import { GatewayAnalytics } from "./analytics/gateway-analytics";
-import { generateAnalyticsMessage } from "./message-generators";
 
 export interface Gateway {
     handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceSensorMessage | DeviceAvailabilityMessage | null>;
+
     observeUnavailableDevices(): Observable<DeviceAvailabilityMessage>;
+
     getGatewayId(): number;
 }
 
@@ -20,12 +20,14 @@ export class BleGateway {
     private readonly configuredGateways: Map<number, Gateway>;
     private readonly defaultGateway: Gateway = new UnknownGateway();
     private miFloraGatewayId?: number;
-    private analytics: GatewayAnalytics;
 
     constructor(config: Config["gateways"]) {
         this.configuredGateways = new Map();
         this.configureGateways(config);
-        this.analytics = new GatewayAnalytics();
+    }
+
+    public observeEvents(): Observable<BleGatewayMessage> {
+        return this.scanBleAdvertisements().pipe(mergeWith(this.observeUnavailableDevices()));
     }
 
     private configureGateways(config: Config["gateways"]) {
@@ -73,15 +75,15 @@ export class BleGateway {
 
     private scanBleAdvertisements(): Observable<DeviceSensorMessage | DeviceAvailabilityMessage> {
         return scan().pipe(
-            tap(() => this.analytics.recordBluetoothAdvertisement()),
             mergeMap((peripheral) => {
                 const gateway = this.resolveGateway(peripheral);
-                return gateway.handleBleAdvertisement(peripheral).pipe(
-                    filter((message): message is DeviceSensorMessage | DeviceAvailabilityMessage => message !== null),
-                    tap((message) => {
-                        this.analytics.recordDeviceMessage(message.device.type);
-                    })
-                );
+                return gateway
+                    .handleBleAdvertisement(peripheral)
+                    .pipe(
+                        filter(
+                            (message): message is DeviceSensorMessage | DeviceAvailabilityMessage => message !== null
+                        )
+                    );
             })
         );
     }
@@ -93,13 +95,5 @@ export class BleGateway {
                 return gateway.observeUnavailableDevices();
             })
         );
-    }
-
-    private observeAnalytics(): Observable<AnalyticsMessage> {
-        return this.analytics.observeAnalytics().pipe(map(generateAnalyticsMessage));
-    }
-
-    public observeEvents(): Observable<BleGatewayMessage> {
-        return this.scanBleAdvertisements().pipe(mergeWith(this.observeUnavailableDevices(), this.observeAnalytics()));
     }
 }

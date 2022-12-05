@@ -12,7 +12,7 @@ declare module "@abandonware/noble" {
     } from "noble";
 
     interface Advertisement {
-        localName: string;
+        localName?: string;
         manufacturerData?: Buffer;
         serviceData: {
             uuid: string;

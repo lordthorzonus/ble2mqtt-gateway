@@ -15,7 +15,7 @@ export const scan = (): Observable<Peripheral> => {
         }
 
         noble.on("discover", (peripheral: Peripheral) => {
-            logger.debug("Received BLE advertisement %p", peripheral);
+            logger.debug("Received BLE advertisement %s", peripheral);
             subscriber.next(peripheral);
         });
 
