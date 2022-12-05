@@ -57,18 +57,18 @@ const MiFloraMeasurementEventParsingStrategyMap = new Map<
  * MiFlora sensors seem to sometimes sent ble events that I'm not yet sure what they are.
  * They at least don't seem to follow the same structure as the expected sensors.
  */
-const parseMiFloraEventType = (data: Buffer) => {
+const parseMiFloraEventType = (data: Buffer, peripheral: Peripheral) => {
     try {
         return data.readUInt16LE(12);
     } catch (e) {
-        logger.warn("MiFlora sent invalid data: %p", data);
+        logger.warn("MiFlora sent invalid data: %s, peripheral: %s", data, peripheral);
 
         return MifloraMeasurementEventType.InvalidEvent;
     }
 };
 
-const resolveMiFloraParsingStrategy = (data: Buffer) => {
-    const eventType = parseMiFloraEventType(data);
+const resolveMiFloraParsingStrategy = (data: Buffer, peripheral: Peripheral) => {
+    const eventType = parseMiFloraEventType(data, peripheral);
     const parsingStrategy = MiFloraMeasurementEventParsingStrategyMap.get(eventType);
 
     if (!parsingStrategy) {
@@ -80,7 +80,7 @@ const resolveMiFloraParsingStrategy = (data: Buffer) => {
 
 export const parseMiFloraPeripheralAdvertisement = (peripheral: Peripheral): SupportedMiFloraMeasurements => {
     const serviceData = getMiFloraServiceData(peripheral);
-    const parsingStrategy = resolveMiFloraParsingStrategy(serviceData);
+    const parsingStrategy = resolveMiFloraParsingStrategy(serviceData, peripheral);
 
     return parsingStrategy(serviceData);
 };
