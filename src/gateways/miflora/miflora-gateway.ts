@@ -31,9 +31,10 @@ export class MiFloraGateway extends AbstractGateway implements Gateway {
     public static isMiFloraPeripheral = (peripheral: Peripheral): boolean => {
         const knownMiFloraDeviceNames = ["flower care", "flower mate"];
         const MiFloraMacPrefix = "c4:7c:8d";
+        const deviceLocalName = peripheral.advertisement.localName ?? "";
 
         return (
-            knownMiFloraDeviceNames.includes(peripheral.advertisement.localName.toLowerCase()) ||
+            knownMiFloraDeviceNames.includes(deviceLocalName.toLowerCase()) ||
             peripheral.address.startsWith(MiFloraMacPrefix)
         );
     };
