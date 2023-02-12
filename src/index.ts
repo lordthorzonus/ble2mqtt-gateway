@@ -1,6 +1,5 @@
 import { catchError, mergeMap, retry } from "rxjs/operators";
 import { throwError } from "rxjs";
-import { MessageType } from "./types";
 import { homeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
 import { getConfiguration } from "./config";
 import { BleGateway } from "./gateways/ble-gateway";
@@ -25,7 +24,8 @@ const messages = gateway.observeEvents().pipe(
 );
 
 const subscription = messages.subscribe((message) => {
-    publish(message).catch(() => {
+    publish(message).catch((e) => {
+        logger.error(e);
         logger.error("Error publishing MQTT message", { message });
     });
 });
