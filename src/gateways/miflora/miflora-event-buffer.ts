@@ -1,24 +1,17 @@
 import { MiFloraMeasurement } from "./miflora-parser/parsing-strategies";
 import { MifloraMeasurementEventType, SupportedMiFloraMeasurements } from "./miflora-parser";
 import { ConfiguredMiFloraSensors } from "./miflora-gateway";
+import { DateTime } from "luxon";
 
 export interface MiFloraSensorMeasurementBuffer {
     temperatureEvent: MiFloraMeasurement<MifloraMeasurementEventType.Temperature> | null;
     moistureEvent: MiFloraMeasurement<MifloraMeasurementEventType.Moisture> | null;
     illuminanceEvent: MiFloraMeasurement<MifloraMeasurementEventType.Illuminance> | null;
     soilConductivityEvent: MiFloraMeasurement<MifloraMeasurementEventType.SoilConductivity> | null;
+    bufferReleasedLast: DateTime;
 }
 
-export type ReadyMiFloraSensorMeasurementBuffer = {
-    [K in keyof MiFloraSensorMeasurementBuffer]: NonNullable<MiFloraSensorMeasurementBuffer[K]>;
-};
-
-const emptySensorMeasurementBuffer: MiFloraSensorMeasurementBuffer = {
-    temperatureEvent: null,
-    moistureEvent: null,
-    illuminanceEvent: null,
-    soilConductivityEvent: null,
-};
+const RETAIN_MIFLORA_BUFFER_FOR_SECONDS = 30;
 
 export class MiFloraEventBuffer {
     private readonly sensorBuffer = new Map<string, MiFloraSensorMeasurementBuffer>();
@@ -29,13 +22,16 @@ export class MiFloraEventBuffer {
         });
     }
 
-    public isBufferReady(buffer: MiFloraSensorMeasurementBuffer): buffer is ReadyMiFloraSensorMeasurementBuffer {
-        return (
+    public isBufferReady(buffer: MiFloraSensorMeasurementBuffer): boolean {
+        const isBufferFull =
             buffer.illuminanceEvent !== null &&
             buffer.moistureEvent !== null &&
             buffer.temperatureEvent !== null &&
-            buffer.soilConductivityEvent !== null
-        );
+            buffer.soilConductivityEvent !== null;
+
+        const isBufferTooOld =
+            buffer.bufferReleasedLast.diffNow("seconds").seconds <= -RETAIN_MIFLORA_BUFFER_FOR_SECONDS;
+        return isBufferFull || isBufferTooOld;
     }
 
     private static updateBuffer(
@@ -81,6 +77,14 @@ export class MiFloraEventBuffer {
     }
 
     public clearBuffer(deviceId: string): void {
+        const emptySensorMeasurementBuffer: MiFloraSensorMeasurementBuffer = {
+            temperatureEvent: null,
+            moistureEvent: null,
+            illuminanceEvent: null,
+            soilConductivityEvent: null,
+            bufferReleasedLast: DateTime.now(),
+        };
+
         this.sensorBuffer.set(deviceId, emptySensorMeasurementBuffer);
     }
 }

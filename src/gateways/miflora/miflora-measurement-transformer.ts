@@ -3,26 +3,26 @@ import { DeviceRegistryEntry } from "../device-registry";
 import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
-import { ReadyMiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
+import { MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type MiFloraSensorData = {
-    temperature: number;
-    moisture: number;
-    illuminance: number;
-    soilConductivity: number;
+    temperature: number | null;
+    moisture: number | null;
+    illuminance: number | null;
+    soilConductivity: number | null;
 };
 
 export const transformMiFloraMeasurementsToDeviceMessage = (
     peripheral: Peripheral,
     deviceRegistryEntry: DeviceRegistryEntry,
-    miFloraSensorMeasurementBuffer: ReadyMiFloraSensorMeasurementBuffer
+    miFloraSensorMeasurementBuffer: MiFloraSensorMeasurementBuffer
 ): DeviceSensorMessage => {
     const sensorData: MiFloraSensorData = {
-        temperature: miFloraSensorMeasurementBuffer.temperatureEvent.data,
-        moisture: miFloraSensorMeasurementBuffer.moistureEvent.data,
-        illuminance: miFloraSensorMeasurementBuffer.illuminanceEvent.data,
-        soilConductivity: miFloraSensorMeasurementBuffer.soilConductivityEvent.data,
+        temperature: miFloraSensorMeasurementBuffer.temperatureEvent?.data ?? null,
+        moisture: miFloraSensorMeasurementBuffer.moistureEvent?.data ?? null,
+        illuminance: miFloraSensorMeasurementBuffer.illuminanceEvent?.data ?? null,
+        soilConductivity: miFloraSensorMeasurementBuffer.soilConductivityEvent?.data ?? null,
     };
 
     return {

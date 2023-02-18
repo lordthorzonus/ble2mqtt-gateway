@@ -1,6 +1,7 @@
 import { MiFloraEventBuffer, MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
 import { MifloraMeasurementEventType } from "./miflora-parser";
 import { MiFloraMeasurement } from "./miflora-parser/parsing-strategies";
+import { DateTime, Settings } from "luxon";
 
 jest.mock("../../infra/logger", () => ({
     __esModule: true,
@@ -19,12 +20,19 @@ function getEventBufferWithConfiguredDeviceId(deviceId: string) {
 }
 
 describe("MiFlora Event Buffer", () => {
+    Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
+
     const emptyBuffer: MiFloraSensorMeasurementBuffer = {
         illuminanceEvent: null,
         moistureEvent: null,
         soilConductivityEvent: null,
         temperatureEvent: null,
+        bufferReleasedLast: DateTime.now(),
     };
+
+    beforeEach(() => {
+        Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
+    });
 
     const moistureEvent: MiFloraMeasurement<MifloraMeasurementEventType.Moisture> = {
         measurementType: MifloraMeasurementEventType.Moisture,
@@ -109,7 +117,24 @@ describe("MiFlora Event Buffer", () => {
             [{ ...emptyBuffer, moistureEvent, temperatureEvent }, false],
             [{ ...emptyBuffer, moistureEvent, illuminanceEvent }, false],
             [{ ...emptyBuffer, illuminanceEvent, temperatureEvent, moistureEvent }, false],
-            [{ soilConductivityEvent, illuminanceEvent, temperatureEvent, moistureEvent }, true],
+            [
+                {
+                    ...emptyBuffer,
+                    moistureEvent,
+                    bufferReleasedLast: DateTime.now().minus({ second: 30 }),
+                },
+                true,
+            ],
+            [
+                {
+                    soilConductivityEvent,
+                    illuminanceEvent,
+                    temperatureEvent,
+                    moistureEvent,
+                    bufferReleasedLast: DateTime.now(),
+                },
+                true,
+            ],
         ];
 
         test.each(testCases)("given buffer %j should return %s", (buffer, expected) => {
