@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Illuminance event as the first advertisement from the sensor 1`] = `
-Array [
-  Object {
-    "device": Object {
+[
+  {
+    "device": {
       "friendlyName": "flower",
       "id": "a",
       "macAddress": "aa:bb",
@@ -12,7 +12,7 @@ Array [
       "type": "miflora",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "state": "online",
     },
     "time": "2019-10-10T00:00:00.000Z",
@@ -22,9 +22,9 @@ Array [
 `;
 
 exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Moisture event as the first advertisement from the sensor 1`] = `
-Array [
-  Object {
-    "device": Object {
+[
+  {
+    "device": {
       "friendlyName": "flower",
       "id": "a",
       "macAddress": "aa:bb",
@@ -33,7 +33,7 @@ Array [
       "type": "miflora",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "state": "online",
     },
     "time": "2019-10-10T00:00:00.000Z",
@@ -43,9 +43,9 @@ Array [
 `;
 
 exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Soil Conductivity event as the first advertisement from the sensor 1`] = `
-Array [
-  Object {
-    "device": Object {
+[
+  {
+    "device": {
       "friendlyName": "flower",
       "id": "a",
       "macAddress": "aa:bb",
@@ -54,7 +54,7 @@ Array [
       "type": "miflora",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "state": "online",
     },
     "time": "2019-10-10T00:00:00.000Z",
@@ -64,9 +64,9 @@ Array [
 `;
 
 exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Temperature event as the first advertisement from the sensor 1`] = `
-Array [
-  Object {
-    "device": Object {
+[
+  {
+    "device": {
       "friendlyName": "flower",
       "id": "a",
       "macAddress": "aa:bb",
@@ -75,7 +75,7 @@ Array [
       "type": "miflora",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "state": "online",
     },
     "time": "2019-10-10T00:00:00.000Z",
@@ -85,8 +85,8 @@ Array [
 `;
 
 exports[`MiFlora Gateway observeUnavailableDevices() should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
-Object {
-  "device": Object {
+{
+  "device": {
     "friendlyName": "flower",
     "id": "a",
     "macAddress": "a",
@@ -95,7 +95,7 @@ Object {
     "type": "miflora",
   },
   "id": "mock-uuid",
-  "payload": Object {
+  "payload": {
     "state": "offline",
   },
   "time": Any<DateTime>,

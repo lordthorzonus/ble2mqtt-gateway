@@ -1,30 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Config getConfiguration() should return the proper configuration given in the env variable 1`] = `
-Object {
-  "gateways": Object {
+{
+  "gateways": {
     "base_topic": "mqtt",
-    "miflora": Object {
-      "devices": Array [
-        Object {
+    "miflora": {
+      "devices": [
+        {
           "id": "c47c8d6e07cf",
           "name": "Other Plant",
         },
-        Object {
+        {
           "id": "c47c8d6e069c",
           "name": "some_plant",
         },
       ],
       "timeout": 60000,
     },
-    "ruuvitag": Object {
+    "ruuvitag": {
       "allow_unknown": true,
-      "devices": Array [
-        Object {
+      "devices": [
+        {
           "id": "da21045d81a8",
           "name": "Fridge Ruuvitag",
         },
-        Object {
+        {
           "id": "641cae0910b5",
           "name": "balcony_ruuvitag",
         },
@@ -32,11 +32,11 @@ Object {
       "timeout": 30000,
     },
   },
-  "homeassistant": Object {
+  "homeassistant": {
     "discovery_topic": "homeassistant",
   },
   "log_level": "info",
-  "mqtt": Object {
+  "mqtt": {
     "client_id": "c",
     "host": "mqtt.lan.fi",
     "password": "b",

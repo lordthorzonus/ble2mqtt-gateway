@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`RuuviTag Gateway handleBleAdvertisement() should handle unknown ruuvitags normally if unknown ruuvitags are allowed 1`] = `
-Array [
-  Object {
-    "device": Object {
+[
+  {
+    "device": {
       "friendlyName": "unknown",
       "id": "unknown",
       "macAddress": "a1:b2",
@@ -12,14 +12,14 @@ Array [
       "type": "ruuvitag",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "state": "online",
     },
     "time": "2019-10-10T00:00:00.000Z",
     "type": "availability",
   },
-  Object {
-    "device": Object {
+  {
+    "device": {
       "friendlyName": "unknown",
       "id": "unknown",
       "macAddress": "CB:B8:33:4C:88:4F",
@@ -28,7 +28,7 @@ Array [
       "type": "ruuvitag",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "absoluteHumidity": 11.84,
       "accelerationX": 0.004,
       "accelerationY": -0.004,
@@ -48,8 +48,8 @@ Array [
     "time": "2019-10-10T00:00:00.000Z",
     "type": "sensor-data",
   },
-  Object {
-    "device": Object {
+  {
+    "device": {
       "friendlyName": "unknown",
       "id": "unknown",
       "macAddress": "CB:B8:33:4C:88:4F",
@@ -58,7 +58,7 @@ Array [
       "type": "ruuvitag",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "absoluteHumidity": 11.84,
       "accelerationX": 0.004,
       "accelerationY": -0.004,
@@ -82,9 +82,9 @@ Array [
 `;
 
 exports[`RuuviTag Gateway handleBleAdvertisement() should produce a availability and a payload message for a found ruuvitag advertisement 1`] = `
-Array [
-  Object {
-    "device": Object {
+[
+  {
+    "device": {
       "friendlyName": "my_ruuvitag",
       "id": "a1:b2",
       "macAddress": "a1:b2",
@@ -93,14 +93,14 @@ Array [
       "type": "ruuvitag",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "state": "online",
     },
     "time": "2019-10-10T00:00:00.000Z",
     "type": "availability",
   },
-  Object {
-    "device": Object {
+  {
+    "device": {
       "friendlyName": "my_ruuvitag",
       "id": "a1:b2",
       "macAddress": "CB:B8:33:4C:88:4F",
@@ -109,7 +109,7 @@ Array [
       "type": "ruuvitag",
     },
     "id": "mock-uuid",
-    "payload": Object {
+    "payload": {
       "absoluteHumidity": 11.84,
       "accelerationX": 0.004,
       "accelerationY": -0.004,
@@ -133,8 +133,8 @@ Array [
 `;
 
 exports[`RuuviTag Gateway observeUnavailableDevices() should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
-Object {
-  "device": Object {
+{
+  "device": {
     "friendlyName": "my_ruuvitag",
     "id": "a1:b2",
     "macAddress": "a1:b2",
@@ -143,7 +143,7 @@ Object {
     "type": "ruuvitag",
   },
   "id": "mock-uuid",
-  "payload": Object {
+  "payload": {
     "state": "offline",
   },
   "time": Any<DateTime>,
