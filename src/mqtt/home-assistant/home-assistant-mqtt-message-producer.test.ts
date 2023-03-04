@@ -3,6 +3,7 @@ import { toArray } from "rxjs";
 jest.mock("../../config", () => ({
     __esModule: true,
     getConfiguration: jest.fn().mockReturnValue({
+        decimal_precision: 2,
         gateways: {
             base_topic: "a_base_topic",
         },
