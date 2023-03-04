@@ -1,3 +1,12 @@
+jest.mock("../../config", () => ({
+    __esModule: true,
+    getConfiguration: jest.fn().mockImplementation(() => {
+        return {
+            decimal_precision: 2,
+        };
+    }),
+}));
+
 import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import parse from "./ruuvitag-parser";
 import decorateRuuviTagSensorDataWithCalculatedValues, {

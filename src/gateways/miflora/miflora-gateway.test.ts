@@ -1,3 +1,12 @@
+jest.mock("../../config", () => ({
+    __esModule: true,
+    getConfiguration: jest.fn().mockImplementation(() => {
+        return {
+            decimal_precision: 2,
+        };
+    }),
+}));
+
 import { getStubPeripheral } from "./miflora-parser/index.test";
 import { MiFloraGateway } from "./miflora-gateway";
 import { DateTime, Settings } from "luxon";

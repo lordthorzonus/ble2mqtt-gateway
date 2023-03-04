@@ -1,3 +1,12 @@
+jest.mock("../../config", () => ({
+    __esModule: true,
+    getConfiguration: jest.fn().mockImplementation(() => {
+        return {
+            decimal_precision: 2,
+        };
+    }),
+}));
+
 import { RuuviTagGateway } from "./ruuvitag-gateway";
 import { Peripheral } from "@abandonware/noble";
 import { take, toArray } from "rxjs";
