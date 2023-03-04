@@ -34,7 +34,7 @@
         "rxjs": "7.8.0",
         "uuid": "9.0.0",
         "winston": "3.8.2",
-        "zod": "3.20.6"
+        "zod": "3.21.0"
     },
     "devDependencies": {
         "@types/jest": "29.4.0",
