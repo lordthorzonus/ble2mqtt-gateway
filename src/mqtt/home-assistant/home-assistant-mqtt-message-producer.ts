@@ -117,7 +117,7 @@ function* haDiscoverAdapter(deviceMessage: DeviceAvailabilityMessage): Generator
         const message: MqttMessage = {
             topic: `${homeAssistantTopicBase}/${component}/${getObjectID(deviceMessage, configEntry)}/config`,
             retain: true,
-            payload: JSON.stringify(haDiscoveryPayload),
+            payload: haDiscoveryPayload !== null ? JSON.stringify(haDiscoveryPayload) : "",
         };
 
         yield message;
