@@ -6,13 +6,14 @@ import decorateRuuviTagSensorDataWithCalculatedValues from "./ruuvitag-sensor-da
 import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { DateTime } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
+import { formatSensorValues } from "./ruuvitag-measurement-formatter";
 
 export interface RuuviTag {
     macAddress: string;
     id: string;
     rssi: number;
 }
-const getSensorData = flow(parse, decorateRuuviTagSensorDataWithCalculatedValues);
+const getSensorData = flow(parse, decorateRuuviTagSensorDataWithCalculatedValues, formatSensorValues);
 
 export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
     peripheral: PeripheralWithManufacturerData,

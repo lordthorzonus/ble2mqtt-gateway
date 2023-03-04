@@ -26,9 +26,8 @@ export const calculateAbsoluteHumidity = (
         return null;
     }
 
-    const absoluteHumidity =
+    return (
         (calculateVapourPressureOfWater(temperatureInCelsius) * relativeHumidityInPercents * molarMassOfWater) /
-        ((273.15 + temperatureInCelsius) * universalGasConstant);
-
-    return parseFloat(absoluteHumidity.toFixed(2));
+        ((273.15 + temperatureInCelsius) * universalGasConstant)
+    );
 };

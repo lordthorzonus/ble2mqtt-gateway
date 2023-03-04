@@ -69,11 +69,11 @@ describe("RuuviTag Measurement Transformer", () => {
             dewPoint: null,
             heatIndex: null,
             humidex: null,
-            temperature: 24.3,
+            temperature: 24.31234,
             pressure: 100044,
             relativeHumidityPercentage: 53.49,
             accelerationX: 0.004,
-            accelerationY: -0.004,
+            accelerationY: -0,
             accelerationZ: 1.036,
             batteryVoltage: 2.977,
             txPower: 4,
@@ -96,6 +96,11 @@ describe("RuuviTag Measurement Transformer", () => {
             time: mockedTime,
             payload: {
                 ...sensorData,
+                batteryVoltage: 2.98,
+                accelerationX: 0,
+                accelerationY: 0,
+                accelerationZ: 1.04,
+                temperature: 24.31,
             },
         };
 
@@ -119,7 +124,7 @@ describe("RuuviTag Measurement Transformer", () => {
 
         it("should use the mac address from the peripheral advertisement if one is not available in sensor data", () => {
             const sensorDataWithoutMacAddress = {
-                ...sensorData,
+                ...expectedMessage.payload,
                 macAddress: null,
             };
             mockedRuuviTagDecorator.mockReturnValue(sensorDataWithoutMacAddress);

@@ -2,6 +2,7 @@
 
 exports[`Config getConfiguration() should return the proper configuration given in the env variable 1`] = `
 {
+  "decimal_precision": 2,
   "gateways": {
     "base_topic": "mqtt",
     "miflora": {
