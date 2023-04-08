@@ -81,6 +81,7 @@ export interface HomeAssistantSensorConfiguration {
     valueTemplate?: string;
     uniqueId: string;
     icon?: string;
+    stateClass?: string;
     device: {
         manufacturer: string;
         model: string;

@@ -70,6 +70,7 @@ interface HADiscoveryPayload {
     suggested_display_precision?: number;
     value_template: string;
     state_topic: string;
+    state_class?: string;
     icon?: string;
     device: {
         name: string;
@@ -96,6 +97,7 @@ const getHaDiscoveryPayload = (
               availability_template: "{{ value_json.state }}",
               expire_after: deviceMessage.device.timeout / 1000,
               suggested_display_precision: config.decimal_precision,
+              state_class: configEntry.stateClass,
               icon: configEntry.icon,
               device: {
                   ...configEntry.device,
