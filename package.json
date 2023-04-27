@@ -31,7 +31,7 @@
         "lodash.snakecase": "4.1.1",
         "luxon": "3.3.0",
         "mqtt": "4.3.7",
-        "rxjs": "7.8.0",
+        "rxjs": "7.8.1",
         "uuid": "9.0.0",
         "winston": "3.8.2",
         "zod": "3.21.4"
