@@ -24,7 +24,7 @@
     "author": "Juuso Leinonen",
     "license": "MIT",
     "dependencies": {
-        "@abandonware/noble": "1.9.2-22",
+        "@abandonware/noble": "1.9.2-23",
         "dotenv": "16.3.1",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
