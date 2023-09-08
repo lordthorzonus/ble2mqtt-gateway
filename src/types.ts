@@ -82,6 +82,7 @@ export interface HomeAssistantSensorConfiguration {
     uniqueId: string;
     icon?: string;
     stateClass?: string;
+    suggestedDecimalPrecision?: number | null;
     device: {
         manufacturer: string;
         model: string;
