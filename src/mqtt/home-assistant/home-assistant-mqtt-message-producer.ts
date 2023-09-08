@@ -61,7 +61,7 @@ interface HADiscoveryPayload {
     name: string;
     device_class?: string;
     expire_after: number;
-    unit_of_measurement: string;
+    unit_of_measurement?: string;
     object_id: string;
     unique_id: string;
     availability_topic: string;

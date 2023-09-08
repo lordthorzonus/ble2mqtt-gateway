@@ -103,8 +103,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
     macAddress: {
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Mac Address",
-        unitOfMeasurement: "",
-        stateClass: "None",
+        unitOfMeasurement: undefined,
         uniqueId: "mac_address",
         device: ruuviTagDeviceConfiguration,
         suggestedDecimalPrecision: null,
