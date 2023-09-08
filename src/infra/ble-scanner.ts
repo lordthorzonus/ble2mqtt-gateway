@@ -1,4 +1,4 @@
-import * as noble from "@abandonware/noble";
+import noble from "@abandonware/noble";
 import { Peripheral } from "@abandonware/noble";
 import { Observable } from "rxjs";
 import { logger } from "./logger";

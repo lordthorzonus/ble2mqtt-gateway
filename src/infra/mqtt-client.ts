@@ -1,4 +1,4 @@
-import * as mqtt from "mqtt";
+import mqtt from "mqtt";
 
 import { MqttMessage } from "../types";
 import { getConfiguration } from "../config";

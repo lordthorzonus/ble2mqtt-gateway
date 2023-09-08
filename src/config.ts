@@ -1,5 +1,5 @@
 import { load } from "js-yaml";
-import * as fs from "fs";
+import fs from "fs";
 import { z, ZodError } from "zod";
 
 const mqttSchema = z.object({
