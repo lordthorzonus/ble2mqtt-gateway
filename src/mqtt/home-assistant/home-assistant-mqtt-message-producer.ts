@@ -14,7 +14,7 @@ import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../mqtt-topic-f
 import { Observable } from "rxjs";
 import { getConfiguration } from "../../config";
 import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora";
-import { snakeCase } from "lodash";
+import { capitalize, snakeCase } from "lodash";
 
 const config = getConfiguration();
 const homeAssistantTopicBase = config.homeassistant.discovery_topic;
@@ -53,10 +53,9 @@ const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSen
     `${snakeCase(deviceMessage.device.friendlyName)}_${configEntry.uniqueId}`;
 
 const getDeviceName = (deviceMessage: DeviceMessage) =>
-    `${deviceMessage.device.type} ${deviceMessage.device.friendlyName}`;
+    `${capitalize(deviceMessage.device.type)} ${deviceMessage.device.friendlyName}`;
 
-const getEntityName = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSensorConfiguration) =>
-    `${deviceMessage.device.friendlyName} ${configEntry.name}`;
+const getEntityName = (configEntry: HomeAssistantSensorConfiguration) => `${configEntry.name}`;
 
 interface HADiscoveryPayload {
     name: string;
@@ -80,6 +79,11 @@ interface HADiscoveryPayload {
     };
 }
 
+const getSuggestedDecimalPrecision = (configEntry: HomeAssistantSensorConfiguration): number | undefined =>
+    configEntry.suggestedDecimalPrecision === undefined
+        ? config.decimal_precision
+        : configEntry.suggestedDecimalPrecision ?? undefined;
+
 const getHaDiscoveryPayload = (
     propertyName: string,
     configEntry: HomeAssistantSensorConfiguration,
@@ -87,7 +91,7 @@ const getHaDiscoveryPayload = (
 ): HADiscoveryPayload | null =>
     deviceMessage.payload.state === "online"
         ? {
-              name: getEntityName(deviceMessage, configEntry),
+              name: getEntityName(configEntry),
               device_class:
                   configEntry.deviceClass === HomeAssistantDeviceClass.None ? undefined : configEntry.deviceClass,
               unit_of_measurement: configEntry.unitOfMeasurement,
@@ -96,7 +100,7 @@ const getHaDiscoveryPayload = (
               availability_topic: getDeviceAvailabilityTopic(deviceMessage.device),
               availability_template: "{{ value_json.state }}",
               expire_after: deviceMessage.device.timeout / 1000,
-              suggested_display_precision: config.decimal_precision,
+              suggested_display_precision: getSuggestedDecimalPrecision(configEntry),
               state_class: configEntry.stateClass,
               icon: configEntry.icon,
               device: {
