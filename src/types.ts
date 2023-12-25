@@ -98,5 +98,5 @@ export type HomeAssistantSensorConfigurationForDevice<T> =
 export type HomeAssistantSensorConfigurationForDeviceType<T> = T extends DeviceType.Ruuvitag
     ? HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagSensorData>
     : T extends DeviceType.MiFlora
-    ? HomeAssistantSensorConfigurationForDevice<MiFloraSensorData>
-    : never;
+      ? HomeAssistantSensorConfigurationForDevice<MiFloraSensorData>
+      : never;
