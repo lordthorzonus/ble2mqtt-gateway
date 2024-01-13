@@ -21,7 +21,7 @@ const getSensorData = flow(
         moisture: buffer.moistureEvent?.data ?? null,
         illuminance: buffer.illuminanceEvent?.data ?? null,
         soilConductivity: buffer.soilConductivityEvent?.data ?? null,
-        lowBatteryWarning: buffer.lowBatteryEvent?.data === 1 ?? false,
+        lowBatteryWarning: buffer.lowBatteryEvent?.data === 1,
     }),
     (sensorData: MiFloraSensorData): MiFloraSensorData => ({
         temperature: formatNumericSensorValue(sensorData.temperature),
