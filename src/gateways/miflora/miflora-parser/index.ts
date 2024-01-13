@@ -3,6 +3,7 @@ import {
     MiFloraMeasurement,
     parseIlluminanceEvent,
     parseInvalidEvent,
+    parseLowBatteryEvent,
     parseMoistureEvent,
     parseSoilConductivityEvent,
     parseTemperatureEvent,
@@ -16,6 +17,7 @@ export enum MifloraMeasurementEventType {
     Illuminance = 4103,
     Moisture = 4104,
     SoilConductivity = 4105,
+    LowBatteryEvent = 9998,
     InvalidEvent = 9999,
 }
 
@@ -38,6 +40,7 @@ export type SupportedMiFloraMeasurements =
     | MiFloraMeasurement<MifloraMeasurementEventType.Illuminance>
     | MiFloraMeasurement<MifloraMeasurementEventType.SoilConductivity>
     | MiFloraMeasurement<MifloraMeasurementEventType.Moisture>
+    | MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent>
     | MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent>;
 
 type MiFloraMeasurementEventParsingStrategy = (data: Buffer) => SupportedMiFloraMeasurements;
@@ -50,8 +53,11 @@ const MiFloraMeasurementEventParsingStrategyMap = new Map<
     [MifloraMeasurementEventType.Moisture, parseMoistureEvent],
     [MifloraMeasurementEventType.Temperature, parseTemperatureEvent],
     [MifloraMeasurementEventType.SoilConductivity, parseSoilConductivityEvent],
+    [MifloraMeasurementEventType.LowBatteryEvent, parseLowBatteryEvent],
     [MifloraMeasurementEventType.InvalidEvent, parseInvalidEvent],
 ]);
+
+const isLowBatteryAdvertisement = (data: Buffer) => data.length === 12 && data[11] === 13;
 
 /**
  * MiFlora sensors seem to sometimes sent ble events that I'm not yet sure what they are.
@@ -61,6 +67,14 @@ const parseMiFloraEventType = (data: Buffer, peripheral: Peripheral) => {
     try {
         return data.readUInt16LE(12);
     } catch (e) {
+        /**
+         * Miflora sensors seem to start sending this advertisement when battery is low.
+         * I haven't been able to find any documentation on this, but it seems to be the case.
+         */
+        if (isLowBatteryAdvertisement(data)) {
+            return MifloraMeasurementEventType.LowBatteryEvent;
+        }
+
         logger.warn("MiFlora sent invalid data: %s, peripheral: %s", data, peripheral);
 
         return MifloraMeasurementEventType.InvalidEvent;

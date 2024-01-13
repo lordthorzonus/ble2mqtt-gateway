@@ -1,5 +1,6 @@
 import {
     HomeAssistantDeviceClass,
+    HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDevice,
 } from "../../../types";
@@ -12,6 +13,7 @@ const ruuviTagDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = 
 
 export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagSensorData> = {
     absoluteHumidity: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Absolute Humidity",
         unitOfMeasurement: "g/m^3",
@@ -20,6 +22,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     temperature: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.Temperature,
         name: "Temperature",
         unitOfMeasurement: "°C",
@@ -27,6 +30,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     batteryVoltage: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Battery Voltage",
         unitOfMeasurement: "V",
@@ -35,6 +39,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         icon: "mdi:battery",
     },
     relativeHumidityPercentage: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.Humidity,
         name: "Humidity",
         unitOfMeasurement: "%",
@@ -44,6 +49,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         icon: "mdi:water-percent",
     },
     dewPoint: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Dew Point",
         unitOfMeasurement: "°C",
@@ -52,12 +58,14 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
     },
     pressure: {
         deviceClass: HomeAssistantDeviceClass.Pressure,
+        component: HomeAssistantMQTTComponent.Sensor,
         name: "Pressure",
         unitOfMeasurement: "hPa",
         uniqueId: "pressure",
         device: ruuviTagDeviceConfiguration,
     },
     txPower: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "TX Power",
         unitOfMeasurement: "dBm",
@@ -66,6 +74,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         icon: "mdi:signal",
     },
     accelerationX: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Acceleration X",
         unitOfMeasurement: "mG",
@@ -73,6 +82,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     accelerationY: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Acceleration Y",
         unitOfMeasurement: "mG",
@@ -80,6 +90,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     accelerationZ: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Acceleration Z",
         unitOfMeasurement: "mG",
@@ -87,6 +98,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     humidex: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Humidex",
         unitOfMeasurement: "",
@@ -94,6 +106,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     heatIndex: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Heat Index",
         unitOfMeasurement: "°C",
@@ -101,6 +114,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     macAddress: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Mac Address",
         unitOfMeasurement: undefined,
@@ -109,6 +123,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         suggestedDecimalPrecision: null,
     },
     measurementSequence: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Measurement Sequence",
         unitOfMeasurement: "",
@@ -116,6 +131,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     movementCounter: {
+        component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Movement Counter",
         unitOfMeasurement: "",
@@ -123,6 +139,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         device: ruuviTagDeviceConfiguration,
     },
     batteryPercentage: {
+        component: HomeAssistantMQTTComponent.Sensor,
         device: ruuviTagDeviceConfiguration,
         deviceClass: HomeAssistantDeviceClass.Battery,
         unitOfMeasurement: "%",

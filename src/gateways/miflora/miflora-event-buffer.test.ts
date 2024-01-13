@@ -27,6 +27,7 @@ describe("MiFlora Event Buffer", () => {
         moistureEvent: null,
         soilConductivityEvent: null,
         temperatureEvent: null,
+        lowBatteryEvent: null,
         bufferReleasedLast: DateTime.now(),
     };
 
@@ -49,6 +50,10 @@ describe("MiFlora Event Buffer", () => {
     const temperatureEvent: MiFloraMeasurement<MifloraMeasurementEventType.Temperature> = {
         measurementType: MifloraMeasurementEventType.Temperature,
         data: 10,
+    };
+    const lowBatteryEvent: MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent> = {
+        measurementType: MifloraMeasurementEventType.LowBatteryEvent,
+        data: 1,
     };
 
     describe("bufferMeasurementEvent()", () => {
@@ -117,6 +122,7 @@ describe("MiFlora Event Buffer", () => {
             [{ ...emptyBuffer, moistureEvent, temperatureEvent }, false],
             [{ ...emptyBuffer, moistureEvent, illuminanceEvent }, false],
             [{ ...emptyBuffer, illuminanceEvent, temperatureEvent, moistureEvent }, false],
+            [{ ...emptyBuffer, illuminanceEvent, temperatureEvent, moistureEvent, lowBatteryEvent }, false],
             [
                 {
                     ...emptyBuffer,
@@ -131,6 +137,7 @@ describe("MiFlora Event Buffer", () => {
                     illuminanceEvent,
                     temperatureEvent,
                     moistureEvent,
+                    lowBatteryEvent,
                     bufferReleasedLast: DateTime.now(),
                 },
                 true,
@@ -152,6 +159,7 @@ describe("MiFlora Event Buffer", () => {
             eventBuffer.bufferMeasurementEvent(deviceId, moistureEvent);
             eventBuffer.bufferMeasurementEvent(deviceId, soilConductivityEvent);
             eventBuffer.bufferMeasurementEvent(deviceId, illuminanceEvent);
+            eventBuffer.bufferMeasurementEvent(deviceId, lowBatteryEvent);
 
             eventBuffer.clearBuffer(deviceId);
             expect(eventBuffer.bufferMeasurementEvent(deviceId, moistureEvent)).toEqual({

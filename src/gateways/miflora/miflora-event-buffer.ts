@@ -8,6 +8,7 @@ export interface MiFloraSensorMeasurementBuffer {
     moistureEvent: MiFloraMeasurement<MifloraMeasurementEventType.Moisture> | null;
     illuminanceEvent: MiFloraMeasurement<MifloraMeasurementEventType.Illuminance> | null;
     soilConductivityEvent: MiFloraMeasurement<MifloraMeasurementEventType.SoilConductivity> | null;
+    lowBatteryEvent: MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent> | null;
     bufferReleasedLast: DateTime;
 }
 
@@ -47,11 +48,11 @@ export class MiFloraEventBuffer {
                 return { ...buffer, soilConductivityEvent: measurement };
             case MifloraMeasurementEventType.Temperature:
                 return { ...buffer, temperatureEvent: measurement };
+            case MifloraMeasurementEventType.LowBatteryEvent:
+                return { ...buffer, lowBatteryEvent: measurement };
             case MifloraMeasurementEventType.InvalidEvent:
                 return { ...buffer };
         }
-
-        throw Error(`Cannot buffer unsupported measurement ${JSON.stringify(measurement)}`);
     }
 
     public bufferMeasurementEvent(
@@ -82,6 +83,7 @@ export class MiFloraEventBuffer {
             moistureEvent: null,
             illuminanceEvent: null,
             soilConductivityEvent: null,
+            lowBatteryEvent: null,
             bufferReleasedLast: DateTime.now(),
         };
 

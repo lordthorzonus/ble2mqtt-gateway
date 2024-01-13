@@ -7,12 +7,12 @@ import { MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
 import { flow } from "lodash";
 import { formatNumericSensorValue } from "../numeric-sensor-value-formatter";
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type MiFloraSensorData = {
     temperature: number | null;
     moisture: number | null;
     illuminance: number | null;
     soilConductivity: number | null;
+    lowBatteryWarning: boolean;
 };
 
 const getSensorData = flow(
@@ -21,12 +21,14 @@ const getSensorData = flow(
         moisture: buffer.moistureEvent?.data ?? null,
         illuminance: buffer.illuminanceEvent?.data ?? null,
         soilConductivity: buffer.soilConductivityEvent?.data ?? null,
+        lowBatteryWarning: buffer.lowBatteryEvent?.data === 1 ?? false,
     }),
     (sensorData: MiFloraSensorData): MiFloraSensorData => ({
         temperature: formatNumericSensorValue(sensorData.temperature),
         moisture: formatNumericSensorValue(sensorData.moisture),
         illuminance: formatNumericSensorValue(sensorData.illuminance),
         soilConductivity: formatNumericSensorValue(sensorData.soilConductivity),
+        lowBatteryWarning: sensorData.lowBatteryWarning,
     })
 );
 
