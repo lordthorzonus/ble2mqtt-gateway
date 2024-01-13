@@ -73,6 +73,9 @@ export enum HomeAssistantMQTTComponent {
     Sensor = "sensor",
     BinarySensor = "binary_sensor",
 }
+export enum HomeAssistantEntityCategory {
+    Diagnostic = "diagnostic",
+}
 
 export interface HomeAssistantSensorConfiguration {
     name: string;
@@ -83,7 +86,10 @@ export interface HomeAssistantSensorConfiguration {
     uniqueId: string;
     icon?: string;
     stateClass?: string;
+    entityCategory?: HomeAssistantEntityCategory;
     suggestedDecimalPrecision?: number | null;
+    payloadOn?: string | boolean;
+    payloadOff?: string | boolean;
     device: {
         manufacturer: string;
         model: string;

@@ -1,5 +1,6 @@
 import {
     HomeAssistantDeviceClass,
+    HomeAssistantEntityCategory,
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDevice,
@@ -49,10 +50,12 @@ export const miFloraSensorConfiguration: HomeAssistantSensorConfigurationForDevi
     lowBatteryWarning: {
         component: HomeAssistantMQTTComponent.BinarySensor,
         deviceClass: HomeAssistantDeviceClass.Battery,
+        entityCategory: HomeAssistantEntityCategory.Diagnostic,
         icon: "mdi:battery-alert",
         name: "Battery Low",
         uniqueId: "battery_low",
-        valueTemplate: "{{ 'on' if value_json.lowBatteryWarning else 'off' }}",
         device: miFloraDeviceConfiguration,
+        payloadOn: true,
+        payloadOff: false,
     },
 };

@@ -49,6 +49,7 @@ interface HADiscoveryPayload {
     unit_of_measurement?: string;
     object_id: string;
     unique_id: string;
+    entity_cateogry?: string;
     availability_topic: string;
     availability_template: string;
     suggested_display_precision?: number;
@@ -57,6 +58,8 @@ interface HADiscoveryPayload {
     state_class?: string;
     payload_available?: string;
     payload_not_available?: string;
+    payload_on?: string | boolean;
+    payload_off?: string | boolean;
     icon?: string;
     device: {
         name: string;
@@ -83,6 +86,7 @@ const getHaDiscoveryPayload = (
     const commonDiscoveryPayload = {
         name: getEntityName(configEntry),
         device_class: configEntry.deviceClass === HomeAssistantDeviceClass.None ? undefined : configEntry.deviceClass,
+        entity_cateogry: configEntry.entityCategory,
         unit_of_measurement: configEntry.unitOfMeasurement,
         object_id: getObjectID(deviceMessage, configEntry),
         unique_id: getObjectID(deviceMessage, configEntry),
@@ -108,8 +112,8 @@ const getHaDiscoveryPayload = (
         case HomeAssistantMQTTComponent.BinarySensor:
             return {
                 ...commonDiscoveryPayload,
-                payload_available: "on",
-                payload_not_available: "off",
+                payload_on: configEntry.payloadOn,
+                payload_off: configEntry.payloadOff,
             };
     }
 };
