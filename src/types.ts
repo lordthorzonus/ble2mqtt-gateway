@@ -77,6 +77,7 @@ export enum HomeAssistantMQTTComponent {
 export interface HomeAssistantSensorConfiguration {
     name: string;
     deviceClass: HomeAssistantDeviceClass;
+    component: HomeAssistantMQTTComponent;
     unitOfMeasurement?: string;
     valueTemplate?: string;
     uniqueId: string;

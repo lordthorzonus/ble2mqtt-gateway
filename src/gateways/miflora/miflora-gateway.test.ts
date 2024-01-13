@@ -7,7 +7,7 @@ jest.mock("../../config", () => ({
     }),
 }));
 
-import { getStubPeripheral } from "./miflora-parser/index.test";
+import { getStubPeripheralWithServiceData } from "./miflora-parser/index.test";
 import { MiFloraGateway } from "./miflora-gateway";
 import { DateTime, Settings } from "luxon";
 import { v4 as uuid } from "uuid";
@@ -25,10 +25,19 @@ const makeMiFloraGateway = () => {
 
 describe("MiFlora Gateway", () => {
     const originalNow = Settings.now;
-    const moisturePeripheralAdvertisement = getStubPeripheral("71209800a864aed0a8654c0d08100112", "a");
-    const soilConductivityPeripheralAdvertisement = getStubPeripheral("71209800b1cf076e8d7cc40d091002c600", "a");
-    const temperaturePeripheralAdvertisement = getStubPeripheral("71209800239c066e8d7cc40d0410020401", "a");
-    const illuminancePeripheralAdvertisement = getStubPeripheral("71209800c3cf076e8d7cc40d071003370000", "a");
+    const moisturePeripheralAdvertisement = getStubPeripheralWithServiceData("71209800a864aed0a8654c0d08100112", "a");
+    const soilConductivityPeripheralAdvertisement = getStubPeripheralWithServiceData(
+        "71209800b1cf076e8d7cc40d091002c600",
+        "a"
+    );
+    const temperaturePeripheralAdvertisement = getStubPeripheralWithServiceData(
+        "71209800239c066e8d7cc40d0410020401",
+        "a"
+    );
+    const illuminancePeripheralAdvertisement = getStubPeripheralWithServiceData(
+        "71209800c3cf076e8d7cc40d071003370000",
+        "a"
+    );
 
     describe("handleBleAdvertisement()", () => {
         const testScheduler = new TestScheduler((actual, expected) => {
@@ -86,7 +95,7 @@ describe("MiFlora Gateway", () => {
 
         it("should not emit the device message until all sensor events are received once", (done) => {
             const gateway = makeMiFloraGateway();
-            testScheduler.run((helpers) => {
+            testScheduler.run((helpers): void => {
                 helpers.expectObservable(gateway.handleBleAdvertisement(moisturePeripheralAdvertisement)).toBe("(a|)", {
                     a: expect.objectContaining({ type: "availability" }),
                 });
@@ -105,6 +114,7 @@ describe("MiFlora Gateway", () => {
                                 moisture: 18,
                                 soilConductivity: 198,
                                 temperature: 26,
+                                lowBatteryWarning: false,
                             },
                         }),
                     });

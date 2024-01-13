@@ -24,11 +24,6 @@ const bleDeviceHAConfigurationMap = new Map<DeviceType, HomeAssistantSensorConfi
     [DeviceType.MiFlora, miFloraSensorConfiguration],
 ]);
 
-const bleDeviceHAComponentMap = new Map<DeviceType, HomeAssistantMQTTComponent>([
-    [DeviceType.Ruuvitag, HomeAssistantMQTTComponent.Sensor],
-    [DeviceType.MiFlora, HomeAssistantMQTTComponent.Sensor],
-]);
-
 const getHASensorConfiguration = <T extends DeviceType>(type: T): HomeAssistantSensorConfigurationForDeviceType<T> => {
     const configuration = bleDeviceHAConfigurationMap.get(type);
 
@@ -37,16 +32,6 @@ const getHASensorConfiguration = <T extends DeviceType>(type: T): HomeAssistantS
     }
 
     return configuration as HomeAssistantSensorConfigurationForDeviceType<T>;
-};
-
-const getHAComponent = (type: DeviceType): HomeAssistantMQTTComponent => {
-    const component = bleDeviceHAComponentMap.get(type);
-
-    if (!component) {
-        throw new Error("No mqtt component configured for given type");
-    }
-
-    return component;
 };
 
 const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSensorConfiguration) =>
@@ -70,6 +55,8 @@ interface HADiscoveryPayload {
     value_template: string;
     state_topic: string;
     state_class?: string;
+    payload_available?: string;
+    payload_not_available?: string;
     icon?: string;
     device: {
         name: string;
@@ -88,42 +75,56 @@ const getHaDiscoveryPayload = (
     propertyName: string,
     configEntry: HomeAssistantSensorConfiguration,
     deviceMessage: DeviceAvailabilityMessage
-): HADiscoveryPayload | null =>
-    deviceMessage.payload.state === "online"
-        ? {
-              name: getEntityName(configEntry),
-              device_class:
-                  configEntry.deviceClass === HomeAssistantDeviceClass.None ? undefined : configEntry.deviceClass,
-              unit_of_measurement: configEntry.unitOfMeasurement,
-              object_id: getObjectID(deviceMessage, configEntry),
-              unique_id: getObjectID(deviceMessage, configEntry),
-              availability_topic: getDeviceAvailabilityTopic(deviceMessage.device),
-              availability_template: "{{ value_json.state }}",
-              expire_after: deviceMessage.device.timeout / 1000,
-              suggested_display_precision: getSuggestedDecimalPrecision(configEntry),
-              state_class: configEntry.stateClass,
-              icon: configEntry.icon,
-              device: {
-                  ...configEntry.device,
-                  name: getDeviceName(deviceMessage),
-                  connections: [["mac", deviceMessage.device.macAddress]],
-              },
-              value_template: configEntry.valueTemplate
-                  ? configEntry.valueTemplate
-                  : `{{ value_json.${propertyName} | default('None') }}`,
-              state_topic: getDeviceStateTopic(deviceMessage.device),
-          }
-        : null;
+): HADiscoveryPayload | null => {
+    if (deviceMessage.payload.state === "offline") {
+        return null;
+    }
+
+    const commonDiscoveryPayload = {
+        name: getEntityName(configEntry),
+        device_class: configEntry.deviceClass === HomeAssistantDeviceClass.None ? undefined : configEntry.deviceClass,
+        unit_of_measurement: configEntry.unitOfMeasurement,
+        object_id: getObjectID(deviceMessage, configEntry),
+        unique_id: getObjectID(deviceMessage, configEntry),
+        availability_topic: getDeviceAvailabilityTopic(deviceMessage.device),
+        availability_template: "{{ value_json.state }}",
+        expire_after: deviceMessage.device.timeout / 1000,
+        suggested_display_precision: getSuggestedDecimalPrecision(configEntry),
+        state_class: configEntry.stateClass,
+        icon: configEntry.icon,
+        device: {
+            ...configEntry.device,
+            name: getDeviceName(deviceMessage),
+            connections: [["mac", deviceMessage.device.macAddress]] satisfies [string, string][],
+        },
+        value_template: configEntry.valueTemplate
+            ? configEntry.valueTemplate
+            : `{{ value_json.${propertyName} | default('None') }}`,
+        state_topic: getDeviceStateTopic(deviceMessage.device),
+    };
+    switch (configEntry.component) {
+        case HomeAssistantMQTTComponent.Sensor:
+            return commonDiscoveryPayload;
+        case HomeAssistantMQTTComponent.BinarySensor:
+            return {
+                ...commonDiscoveryPayload,
+                payload_available: "on",
+                payload_not_available: "off",
+            };
+    }
+};
 
 function* haDiscoverAdapter(deviceMessage: DeviceAvailabilityMessage): Generator<MqttMessage> {
     const configuration = getHASensorConfiguration(deviceMessage.device.type);
-    const component = getHAComponent(deviceMessage.device.type);
 
     for (const [propertyName, configEntry] of Object.entries(configuration)) {
         const haDiscoveryPayload = getHaDiscoveryPayload(propertyName, configEntry, deviceMessage);
 
         const message: MqttMessage = {
-            topic: `${homeAssistantTopicBase}/${component}/${getObjectID(deviceMessage, configEntry)}/config`,
+            topic: `${homeAssistantTopicBase}/${configEntry.component}/${getObjectID(
+                deviceMessage,
+                configEntry
+            )}/config`,
             retain: true,
             payload: haDiscoveryPayload !== null ? JSON.stringify(haDiscoveryPayload) : "",
         };

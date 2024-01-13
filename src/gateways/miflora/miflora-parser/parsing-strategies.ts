@@ -42,6 +42,13 @@ export const parseIlluminanceEvent = (data: Buffer): MiFloraMeasurement<MifloraM
     };
 };
 
+export const parseLowBatteryEvent = (): MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent> => {
+    return {
+        measurementType: MifloraMeasurementEventType.LowBatteryEvent,
+        data: 1,
+    };
+};
+
 export const parseInvalidEvent = (): MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent> => {
     return {
         measurementType: MifloraMeasurementEventType.InvalidEvent,
