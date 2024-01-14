@@ -56,10 +56,16 @@ type CommonHADiscoveryPayload = {
     value_template: string;
     state_topic: string;
     icon?: string;
+    origin: {
+        name: string;
+        sw_version: string;
+        support_url: string;
+    };
     device: {
         name: string;
         manufacturer: string;
         model: string;
+        identifiers: string[];
         connections: [string, string][];
     };
 };
@@ -119,11 +125,17 @@ const getHaDiscoveryPayload = (
             ...configEntry.device,
             name: getDeviceName(deviceMessage),
             connections: [["mac", deviceMessage.device.macAddress]] satisfies [string, string][],
+            identifiers: [deviceMessage.device.id, deviceMessage.device.macAddress],
         },
         value_template: configEntry.valueTemplate
             ? configEntry.valueTemplate
             : `{{ value_json.${propertyName} | default('None') }}`,
         state_topic: getDeviceStateTopic(deviceMessage.device),
+        origin: {
+            name: config.gateway_name,
+            sw_version: config.gateway_version,
+            support_url: "https://github.com/lordthorzonus/ble2mqtt-gateway",
+        },
     };
 
     switch (configEntry.component) {
