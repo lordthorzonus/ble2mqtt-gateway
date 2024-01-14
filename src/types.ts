@@ -19,20 +19,37 @@ export interface Device {
     type: DeviceType;
 }
 
-export interface DeviceSensorMessage {
+type CommonDeviceSensorMessage = {
     device: {
         macAddress: string;
         id: string;
+        type: DeviceType;
         rssi: number | null;
         friendlyName: string;
-        type: DeviceType;
         timeout: number;
     };
     id: string;
     time: DateTime;
     type: MessageType.SensorData;
-    payload: Record<string, unknown>;
-}
+};
+
+export type MifloraSensorMessage = CommonDeviceSensorMessage & {
+    deviceType: DeviceType.MiFlora;
+    device: CommonDeviceSensorMessage["device"] & {
+        type: DeviceType.MiFlora;
+    };
+    payload: MiFloraSensorData;
+};
+
+export type RuuvitagSensorMessage = CommonDeviceSensorMessage & {
+    deviceType: DeviceType.Ruuvitag;
+    device: CommonDeviceSensorMessage["device"] & {
+        type: DeviceType.Ruuvitag;
+    };
+    payload: EnhancedRuuviTagSensorData;
+};
+
+export type DeviceSensorMessage = MifloraSensorMessage | RuuvitagSensorMessage;
 
 export interface DeviceAvailabilityMessage {
     device: {

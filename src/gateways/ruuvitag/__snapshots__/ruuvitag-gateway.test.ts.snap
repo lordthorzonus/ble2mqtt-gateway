@@ -27,6 +27,7 @@ exports[`RuuviTag Gateway handleBleAdvertisement() should handle unknown ruuvita
       "timeout": 30000,
       "type": "ruuvitag",
     },
+    "deviceType": "ruuvitag",
     "id": "mock-uuid",
     "payload": {
       "absoluteHumidity": 11.84,
@@ -57,6 +58,7 @@ exports[`RuuviTag Gateway handleBleAdvertisement() should handle unknown ruuvita
       "timeout": 30000,
       "type": "ruuvitag",
     },
+    "deviceType": "ruuvitag",
     "id": "mock-uuid",
     "payload": {
       "absoluteHumidity": 11.84,
@@ -108,6 +110,7 @@ exports[`RuuviTag Gateway handleBleAdvertisement() should produce a availability
       "timeout": 30000,
       "type": "ruuvitag",
     },
+    "deviceType": "ruuvitag",
     "id": "mock-uuid",
     "payload": {
       "absoluteHumidity": 11.84,

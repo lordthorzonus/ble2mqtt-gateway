@@ -16,14 +16,17 @@ jest.mock("../../config", () => ({
 import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { DateTime } from "luxon";
 import { homeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
+import { EnhancedRuuviTagSensorData } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
+import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer";
 
 describe("HomeAssistant MQTT Message producer", () => {
     it("should generate device state mqtt message if device sensor message is given", (done) => {
         const deviceMessage: DeviceSensorMessage = {
             id: "a",
+            deviceType: DeviceType.Ruuvitag,
             payload: {
                 sensor1: "value",
-            },
+            } as unknown as EnhancedRuuviTagSensorData,
             type: MessageType.SensorData,
             time: DateTime.now(),
             device: {
@@ -53,9 +56,10 @@ describe("HomeAssistant MQTT Message producer", () => {
     it("should vary the state topic based on the device type", (done) => {
         const deviceMessage: DeviceSensorMessage = {
             id: "a",
+            deviceType: DeviceType.MiFlora,
             payload: {
                 sensor1: "value",
-            },
+            } as unknown as MiFloraSensorData,
             type: MessageType.SensorData,
             time: DateTime.now(),
             device: {
