@@ -49,7 +49,7 @@ interface HADiscoveryPayload {
     unit_of_measurement?: string;
     object_id: string;
     unique_id: string;
-    entity_cateogry?: string;
+    entity_category?: string;
     availability_topic: string;
     availability_template: string;
     suggested_display_precision?: number;
