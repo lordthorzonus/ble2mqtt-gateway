@@ -1,6 +1,6 @@
 import { Peripheral } from "@abandonware/noble";
 import { DeviceRegistryEntry } from "../device-registry";
-import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
+import { MessageType, DeviceType, MifloraSensorMessage } from "../../types";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 import { MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
@@ -36,11 +36,12 @@ export const transformMiFloraMeasurementsToDeviceMessage = (
     peripheral: Peripheral,
     deviceRegistryEntry: DeviceRegistryEntry,
     miFloraSensorMeasurementBuffer: MiFloraSensorMeasurementBuffer
-): DeviceSensorMessage => {
+): MifloraSensorMessage => {
     const sensorData = getSensorData(miFloraSensorMeasurementBuffer);
 
     return {
         id: uuid(),
+        deviceType: DeviceType.MiFlora,
         device: {
             macAddress: peripheral.address,
             rssi: peripheral.rssi,

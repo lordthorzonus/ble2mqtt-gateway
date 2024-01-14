@@ -94,6 +94,7 @@ describe("RuuviTag Measurement Transformer", () => {
         const expectedMessage: DeviceSensorMessage = {
             id: mockId,
             type: MessageType.SensorData,
+            deviceType: DeviceType.Ruuvitag,
             device: {
                 type: DeviceType.Ruuvitag,
                 friendlyName: device.device.friendlyName,

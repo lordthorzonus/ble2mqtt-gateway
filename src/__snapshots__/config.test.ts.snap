@@ -3,6 +3,8 @@
 exports[`Config getConfiguration() should return the proper configuration given in the env variable 1`] = `
 {
   "decimal_precision": 2,
+  "gateway_name": "ble2mqtt",
+  "gateway_version": "development",
   "gateways": {
     "base_topic": "mqtt",
     "miflora": {
