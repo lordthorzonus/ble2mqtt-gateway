@@ -57,5 +57,6 @@ export const miFloraSensorConfiguration: HomeAssistantSensorConfigurationForDevi
         device: miFloraDeviceConfiguration,
         payloadOn: true,
         payloadOff: false,
+        valueTemplate: "{{ value_json.lowBatteryWarning }}"
     },
 };
