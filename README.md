@@ -4,6 +4,8 @@ Gateway for turning ble data into home assistant compatible mqtt messages. Curre
 
 ## Configuration
 
+The behaviour of the gateway is controlled by a configuration file. The file is in YAML format and it's location can be set with the `CONFIG_FILE_LOCATION` environment variable.
+
 ### Example Configuration (configuration.yaml)
 
 ```yaml
@@ -36,12 +38,16 @@ homeassistant:
     discovery_topic: homeassistant
 ```
 
+## Installation
+
+The easiest way to run the gateyway is to use the built docker image:
+
 ### Example docker-compose.yml
 
 ```yaml
 services:
     ble2mqtt:
-        image: "lordthorzonus/ble2mqtt-gateway:edge"
+        image: "lordthorzonus/ble2mqtt-gateway:x.x.x"
         restart: unless-stopped
         cap_add:
             - NET_RAW
@@ -51,6 +57,30 @@ services:
         environment:
             - CONFIG_FILE_LOCATION="/home/node/app/config/configuration.yaml"
             - TZ="Europe/Helsinki"
+```
+
+The Docker image is available at [Docker Hub](https://hub.docker.com/r/lordthorzonus/ble2mqtt-gateway). The version tag "x.x.x" should be replaced with the latest version.
+
+The tagging scheme is as follows:
+
+-   `latest` - The latest numbered release
+-   `x.x.x` - The specific version of the release
+-   `edge` - The latest commit on the main branch (Here be dragons)
+
+The numbered releases are following semantic versioning.
+
+See example here for how I deploy it with a [ansible playbook](https://github.com/lordthorzonus/homelab-provisioning/blob/main/roles/ble2mqtt/templates/docker-compose.yml)
+
+### Using just docker
+
+```bash
+docker run \
+    -v $(pwd)/configuration.yaml:/home/node/app/config/configuration.yaml \
+    -e CONFIG_FILE_LOCATION="/home/node/app/config/configuration.yaml" \
+    -e TZ="Europe/Helsinki" \
+    --network host \
+    --cap-add NET_RAW \
+    lordthorzonus/ble2mqtt-gateway:x.x.x
 ```
 
 ## Development
