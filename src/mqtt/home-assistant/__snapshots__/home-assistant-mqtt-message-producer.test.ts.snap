@@ -23,7 +23,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/aa:bb/super_plant_soil_conductivity/config",
   },
   {
-    "payload": "{"name":"Battery Low","device_class":"battery","entity_category":"diagnostic","object_id":"super_plant_battery_low","unique_id":"super_plant_battery_low","availability_topic":"a_base_topic/miflora/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":30,"icon":"mdi:battery-alert","device":{"manufacturer":"Xiaomi Inc.","model":"MiFlora Plant Sensor HHCCJCV01","name":"Miflora Super Plant","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.lowBatteryWarning }}","state_topic":"a_base_topic/miflora/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"payload_on":true,"payload_off":false}",
+    "payload": "{"name":"Battery","device_class":"battery","entity_category":"diagnostic","object_id":"super_plant_battery_low","unique_id":"super_plant_battery_low","availability_topic":"a_base_topic/miflora/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":30,"icon":"mdi:battery","device":{"manufacturer":"Xiaomi Inc.","model":"MiFlora Plant Sensor HHCCJCV01","name":"Miflora Super Plant","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.lowBatteryWarning }}","state_topic":"a_base_topic/miflora/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"payload_on":true,"payload_off":false}",
     "retain": true,
     "topic": "homeassistant/binary_sensor/aa:bb/super_plant_battery_low/config",
   },
