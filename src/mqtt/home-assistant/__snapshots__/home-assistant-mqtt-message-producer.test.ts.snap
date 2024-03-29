@@ -83,7 +83,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/aa:bb/my_fridge_temperature/config",
   },
   {
-    "payload": "{"name":"Battery Voltage","object_id":"my_fridge_battery_voltage","unique_id":"my_fridge_battery_voltage","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:battery","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.batteryVoltage | default('None') }}","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"V","suggested_display_precision":2}",
+    "payload": "{"name":"Battery Voltage","entity_category":"diagnostic","object_id":"my_fridge_battery_voltage","unique_id":"my_fridge_battery_voltage","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:battery","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.batteryVoltage | default('None') }}","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"V","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/aa:bb/my_fridge_battery_voltage/config",
   },
@@ -103,7 +103,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/aa:bb/my_fridge_pressure/config",
   },
   {
-    "payload": "{"name":"TX Power","object_id":"my_fridge_txPower","unique_id":"my_fridge_txPower","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:signal","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.txPower | default('None') }}","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"dBm","suggested_display_precision":2}",
+    "payload": "{"name":"TX Power","entity_category":"diagnostic","object_id":"my_fridge_txPower","unique_id":"my_fridge_txPower","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:signal","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.txPower | default('None') }}","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"dBm","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/aa:bb/my_fridge_txPower/config",
   },
@@ -133,7 +133,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/aa:bb/my_fridge_heat_index/config",
   },
   {
-    "payload": "{"name":"Mac Address","object_id":"my_fridge_mac_address","unique_id":"my_fridge_mac_address","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.macAddress | default('None') }}","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"}}",
+    "payload": "{"name":"Mac Address","entity_category":"diagnostic","object_id":"my_fridge_mac_address","unique_id":"my_fridge_mac_address","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.macAddress | default('None') }}","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"}}",
     "retain": true,
     "topic": "homeassistant/sensor/aa:bb/my_fridge_mac_address/config",
   },
@@ -148,9 +148,14 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/aa:bb/my_fridge_movement_counter/config",
   },
   {
-    "payload": "{"name":"Battery Percentage","device_class":"battery","object_id":"my_fridge_battery_percentage","unique_id":"my_fridge_battery_percentage","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:battery","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"\\n{% set temperature = value_json.temperature | float %}\\n{% set batteryVoltage = value_json.batteryVoltage | float %}\\n{% set maxBattery = 3 %}\\n{% set minBattery = iif(temperature < -20, 2, iif(temperature | float < 0, 2.3, 2.5)) %}\\n{{ (((batteryVoltage - minBattery) / (maxBattery - minBattery)) * 100) | round(2) }}\\n        ","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"%","suggested_display_precision":2}",
+    "payload": "{"name":"Battery Percentage","device_class":"battery","entity_category":"diagnostic","object_id":"my_fridge_battery_percentage","unique_id":"my_fridge_battery_percentage","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:battery","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"\\n{% set temperature = value_json.temperature | float %}\\n{% set batteryVoltage = value_json.batteryVoltage | float %}\\n{% set maxBattery = 3 %}\\n{% set minBattery = iif(temperature < -20, 2, iif(temperature | float < 0, 2.3, 2.5)) %}\\n{{ (((batteryVoltage - minBattery) / (maxBattery - minBattery)) * 100) | round(2) }}\\n        ","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"%","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/aa:bb/my_fridge_battery_percentage/config",
+  },
+  {
+    "payload": "{"name":"Battery","device_class":"battery","entity_category":"diagnostic","object_id":"my_fridge_battery_low","unique_id":"my_fridge_battery_low","availability_topic":"a_base_topic/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:battery","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"\\n{% set temperature = value_json.temperature | float %}\\n{% set batteryVoltage = value_json.batteryVoltage | float %}\\n{% if temperature < -20 %}\\n    {{ batteryVoltage < 2 }}\\n{% elif temperature < 0 %}\\n    {{ batteryVoltage < 2.3 }}\\n{% else %}\\n    {{ batteryVoltage < 2.5 }}\\n{% endif %}\\n        ","state_topic":"a_base_topic/ruuvitag/aa:bb/state","origin":{"support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"payload_on":true,"payload_off":false}",
+    "retain": true,
+    "topic": "homeassistant/binary_sensor/aa:bb/my_fridge_battery_low/config",
   },
   {
     "payload": "{"state":"online"}",
@@ -241,6 +246,11 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "payload": "",
     "retain": true,
     "topic": "homeassistant/sensor/aa:bb/fridge_battery_percentage/config",
+  },
+  {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/binary_sensor/aa:bb/fridge_battery_low/config",
   },
   {
     "payload": "{"state":"offline"}",

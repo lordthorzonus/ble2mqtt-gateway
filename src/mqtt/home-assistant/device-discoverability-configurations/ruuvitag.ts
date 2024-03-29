@@ -1,5 +1,6 @@
 import {
     HomeAssistantDeviceClass,
+    HomeAssistantEntityCategory,
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDevice,
@@ -32,6 +33,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
     batteryVoltage: {
         component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
+        entityCategory: HomeAssistantEntityCategory.Diagnostic,
         name: "Battery Voltage",
         unitOfMeasurement: "V",
         uniqueId: "battery_voltage",
@@ -67,6 +69,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
     txPower: {
         component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
+        entityCategory: HomeAssistantEntityCategory.Diagnostic,
         name: "TX Power",
         unitOfMeasurement: "dBm",
         uniqueId: "txPower",
@@ -116,6 +119,7 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
     macAddress: {
         component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
+        entityCategory: HomeAssistantEntityCategory.Diagnostic,
         name: "Mac Address",
         unitOfMeasurement: undefined,
         uniqueId: "mac_address",
@@ -138,9 +142,14 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
         uniqueId: "movement_counter",
         device: ruuviTagDeviceConfiguration,
     },
+    /**
+     * This is still quite inaccurate, but it's better than nothing.
+     * @see https://ruuvi.com/ruuvitag-battery-and-how-to-change/#Ruuvi%20Station%20app%20battery%20indicator
+     */
     batteryPercentage: {
         component: HomeAssistantMQTTComponent.Sensor,
         device: ruuviTagDeviceConfiguration,
+        entityCategory: HomeAssistantEntityCategory.Diagnostic,
         deviceClass: HomeAssistantDeviceClass.Battery,
         unitOfMeasurement: "%",
         uniqueId: "battery_percentage",
@@ -153,5 +162,30 @@ export const ruuviTagSensorConfiguration: HomeAssistantSensorConfigurationForDev
 {{ (((batteryVoltage - minBattery) / (maxBattery - minBattery)) * 100) | round(2) }}
         `,
         icon: "mdi:battery",
+    },
+    /**
+     * @see https://ruuvi.com/ruuvitag-battery-and-how-to-change/#Ruuvi%20Station%20app%20battery%20indicator
+     */
+    lowBatteryWarning: {
+        component: HomeAssistantMQTTComponent.BinarySensor,
+        deviceClass: HomeAssistantDeviceClass.Battery,
+        entityCategory: HomeAssistantEntityCategory.Diagnostic,
+        icon: "mdi:battery",
+        name: "Battery",
+        uniqueId: "battery_low",
+        device: ruuviTagDeviceConfiguration,
+        payloadOn: true,
+        payloadOff: false,
+        valueTemplate: `
+{% set temperature = value_json.temperature | float %}
+{% set batteryVoltage = value_json.batteryVoltage | float %}
+{% if temperature < -20 %}
+    {{ batteryVoltage < 2 }}
+{% elif temperature < 0 %}
+    {{ batteryVoltage < 2.3 }}
+{% else %}
+    {{ batteryVoltage < 2.5 }}
+{% endif %}
+        `,
     },
 };
