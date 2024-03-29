@@ -1,7 +1,7 @@
-ARG NODE_VERSION=18.20.0
+ARG NODE_VERSION=18.20.0-alpine
 ARG NPM_VERSION=10.5.0
 
-FROM node:${NODE_VERSION}-alpine as base
+FROM node:${NODE_VERSION} as base
 RUN npm i -g npm@${NPM_VERSION}
 RUN apk add --no-cache --update \
     tzdata \
