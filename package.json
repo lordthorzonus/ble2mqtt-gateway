@@ -43,7 +43,7 @@
         "@types/lodash.snakecase": "4.1.9",
         "@types/luxon": "3.4.2",
         "@types/noble": "0.0.44",
-        "@types/node": "20.12.2",
+        "@types/node": "20.12.3",
         "@types/uuid": "9.0.8",
         "@types/ws": "8.5.10",
         "@typescript-eslint/eslint-plugin": "7.5.0",
