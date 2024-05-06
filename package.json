@@ -24,7 +24,7 @@
     "author": "Juuso Leinonen",
     "license": "MIT",
     "dependencies": {
-        "@abandonware/noble": "1.9.2-24",
+        "@abandonware/noble": "1.9.2-25",
         "dotenv": "16.4.5",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
@@ -43,7 +43,7 @@
         "@types/lodash.snakecase": "4.1.9",
         "@types/luxon": "3.4.2",
         "@types/noble": "0.0.44",
-        "@types/node": "20.12.8",
+        "@types/node": "20.12.10",
         "@types/uuid": "9.0.8",
         "@types/ws": "8.5.10",
         "@typescript-eslint/eslint-plugin": "7.8.0",
