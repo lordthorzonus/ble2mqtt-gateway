@@ -39,7 +39,7 @@
     "devDependencies": {
         "@types/jest": "29.5.12",
         "@types/js-yaml": "4.0.9",
-        "@types/lodash": "4.17.1",
+        "@types/lodash": "4.17.3",
         "@types/lodash.snakecase": "4.1.9",
         "@types/luxon": "3.4.2",
         "@types/noble": "0.0.44",
