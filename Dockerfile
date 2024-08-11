@@ -22,7 +22,7 @@ WORKDIR /home/node/app
 
 COPY package*.json ./
 COPY tsconfig.json .eslintrc .prettierrc ./
-RUN npm ci
+RUN npm ci --audit false
 
 COPY --chown=node:node  . ./
 
