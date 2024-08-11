@@ -2,7 +2,7 @@ ARG NODE_VERSION=20.16.0-alpine
 ARG NPM_VERSION=10.5.0
 
 FROM node:${NODE_VERSION} as base
-RUN npm i -g npm@${NPM_VERSION}
+RUN npm i -g npm@${NPM_VERSION} --audit false
 RUN apk add --no-cache --update \
     tzdata \
     bluez \
