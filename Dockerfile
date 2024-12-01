@@ -1,4 +1,4 @@
-ARG NODE_VERSION=22.10.0-bookworm-slim
+ARG NODE_VERSION=18.20.5-alpine
 ARG NPM_VERSION=10.9.1
 
 FROM node:${NODE_VERSION} as base
