@@ -24,11 +24,15 @@ const messages = gateway.observeEvents().pipe(
 );
 
 const subscription = messages.subscribe((message) => {
-    publish(message).catch((e) => {
+    publish(message).catch((e: unknown) => {
         logger.error(e);
         logger.error("Error publishing MQTT message", { message });
     });
 });
 
-process.on("SIGINT", () => subscription.unsubscribe());
-process.on("SIGTERM", () => subscription.unsubscribe());
+process.on("SIGINT", () => {
+    subscription.unsubscribe();
+});
+process.on("SIGTERM", () => {
+    subscription.unsubscribe();
+});

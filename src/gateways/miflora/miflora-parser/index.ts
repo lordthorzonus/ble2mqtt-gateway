@@ -66,7 +66,7 @@ const isLowBatteryAdvertisement = (data: Buffer) => data.length === 12 && data[1
 const parseMiFloraEventType = (data: Buffer, peripheral: Peripheral) => {
     try {
         return data.readUInt16LE(12);
-    } catch (e) {
+    } catch (_e) {
         /**
          * Miflora sensors seem to start sending this advertisement when battery is low.
          * I haven't been able to find any documentation on this, but it seems to be the case.

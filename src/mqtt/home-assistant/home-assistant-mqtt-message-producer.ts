@@ -40,9 +40,9 @@ const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSen
 const getDeviceName = (deviceMessage: DeviceMessage) =>
     `${capitalize(deviceMessage.device.type)} ${deviceMessage.device.friendlyName}`;
 
-const getEntityName = (configEntry: HomeAssistantSensorConfiguration) => `${configEntry.name}`;
+const getEntityName = (configEntry: HomeAssistantSensorConfiguration) => configEntry.name;
 
-type CommonHADiscoveryPayload = {
+interface CommonHADiscoveryPayload {
     name: string;
     device_class?: string;
     expire_after: number;
@@ -68,36 +68,36 @@ type CommonHADiscoveryPayload = {
         identifiers: string[];
         connections: [string, string][];
     };
-};
+}
 
-type SensorHADiscoveryPayload = {
+interface SensorHADiscoveryPayload {
     component: HomeAssistantMQTTComponent.Sensor;
     payload: CommonHADiscoveryPayload & {
         unit_of_measurement?: string;
         suggested_display_precision?: number;
         state_class?: string;
     };
-};
+}
 
-type BinarySensorHADiscoveryPayload = {
+interface BinarySensorHADiscoveryPayload {
     component: HomeAssistantMQTTComponent.BinarySensor;
     payload: CommonHADiscoveryPayload & {
         payload_on?: string | boolean;
         payload_off?: string | boolean;
     };
-};
+}
 
-type NullPayloadDiscoveryPayload = {
+interface NullPayloadDiscoveryPayload {
     component: HomeAssistantMQTTComponent;
     payload: null;
-};
+}
 
 type HADiscoveryPayload = SensorHADiscoveryPayload | BinarySensorHADiscoveryPayload | NullPayloadDiscoveryPayload;
 
 const getSuggestedDecimalPrecision = (configEntry: HomeAssistantSensorConfiguration): number | undefined =>
     configEntry.suggestedDecimalPrecision === undefined
         ? config.decimal_precision
-        : configEntry.suggestedDecimalPrecision ?? undefined;
+        : (configEntry.suggestedDecimalPrecision ?? undefined);
 
 const getHaDiscoveryPayload = (
     propertyName: string,
@@ -127,9 +127,7 @@ const getHaDiscoveryPayload = (
             connections: [["mac", deviceMessage.device.macAddress]] satisfies [string, string][],
             identifiers: [deviceMessage.device.id, deviceMessage.device.macAddress],
         },
-        value_template: configEntry.valueTemplate
-            ? configEntry.valueTemplate
-            : `{{ value_json.${propertyName} | default('None') }}`,
+        value_template: configEntry.valueTemplate ?? `{{ value_json.${propertyName} | default('None') }}`,
         state_topic: getDeviceStateTopic(deviceMessage.device),
         origin: {
             name: config.gateway_name,

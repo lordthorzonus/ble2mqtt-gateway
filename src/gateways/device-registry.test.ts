@@ -192,8 +192,8 @@ describe("Device Registry", () => {
                 .observeUnavailableDevices()
                 .pipe(take(2), toArray())
                 .subscribe((observedDevices) => {
-                    expect(observedDevices[0].device.id).toBe("a");
-                    expect(observedDevices[1].device.id).toBe("b");
+                    expect(observedDevices[0]?.device.id).toBe("a");
+                    expect(observedDevices[1]?.device.id).toBe("b");
                     done();
                 });
 

@@ -30,6 +30,7 @@ describe("formatNumericSensorValue", () => {
             mockGetConfiguration.mockReturnValue({
                 decimal_precision: decimalPrecision,
             });
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             const formatNumericSensorValue = require("./numeric-sensor-value-formatter").formatNumericSensorValue;
 
             expect(formatNumericSensorValue(givenValue)).toBe(expectedValue);
@@ -40,6 +41,7 @@ describe("formatNumericSensorValue", () => {
         mockGetConfiguration.mockReturnValue({
             decimal_precision: 2,
         });
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const formatNumericSensorValue = require("./numeric-sensor-value-formatter").formatNumericSensorValue;
 
         expect(formatNumericSensorValue(0)).toBe(0);

@@ -7,13 +7,13 @@ import { MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
 import { flow } from "lodash";
 import { formatNumericSensorValue } from "../numeric-sensor-value-formatter";
 
-export type MiFloraSensorData = {
+export interface MiFloraSensorData {
     temperature: number | null;
     moisture: number | null;
     illuminance: number | null;
     soilConductivity: number | null;
     lowBatteryWarning: boolean;
-};
+}
 
 const getSensorData = flow(
     (buffer: MiFloraSensorMeasurementBuffer) => ({

@@ -7,7 +7,7 @@ import { DeviceType } from "./types";
 import { throwError } from "rxjs";
 import { homeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
 
-const mode: string = process.argv[2];
+const mode: string | undefined = process.argv[2];
 
 logger.info("Dev mode: %s", mode);
 
@@ -32,7 +32,7 @@ if (mode === "ble") {
 if (mode === "gateway") {
     const config = getConfiguration();
     const gateway = new BleGateway(config.gateways);
-    const filterDeviceType: DeviceType = process.argv[3] as DeviceType;
+    const filterDeviceType: DeviceType | undefined = process.argv[3] as DeviceType | undefined;
 
     if (filterDeviceType) {
         logger.info("Filtering device type %s", filterDeviceType);
@@ -50,7 +50,7 @@ if (mode === "gateway") {
 if (mode === "mqtt") {
     const config = getConfiguration();
     const gateway = new BleGateway(config.gateways);
-    const filterDeviceType: DeviceType = process.argv[3] as DeviceType;
+    const filterDeviceType: DeviceType | undefined = process.argv[3] as DeviceType | undefined;
 
     if (filterDeviceType) {
         logger.info("Filtering device type %s", filterDeviceType);

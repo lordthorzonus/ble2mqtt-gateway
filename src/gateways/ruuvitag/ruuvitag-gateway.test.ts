@@ -74,7 +74,7 @@ describe("RuuviTag Gateway", () => {
                 expect(actual).toEqual(expected);
             });
 
-            return testScheduler.run((helpers) => {
+            testScheduler.run((helpers) => {
                 helpers
                     .expectObservable(
                         gateway.handleBleAdvertisement({ ...peripheral, uuid: "no-such-ruuvitag" } as Peripheral)
@@ -82,6 +82,8 @@ describe("RuuviTag Gateway", () => {
                     .toBe("|");
                 done();
             });
+
+            return;
         });
 
         it("should not produce the availability message twice if the ruuvitag availability has not changed", () => {

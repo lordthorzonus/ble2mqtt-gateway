@@ -182,7 +182,7 @@ describe("BLE Gateway", () => {
             expect(actual).toEqual(expected);
         });
 
-        return testScheduler.run((helpers) => {
+        testScheduler.run((helpers) => {
             helpers.expectObservable(gateway.observeEvents().pipe(take(6))).toBe("(abcdef|)", {
                 a: handledMessage,
                 b: handledMessage,
@@ -193,5 +193,7 @@ describe("BLE Gateway", () => {
             });
             done();
         });
+
+        return;
     });
 });

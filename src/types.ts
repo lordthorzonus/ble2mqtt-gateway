@@ -19,7 +19,7 @@ export interface Device {
     type: DeviceType;
 }
 
-type CommonDeviceSensorMessage = {
+interface CommonDeviceSensorMessage {
     device: {
         macAddress: string;
         id: string;
@@ -31,7 +31,7 @@ type CommonDeviceSensorMessage = {
     id: string;
     time: DateTime;
     type: MessageType.SensorData;
-};
+}
 
 export type MifloraSensorMessage = CommonDeviceSensorMessage & {
     deviceType: DeviceType.MiFlora;
