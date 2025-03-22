@@ -1,88 +1,80 @@
 name: BLE to MQTT Gateway Pipeline
 concurrency:
-  group: ${{ github.head_ref || github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.head_ref || github.ref }}
+    cancel-in-progress: true
 on:
-  push:
-    branches:
-      - "main"
-    tags:
-      - "v*.*.*"
-  pull_request:
-    branches:
-      - "main"
+    push:
+        branches:
+            - "main"
+        tags:
+            - "v*.*.*"
+    pull_request:
+        branches:
+            - "main"
 jobs:
-  pipeline:
-    env:
-      PLATFORMS: linux/amd64${{ github.event_name != 'pull_request' && ', linux/arm64, linux/arm/v7' || '' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    pipeline:
+        env:
+            PLATFORMS: linux/arm/v7${{ github.event_name != 'pull_request' && ', linux/arm64, linux/amd64' || '' }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: lordthorzonus/ble2mqtt-gateway
-          tags: |
-            type=edge, branch=main
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}
+            - name: Docker metadata
+              id: meta
+              uses: docker/metadata-action@v5
+              with:
+                  images: lordthorzonus/ble2mqtt-gateway
+                  tags: |
+                      type=edge, branch=main
+                      type=ref,event=pr
+                      type=semver,pattern={{version}}
+                      type=semver,pattern={{major}}
 
-      - name: Set up QEMU
-        id: qemu
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+            - name: Set up QEMU
+              id: qemu
+              uses: docker/setup-qemu-action@v3
+              with:
+                  platforms: linux/amd64,linux/arm64,linux/arm/v7
 
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v3
+            - name: Set up Docker Buildx
+              id: buildx
+              uses: docker/setup-buildx-action@v3
 
-      - name: Build test image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          builder: ${{ steps.buildx.outputs.name }}
-          push: false
-          tags: test-build:${{ github.sha }}
-          load: true
-          target: development
-          cache-from: type=gha, scope=${{ github.workflow }}
-          cache-to: type=gha,mode=max, scope=${{ github.workflow }}
+            - name: Build test image
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  builder: ${{ steps.buildx.outputs.name }}
+                  push: false
+                  tags: test-build:${{ github.sha }}
+                  load: true
+                  target: development
+                  cache-from: type=gha, scope=${{ github.workflow }}
+                  cache-to: type=gha,mode=max, scope=${{ github.workflow }}
 
-      - name: Lint
-        run: docker run test-build:${{ github.sha }} npm run lint
+            - name: Lint
+              run: docker run test-build:${{ github.sha }} npm run lint
 
-      - name: Test
-        run: docker run test-build:${{ github.sha }} npm run test
+            - name: Test
+              run: docker run test-build:${{ github.sha }} npm run test
 
-      - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - name: Login to DockerHub
+              if: github.event_name != 'pull_request'
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: ${{ env.PLATFORMS }}
-          target: production
-          builder: ${{ steps.buildx.outputs.name }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-
-
-
-
-
-
-
+            - name: Build and push
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  push: ${{ github.event_name != 'pull_request' }}
+                  tags: ${{ steps.meta.outputs.tags }}
+                  labels: ${{ steps.meta.outputs.labels }}
+                  platforms: ${{ env.PLATFORMS }}
+                  target: production
+                  builder: ${{ steps.buildx.outputs.name }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
