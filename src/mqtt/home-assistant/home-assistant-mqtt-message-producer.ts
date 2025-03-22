@@ -194,18 +194,11 @@ const generateStateMessage = (deviceMessage: DeviceMessage): MqttMessage => ({
     payload: JSON.stringify({ ...deviceMessage.payload, time: deviceMessage.time, id: deviceMessage.id }),
 });
 
-export function homeAssistantMqttMessageProducer(deviceMessage: DeviceMessage): Observable<MqttMessage> {
-    return new Observable((subscriber) => {
-        if (isAvailabilityMessage(deviceMessage)) {
-            for (const message of haDiscoverAdapter(deviceMessage)) {
-                subscriber.next(message);
-            }
+export function* homeAssistantMqttMessageProducer(deviceMessage: DeviceMessage): Generator<MqttMessage> {
+    if (isAvailabilityMessage(deviceMessage)) {
+        yield* haDiscoverAdapter(deviceMessage);
+        return generateAvailabilityMessage(deviceMessage);
+    }
 
-            subscriber.next(generateAvailabilityMessage(deviceMessage));
-            subscriber.complete();
-        }
-
-        subscriber.next(generateStateMessage(deviceMessage));
-        subscriber.complete();
-    });
+    return generateStateMessage(deviceMessage);
 }

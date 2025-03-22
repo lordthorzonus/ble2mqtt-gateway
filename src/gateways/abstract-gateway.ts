@@ -3,6 +3,7 @@ import { DeviceAvailabilityMessage, DeviceMessage, DeviceSensorMessage, DeviceTy
 import { generateAvailabilityMessage } from "./message-generators";
 import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry";
 import { Data, Effect, Stream, Context, Option } from "effect";
+import { logger } from "../infra/logger";
 
 export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")<{
     id: string;
@@ -57,13 +58,13 @@ export const handleBleAdvertisement = <TError, TPeripheral extends Peripheral>(
         const deviceRegistry = yield* DeviceRegistryService;
 
         if (deviceRegistry.has(id) || unknownDevicesAllowed) {
+            const availabilityMessage = yield* handleDeviceAvailability(peripheral, deviceType);
             const deviceRegistryEntry = deviceRegistry.get(id);
 
             if (deviceRegistryEntry === null) {
                 return yield* new DeviceNotFoundError({ id });
             }
 
-            const availabilityMessage = yield* handleDeviceAvailability(peripheral, deviceType);
             const sensorDataMessage = yield* handleDeviceSensorData(peripheral, deviceRegistryEntry);
             const messages: DeviceMessage[] = [];
 
@@ -77,6 +78,7 @@ export const handleBleAdvertisement = <TError, TPeripheral extends Peripheral>(
 
             return messages;
         }
+
         return [];
     });
 

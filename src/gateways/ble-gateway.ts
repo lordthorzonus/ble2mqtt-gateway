@@ -6,13 +6,13 @@ import {
     isMiFloraPeripheral,
     makeMiFloraDeviceRegistry,
     mifloraGatewayId,
-    makeMiFloraGateway
-
+    makeMiFloraGateway,
 } from "./miflora/miflora-gateway";
 import { Effect, Stream, Option, pipe, Data } from "effect";
 import { DeviceRegistry } from "./device-registry";
 import { ruuviTagManufacturerId } from "./ruuvitag/ruuvitag-parser/ruuvitag-validator";
 import { DeviceRegistryService, streamUnavailableDevices } from "./abstract-gateway";
+import { logger } from "../infra/logger";
 
 export interface Gateway {
     mapMessage: MapMessage;
@@ -56,15 +56,15 @@ const makeUnavailableDevicesStream = (gateways: Map<number, Gateway>): Stream.St
 const handleBlePeripheralMessage = (
     peripheral: Peripheral,
     configuredGateways: Map<number, Gateway>
-): Stream.Stream<DeviceMessage, GatewayError> =>
+): Option.Option<Effect.Effect<Iterable<DeviceMessage>, GatewayError>> =>
     pipe(
         peripheral,
         resolveGatewayId,
         Option.flatMap((gatewayId) => Option.fromNullable(configuredGateways.get(gatewayId))),
         Option.match({
-            onNone: () => Stream.make(),
+            onNone: () => Option.none(),
             onSome: (gateway) =>
-                Stream.fromIterableEffect(
+                Option.some(
                     Effect.provideService(gateway.mapMessage(peripheral), DeviceRegistryService, gateway.deviceRegistry)
                 ),
         })
@@ -81,6 +81,7 @@ export const makeGateway = (
             mapMessage: ruuviGateway,
             deviceRegistry: makeRuuvitagDeviceRegistry(config.ruuvitag),
         });
+        logger.info("configured gateway to work with RuuviTags");
     }
 
     if (config.miflora !== undefined) {
@@ -89,11 +90,16 @@ export const makeGateway = (
             mapMessage: miFloraGateway,
             deviceRegistry: makeMiFloraDeviceRegistry(config.miflora),
         });
+
+        logger.info("configured gateway to work with MiFlora");
     }
 
     return (peripheralStream: Stream.Stream<Peripheral>) =>
         peripheralStream.pipe(
-            Stream.flatMap((peripheral) => handleBlePeripheralMessage(peripheral, configuredGateways)),
+            Stream.map((peripheral) => handleBlePeripheralMessage(peripheral, configuredGateways)),
+            Stream.filter(Option.isSome),
+            Stream.mapEffect((option) => option.value),
+            Stream.flatMap((deviceMessages) => Stream.fromIterable(deviceMessages)),
             Stream.merge(makeUnavailableDevicesStream(configuredGateways))
         );
 };

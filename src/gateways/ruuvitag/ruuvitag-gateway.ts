@@ -6,6 +6,7 @@ import { Config } from "../../config";
 import { DeviceRegistryService, handleBleAdvertisement, DeviceNotFoundError } from "../abstract-gateway";
 import { Data, Effect } from "effect";
 import { GatewayError } from "../ble-gateway";
+import { logger } from "../../infra/logger";
 
 export class PeripheralWithoutManufacturerDataError extends Data.TaggedError("PeripheralWithoutManufacturerDataError")<{
     peripheral: Peripheral;
@@ -17,7 +18,6 @@ const validatePeripheral = (
     if (peripheral.advertisement.manufacturerData === undefined) {
         return new PeripheralWithoutManufacturerDataError({ peripheral });
     }
-
     return Effect.succeed(peripheral as PeripheralWithManufacturerData);
 };
 
