@@ -28,7 +28,9 @@ declare module "@abandonware/noble" {
     }
 
     interface PeripheralWithManufacturerData extends Peripheral {
-        advertisement: Required<Advertisement>;
+        advertisement: Omit<Advertisement, "manufacturerData"> & {
+            manufacturerData: Buffer;
+        };
     }
 
     export {

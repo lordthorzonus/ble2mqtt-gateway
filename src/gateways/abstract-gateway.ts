@@ -1,9 +1,95 @@
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral, PeripheralWithManufacturerData } from "@abandonware/noble";
 import { concat, EMPTY, map, Observable } from "rxjs";
 import { DeviceAvailabilityMessage, DeviceSensorMessage, DeviceType } from "../types";
 import { generateAvailabilityMessage } from "./message-generators";
 import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry";
 import { Gateway } from "./ble-gateway";
+import { Data, Effect, Stream, Context, Option } from "effect";
+
+export type DeviceMessage = DeviceSensorMessage | DeviceAvailabilityMessage;
+
+export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")<{
+    id: string;
+}> {}
+
+export class DeviceRegistryService extends Context.Tag("DeviceRegistryService")<
+    DeviceRegistryService,
+    DeviceRegistry
+>() {}
+
+const shouldDeviceAvailabilityBeBroadcast = (deviceRegistryEntry: DeviceRegistryEntry) =>
+    deviceRegistryEntry.availability !== deviceRegistryEntry.lastPublishedAvailability;
+
+const handleDeviceAvailability = (
+    peripheral: Peripheral,
+    deviceType: DeviceType
+): Effect.Effect<Option.Option<DeviceAvailabilityMessage>, DeviceNotFoundError, DeviceRegistryService> =>
+    Effect.gen(function* () {
+        const id = peripheral.uuid;
+        const deviceRegistry = yield* DeviceRegistryService;
+
+        if (!deviceRegistry.has(id)) {
+            deviceRegistry.registerUnknownDevice(peripheral, deviceType);
+        }
+
+        deviceRegistry.registerFoundAdvertisement(id);
+        const device = deviceRegistry.get(id);
+
+        if (device === null) {
+            return yield* Effect.fail(new DeviceNotFoundError({ id }));
+        }
+
+        if (shouldDeviceAvailabilityBeBroadcast(device)) {
+            deviceRegistry.registerDeviceStatusPublished(id);
+            return Option.some(generateAvailabilityMessage(device, "online", peripheral));
+        }
+
+        return Option.none();
+    });
+
+export const handleBleAdvertisement = <TError>(
+    peripheral: PeripheralWithManufacturerData,
+    deviceType: DeviceType,
+    unknownDevicesAllowed: boolean,
+    handleDeviceSensorData: (
+        peripheral: PeripheralWithManufacturerData,
+        deviceRegistryEntry: DeviceRegistryEntry
+    ) => Effect.Effect<DeviceSensorMessage, TError, DeviceRegistryService>
+): Effect.Effect<Iterable<DeviceMessage>, DeviceNotFoundError | TError, DeviceRegistryService> =>
+    Effect.gen(function* () {
+        const id = peripheral.uuid;
+        const deviceRegistry = yield* DeviceRegistryService;
+
+        if (deviceRegistry.has(id) || unknownDevicesAllowed) {
+            const deviceRegistryEntry = deviceRegistry.get(id);
+
+            if (deviceRegistryEntry === null) {
+                return yield* Effect.fail(new DeviceNotFoundError({ id }));
+            }
+
+            const availabilityMessage = yield* handleDeviceAvailability(peripheral, deviceType);
+            const sensorDataMessage = yield* handleDeviceSensorData(peripheral, deviceRegistryEntry);
+
+            if (Option.isSome(availabilityMessage)) {
+                return [availabilityMessage.value, sensorDataMessage];
+            }
+
+            return [sensorDataMessage];
+        }
+        return [];
+    });
+
+export const streamUnavailableDevices = (): Effect.Effect<
+    Stream.Stream<DeviceAvailabilityMessage>,
+    never,
+    DeviceRegistryService
+> =>
+    Effect.gen(function* () {
+        const deviceRegistry = yield* DeviceRegistryService;
+        return deviceRegistry
+            .streamUnavailableDevices()
+            .pipe(Stream.map((device) => generateAvailabilityMessage(device, "offline")));
+    });
 
 export abstract class AbstractGateway implements Gateway {
     protected readonly deviceRegistry: DeviceRegistry;

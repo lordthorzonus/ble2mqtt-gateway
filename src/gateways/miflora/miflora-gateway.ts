@@ -10,7 +10,19 @@ import { parseMiFloraPeripheralAdvertisement } from "./miflora-parser";
 import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer";
 
 export type ConfiguredMiFloraSensors = Required<Config["gateways"]>["miflora"]["devices"];
-const xiaomiId = 0x95fe;
+export const mifloraGatewayId = 0x95fe;
+
+export const isMiFloraPeripheral = (peripheral: Peripheral): boolean => {
+    const knownMiFloraDeviceNames = ["flower care", "flower mate"];
+    const MiFloraMacPrefix = "c4:7c:8d";
+    const deviceLocalName = peripheral.advertisement.localName ?? "";
+
+    return (
+        knownMiFloraDeviceNames.includes(deviceLocalName.toLowerCase()) ||
+        peripheral.address.startsWith(MiFloraMacPrefix)
+    );
+};
+
 export class MiFloraGateway extends AbstractGateway implements Gateway {
     private readonly sensorEventBuffer: MiFloraEventBuffer;
 
@@ -40,7 +52,7 @@ export class MiFloraGateway extends AbstractGateway implements Gateway {
     };
 
     public getGatewayId(): number {
-        return xiaomiId;
+        return mifloraGatewayId;
     }
 
     protected handleDeviceSensorData(peripheral: Peripheral): Observable<MifloraSensorMessage> {

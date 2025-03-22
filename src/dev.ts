@@ -1,11 +1,12 @@
 import { catchError, filter, mergeMap, retry } from "rxjs/operators";
 import { getConfiguration } from "./config";
 import { BleGateway } from "./gateways/ble-gateway";
-import { scan } from "./infra/ble-scanner";
+import { effectScan, scan } from "./infra/ble-scanner";
 import { logger } from "./infra/logger";
 import { DeviceType } from "./types";
 import { throwError } from "rxjs";
 import { homeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
+import { Stream, Effect } from "effect";
 
 const mode: string | undefined = process.argv[2];
 
@@ -18,15 +19,21 @@ if (mode === "ble") {
         logger.info("Filtering manufacturer id %s", filterManufacturerId);
     }
 
-    scan().subscribe((peripheral) => {
-        const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+    void Effect.runPromise(
+        effectScan().pipe(
+            Stream.runForEach((peripheral) =>
+                Effect.sync(() => {
+                    const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
 
-        if (filterManufacturerId && filterManufacturerId !== manufacturerId) {
-            return;
-        }
+                    if (filterManufacturerId && filterManufacturerId !== manufacturerId) {
+                        return;
+                    }
 
-        logger.info("Received BLE advertisement %s", peripheral);
-    });
+                    logger.info("Received BLE advertisement %s", peripheral);
+                })
+            )
+        )
+    );
 }
 
 if (mode === "gateway") {

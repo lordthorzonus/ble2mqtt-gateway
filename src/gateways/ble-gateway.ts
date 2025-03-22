@@ -6,7 +6,8 @@ import { BleGatewayMessage, DeviceAvailabilityMessage, DeviceSensorMessage } fro
 import { UnknownGateway } from "./unknown-gateway";
 import { scan } from "../infra/ble-scanner";
 import { filter, mergeWith } from "rxjs/operators";
-import { MiFloraGateway } from "./miflora/miflora-gateway";
+import { isMiFloraPeripheral, MiFloraGateway, mifloraGatewayId } from "./miflora/miflora-gateway";
+import { Effect, Stream } from "effect";
 
 export interface Gateway {
     handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceSensorMessage | DeviceAvailabilityMessage | null>;
@@ -15,6 +16,57 @@ export interface Gateway {
 
     getGatewayId(): number;
 }
+
+const resolveGatewayId = (peripheral: Peripheral): number | undefined => {
+    const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+
+    if (!manufacturerId && isMiFloraPeripheral(peripheral)) {
+        return mifloraGatewayId;
+    }
+
+    return manufacturerId;
+};
+
+// const makeGateway = (
+//     config: Config["gateways"]
+// ): ((peripheralStream: Stream.Stream<Peripheral>) => Stream.Stream<BleGatewayMessage>) => {
+//     const configuredGateways = new Map<number, Gateway>();
+//     const defaultGateway = new UnknownGateway();
+
+//     if (config.ruuvitag !== undefined) {
+//         const ruuviGateway = new RuuviTagGateway(
+//             config.ruuvitag.devices,
+//             config.ruuvitag.timeout,
+//             config.ruuvitag.allow_unknown
+//         );
+//         configuredGateways.set(ruuviGateway.getGatewayId(), ruuviGateway);
+//     }
+
+//     if (config.miflora !== undefined) {
+//         const miFloraGateway = new MiFloraGateway(config.miflora.devices, config.miflora.timeout);
+//         configuredGateways.set(miFloraGateway.getGatewayId(), miFloraGateway);
+//     }
+
+//     return (peripheralStream: Stream.Stream<Peripheral>) => {
+//         return peripheralStream.pipe(
+//             Stream.runForEach((peripheral) => {
+//                 const gatewayId = resolveGatewayId(peripheral);
+
+//                 if (!gatewayId) {
+//                     return defaultGateway.handleBleAdvertisement();
+//                 }
+
+//                 const gateway = configuredGateways.get(gatewayId);
+
+//                 if (!gateway) {
+//                     return defaultGateway.handleBleAdvertisement(peripheral);
+//                 }
+
+//                 return gateway.handleBleAdvertisement(peripheral);
+//             })
+//         );
+//     };
+// };
 
 export class BleGateway {
     private readonly configuredGateways: Map<number, Gateway>;

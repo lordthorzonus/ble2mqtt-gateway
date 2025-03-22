@@ -3,6 +3,8 @@ import { from, interval, map, mergeMap, Observable } from "rxjs";
 import { filter } from "rxjs/operators";
 import { Peripheral } from "@abandonware/noble";
 import { DateTime } from "luxon";
+import { Stream } from "effect";
+import { Schedule } from "effect";
 
 export interface DeviceSettings {
     device: Device;
@@ -115,17 +117,15 @@ export class DeviceRegistry {
         return difference > device.timeout;
     }
 
-    public observeUnavailableDevices(): Observable<DeviceRegistryEntry> {
-        return interval(10000).pipe(
-            mergeMap(() => {
-                return from(this.devices.values()).pipe(
-                    filter((device) => DeviceRegistry.isDeviceUnavailable(device)),
-                    filter((device) => device.availability === "online"),
-                    map((device) => {
-                        return this.registerDeviceAsUnavailable(device);
-                    })
-                );
-            })
+    public streamUnavailableDevices(): Stream.Stream<DeviceRegistryEntry> {
+        return Stream.fromSchedule(Schedule.spaced(10000)).pipe(
+            Stream.flatMap(() =>
+                Stream.fromIterable(this.devices.values()).pipe(
+                    Stream.filter((device) => DeviceRegistry.isDeviceUnavailable(device)),
+                    Stream.filter((device) => device.availability === "online"),
+                    Stream.map((device) => this.registerDeviceAsUnavailable(device))
+                )
+            )
         );
     }
 }
