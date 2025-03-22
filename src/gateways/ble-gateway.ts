@@ -1,35 +1,36 @@
 import { Config } from "../config";
-import {
-    makeRuuvitagDeviceRegistry,
-    makeRuuvitagGateway,
-    PeripheralWithoutManufacturerDataError,
-} from "./ruuvitag/ruuvitag-gateway";
+import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag/ruuvitag-gateway";
 import { Peripheral } from "@abandonware/noble";
-import { merge, mergeMap, Observable } from "rxjs";
-import { BleGatewayMessage, DeviceAvailabilityMessage, DeviceMessage, DeviceSensorMessage } from "../types";
-import { UnknownGateway } from "./unknown-gateway";
-import { scan } from "../infra/ble-scanner";
-import { filter, mergeWith } from "rxjs/operators";
-import { isMiFloraPeripheral, MiFloraGateway, mifloraGatewayId } from "./miflora/miflora-gateway";
+import { DeviceAvailabilityMessage, DeviceMessage } from "../types";
+import {
+    isMiFloraPeripheral,
+    makeMiFloraDeviceRegistry,
+    mifloraGatewayId,
+    makeMiFloraGateway
+
+} from "./miflora/miflora-gateway";
 import { Effect, Stream, Option, pipe, Data } from "effect";
 import { DeviceRegistry } from "./device-registry";
 import { ruuviTagManufacturerId } from "./ruuvitag/ruuvitag-parser/ruuvitag-validator";
-import { DeviceNotFoundError, DeviceRegistryService, streamUnavailableDevices } from "./abstract-gateway";
-import { RuuviParsingError } from "./ruuvitag/ruuvitag-parser";
+import { DeviceRegistryService, streamUnavailableDevices } from "./abstract-gateway";
 
 export interface Gateway {
     mapMessage: MapMessage;
     deviceRegistry: DeviceRegistry;
 }
 
-const resolveGatewayId = (peripheral: Peripheral): number | undefined => {
+const resolveGatewayId = (peripheral: Peripheral): Option.Option<number> => {
     const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
 
     if (!manufacturerId && isMiFloraPeripheral(peripheral)) {
-        return mifloraGatewayId;
+        return Option.some(mifloraGatewayId);
     }
 
-    return manufacturerId;
+    if (manufacturerId) {
+        return Option.some(manufacturerId);
+    }
+
+    return Option.none();
 };
 
 export class GatewayError extends Data.TaggedError("GatewayError")<{
@@ -52,7 +53,24 @@ const makeUnavailableDevicesStream = (gateways: Map<number, Gateway>): Stream.St
     });
 };
 
-const makeGateway = (
+const handleBlePeripheralMessage = (
+    peripheral: Peripheral,
+    configuredGateways: Map<number, Gateway>
+): Stream.Stream<DeviceMessage, GatewayError> =>
+    pipe(
+        peripheral,
+        resolveGatewayId,
+        Option.flatMap((gatewayId) => Option.fromNullable(configuredGateways.get(gatewayId))),
+        Option.match({
+            onNone: () => Stream.make(),
+            onSome: (gateway) =>
+                Stream.fromIterableEffect(
+                    Effect.provideService(gateway.mapMessage(peripheral), DeviceRegistryService, gateway.deviceRegistry)
+                ),
+        })
+    );
+
+export const makeGateway = (
     config: Config["gateways"]
 ): ((peripheralStream: Stream.Stream<Peripheral>) => Stream.Stream<DeviceMessage, GatewayError>) => {
     const configuredGateways = new Map<number, { mapMessage: MapMessage; deviceRegistry: DeviceRegistry }>();
@@ -65,44 +83,19 @@ const makeGateway = (
         });
     }
 
-    // if (config.miflora !== undefined) {
-    //     const miFloraGateway = new MiFloraGateway(config.miflora.devices, config.miflora.timeout);
-    //     configuredGateways.set(miFloraGateway.getGatewayId(), miFloraGateway);
-    // }
+    if (config.miflora !== undefined) {
+        const miFloraGateway = makeMiFloraGateway(config.miflora);
+        configuredGateways.set(mifloraGatewayId, {
+            mapMessage: miFloraGateway,
+            deviceRegistry: makeMiFloraDeviceRegistry(config.miflora),
+        });
+    }
 
-    return (peripheralStream: Stream.Stream<Peripheral>) => {
-        return Stream.merge(
-            peripheralStream.pipe(
-                Stream.flatMap((peripheral) => {
-                    const gatewayId = resolveGatewayId(peripheral);
-
-                    if (!gatewayId) {
-                        return Stream.make(Option.none());
-                    }
-
-                    const gateway = configuredGateways.get(gatewayId);
-
-                    if (!gateway) {
-                        return Stream.make(Option.none());
-                    }
-
-                    return pipe(
-                        Stream.fromIterableEffect(
-                            Effect.provideService(
-                                gateway.mapMessage(peripheral),
-                                DeviceRegistryService,
-                                gateway.deviceRegistry
-                            )
-                        ),
-                        Stream.map((message) => Option.some(message))
-                    );
-                }),
-                Stream.filter(Option.isSome),
-                Stream.map((option) => option.value)
-            ),
-            makeUnavailableDevicesStream(configuredGateways)
+    return (peripheralStream: Stream.Stream<Peripheral>) =>
+        peripheralStream.pipe(
+            Stream.flatMap((peripheral) => handleBlePeripheralMessage(peripheral, configuredGateways)),
+            Stream.merge(makeUnavailableDevicesStream(configuredGateways))
         );
-    };
 };
 
 // export class BleGateway {

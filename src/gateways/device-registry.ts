@@ -1,6 +1,4 @@
 import { Device, DeviceType } from "../types";
-import { from, interval, map, mergeMap, Observable } from "rxjs";
-import { filter } from "rxjs/operators";
 import { Peripheral } from "@abandonware/noble";
 import { DateTime } from "luxon";
 import { Stream } from "effect";

@@ -9,6 +9,7 @@ import {
     parseTemperatureEvent,
 } from "./parsing-strategies";
 import { logger } from "../../../infra/logger";
+import { Data, Effect, pipe } from "effect";
 
 const XiaomiServiceId = "fe95";
 
@@ -21,18 +22,24 @@ export enum MifloraMeasurementEventType {
     InvalidEvent = 9999,
 }
 
-const getMiFloraServiceData = (peripheral: Peripheral) => {
+export class InvalidMiFloraAdvertisementError extends Data.TaggedError("InvalidMiFloraAdvertisementError")<{
+    peripheral: Peripheral;
+}> {}
+
+export class UnsupportedMiFloraEventError extends Data.TaggedError("UnsupportedMiFloraEventError")<{
+    eventType: number;
+}> {}
+
+export type MiFloraParsingError = InvalidMiFloraAdvertisementError | UnsupportedMiFloraEventError;
+
+const getMiFloraServiceData = (peripheral: Peripheral): Effect.Effect<Buffer, InvalidMiFloraAdvertisementError> => {
     const xiaomiService = peripheral.advertisement.serviceData.find((service) => service.uuid === XiaomiServiceId);
 
     if (!xiaomiService) {
-        throw new Error(
-            `Not a valid MiFlora device advertisement. Could not find a service with uuid: "${XiaomiServiceId}". Advertisement: ${JSON.stringify(
-                peripheral.advertisement
-            )}`
-        );
+        return new InvalidMiFloraAdvertisementError({ peripheral });
     }
 
-    return xiaomiService.data;
+    return Effect.succeed(xiaomiService.data);
 };
 
 export type SupportedMiFloraMeasurements =
@@ -81,20 +88,26 @@ const parseMiFloraEventType = (data: Buffer, peripheral: Peripheral) => {
     }
 };
 
-const resolveMiFloraParsingStrategy = (data: Buffer, peripheral: Peripheral) => {
+const resolveMiFloraParsingStrategy = (
+    data: Buffer,
+    peripheral: Peripheral
+): Effect.Effect<MiFloraMeasurementEventParsingStrategy, UnsupportedMiFloraEventError> => {
     const eventType = parseMiFloraEventType(data, peripheral);
     const parsingStrategy = MiFloraMeasurementEventParsingStrategyMap.get(eventType);
 
     if (!parsingStrategy) {
-        throw new Error(`Unsupported MiFlora event got: ${eventType}`);
+        return new UnsupportedMiFloraEventError({ eventType });
     }
 
-    return parsingStrategy;
+    return Effect.succeed(parsingStrategy);
 };
 
-export const parseMiFloraPeripheralAdvertisement = (peripheral: Peripheral): SupportedMiFloraMeasurements => {
-    const serviceData = getMiFloraServiceData(peripheral);
-    const parsingStrategy = resolveMiFloraParsingStrategy(serviceData, peripheral);
+export const parseMiFloraPeripheralAdvertisement = (
+    peripheral: Peripheral
+): Effect.Effect<SupportedMiFloraMeasurements, MiFloraParsingError> =>
+    Effect.gen(function* () {
+        const serviceData = yield* getMiFloraServiceData(peripheral);
+        const parsingStrategy = yield* resolveMiFloraParsingStrategy(serviceData, peripheral);
 
-    return parsingStrategy(serviceData);
-};
+        return yield* Effect.succeed(parsingStrategy(serviceData));
+    });

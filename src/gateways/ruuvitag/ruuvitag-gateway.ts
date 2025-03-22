@@ -39,9 +39,9 @@ export const makeRuuvitagDeviceRegistry = (
 export const makeRuuvitagGateway =
     (ruuviTagSettings: Required<Config["gateways"]>["ruuvitag"]) =>
     (peripheral: Peripheral): Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService> =>
-        Effect.flatMap(validatePeripheral(peripheral), (peripheral) =>
+        Effect.flatMap(validatePeripheral(peripheral), (p) =>
             handleBleAdvertisement(
-                peripheral,
+                p,
                 DeviceType.Ruuvitag,
                 ruuviTagSettings.allow_unknown,
                 transformPeripheralAdvertisementToSensorDataDeviceMessage

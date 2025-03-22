@@ -43,14 +43,14 @@ const handleDeviceAvailability = (
         return Option.none();
     });
 
-export const handleBleAdvertisement = <TError>(
-    peripheral: PeripheralWithManufacturerData,
+export const handleBleAdvertisement = <TError, TPeripheral extends Peripheral>(
+    peripheral: TPeripheral,
     deviceType: DeviceType,
     unknownDevicesAllowed: boolean,
     handleDeviceSensorData: (
-        peripheral: PeripheralWithManufacturerData,
+        peripheral: TPeripheral,
         deviceRegistryEntry: DeviceRegistryEntry
-    ) => Effect.Effect<DeviceSensorMessage, TError, DeviceRegistryService>
+    ) => Effect.Effect<Option.Option<DeviceSensorMessage>, TError, DeviceRegistryService>
 ): Effect.Effect<Iterable<DeviceMessage>, DeviceNotFoundError | TError, DeviceRegistryService> =>
     Effect.gen(function* () {
         const id = peripheral.uuid;
@@ -65,12 +65,17 @@ export const handleBleAdvertisement = <TError>(
 
             const availabilityMessage = yield* handleDeviceAvailability(peripheral, deviceType);
             const sensorDataMessage = yield* handleDeviceSensorData(peripheral, deviceRegistryEntry);
+            const messages: DeviceMessage[] = [];
 
             if (Option.isSome(availabilityMessage)) {
-                return [availabilityMessage.value, sensorDataMessage];
+                messages.push(availabilityMessage.value);
             }
 
-            return [sensorDataMessage];
+            if (Option.isSome(sensorDataMessage)) {
+                messages.push(sensorDataMessage.value);
+            }
+
+            return messages;
         }
         return [];
     });

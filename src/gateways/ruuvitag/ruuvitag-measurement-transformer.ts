@@ -8,7 +8,7 @@ import { MessageType, DeviceType, RuuvitagSensorMessage } from "../../types";
 import { DateTime } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
 import { formatSensorValues } from "./ruuvitag-measurement-formatter";
-import { Effect, pipe } from "effect";
+import { Effect, Option, pipe } from "effect";
 
 export interface RuuviTag {
     macAddress: string;
@@ -21,12 +21,12 @@ const getSensorData = (data: Buffer): Effect.Effect<EnhancedRuuviTagSensorData, 
 export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
     peripheral: PeripheralWithManufacturerData,
     deviceRegistryEntry: DeviceRegistryEntry
-): Effect.Effect<RuuvitagSensorMessage, RuuviParsingError> =>
+): Effect.Effect<Option.Option<RuuvitagSensorMessage>, RuuviParsingError> =>
     Effect.gen(function* () {
         const sensorData = yield* getSensorData(peripheral.advertisement.manufacturerData);
         const macAddress = sensorData.macAddress ?? peripheral.address;
 
-        return {
+        return Option.some({
             id: uuid(),
             deviceType: DeviceType.Ruuvitag,
             device: {
@@ -40,5 +40,5 @@ export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
             time: DateTime.now(),
             type: MessageType.SensorData,
             payload: sensorData,
-        };
+        });
     });
