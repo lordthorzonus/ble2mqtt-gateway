@@ -2,7 +2,6 @@
 
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
-import eslintPluginPrettier from "eslint-plugin-prettier";
 import jestPlugin from "eslint-plugin-jest";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
@@ -24,7 +23,7 @@ export default tseslint.config(
     {
         rules: {
             "prettier/prettier": "error",
-            "@typescript-eslint/explicit-module-boundary-types": "error",
+            "@typescript-eslint/explicit-module-boundary-types": "off",
             "@typescript-eslint/restrict-template-expressions": "off",
             "@typescript-eslint/no-duplicate-enum-values": "off",
             "@typescript-eslint/no-unused-vars": [

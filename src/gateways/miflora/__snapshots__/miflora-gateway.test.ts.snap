@@ -83,22 +83,3 @@ exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability
   },
 ]
 `;
-
-exports[`MiFlora Gateway observeUnavailableDevices() should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
-{
-  "device": {
-    "friendlyName": "flower",
-    "id": "a",
-    "macAddress": "a",
-    "rssi": null,
-    "timeout": 30000,
-    "type": "miflora",
-  },
-  "id": "mock-uuid",
-  "payload": {
-    "state": "offline",
-  },
-  "time": Any<DateTime>,
-  "type": "availability",
-}
-`;

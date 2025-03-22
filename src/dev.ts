@@ -1,80 +1,104 @@
-import { catchError, filter, mergeMap, retry } from "rxjs/operators";
-import { getConfiguration } from "./config";
-import { BleGateway } from "./gateways/ble-gateway";
-import { scan } from "./infra/ble-scanner";
-import { logger } from "./infra/logger";
+import { makeBleGateway } from "./gateways/ble-gateway";
+import { scan, stopScanning } from "./infra/ble-scanner";
+import { Logger } from "./infra/logger";
 import { DeviceType } from "./types";
-import { throwError } from "rxjs";
-import { homeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
+import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
+import { Stream, Effect, Match, Layer } from "effect";
+import { Config } from "./config";
+import { NodeRuntime } from "@effect/platform-node";
 
-const mode: string | undefined = process.argv[2];
+const bleMode = Effect.gen(function* () {
+    const logger = yield* Logger;
 
-logger.info("Dev mode: %s", mode);
-
-if (mode === "ble") {
     const filterManufacturerId = Number(process.argv[3]);
 
     if (filterManufacturerId) {
         logger.info("Filtering manufacturer id %s", filterManufacturerId);
     }
 
-    scan().subscribe((peripheral) => {
-        const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+    return yield* scan().pipe(
+        Stream.tap((peripheral) =>
+            Effect.sync(() => {
+                const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
 
-        if (filterManufacturerId && filterManufacturerId !== manufacturerId) {
-            return;
-        }
+                if (filterManufacturerId && filterManufacturerId !== manufacturerId) {
+                    return;
+                }
 
-        logger.info("Received BLE advertisement %s", peripheral);
-    });
-}
+                logger.info("Received BLE advertisement %s", peripheral);
+            })
+        ),
+        Stream.runDrain
+    );
+});
 
-if (mode === "gateway") {
-    const config = getConfiguration();
-    const gateway = new BleGateway(config.gateways);
+const gatewayMode = Effect.gen(function* () {
+    const logger = yield* Logger;
+
     const filterDeviceType: DeviceType | undefined = process.argv[3] as DeviceType | undefined;
 
     if (filterDeviceType) {
         logger.info("Filtering device type %s", filterDeviceType);
     }
 
-    gateway.observeEvents().subscribe((message) => {
-        if (filterDeviceType && filterDeviceType !== message.device.type) {
-            return;
-        }
+    const bleGateway = yield* makeBleGateway();
 
-        logger.info("Received device message %s", message);
-    });
-}
+    return yield* scan().pipe(
+        bleGateway,
+        Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType),
+        Stream.tap((message) =>
+            Effect.sync(() => {
+                logger.info("Received Device message %s", JSON.stringify(message));
+            })
+        ),
+        Stream.runDrain
+    );
+});
 
-if (mode === "mqtt") {
-    const config = getConfiguration();
-    const gateway = new BleGateway(config.gateways);
+const mqttMode = Effect.gen(function* () {
+    const logger = yield* Logger;
+    const bleGateway = yield* makeBleGateway();
+    const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+
     const filterDeviceType: DeviceType | undefined = process.argv[3] as DeviceType | undefined;
 
     if (filterDeviceType) {
         logger.info("Filtering device type %s", filterDeviceType);
     }
 
-    const messages = gateway.observeEvents().pipe(
-        catchError((error: Error) => {
-            logger.error(error);
-            return throwError(() => error);
-        }),
-        retry({ delay: 1000, count: 10, resetOnSuccess: true }),
-        filter((message) => {
-            if (filterDeviceType && filterDeviceType !== message.device.type) {
-                return false;
-            }
+    return yield* scan().pipe(
+        bleGateway,
+        Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType),
+        Stream.flatMap((message) => homeAssistantMqttMessageProducer(message)),
+        Stream.tap((message) => Effect.sync(() => logger.info("Received MQTT message %s", JSON.stringify(message)))),
+        Stream.runDrain
+    );
+});
 
-            return true;
-        }),
-        mergeMap((message) => {
-            return homeAssistantMqttMessageProducer(message);
+const DevLive = Layer.mergeAll(Config.Default, Logger.Default);
+
+const devProgram = Effect.gen(function* () {
+    const logger = yield* Logger;
+    const mode: string | undefined = process.argv[2];
+
+    logger.info("Dev mode: %s", mode);
+
+    yield* Effect.addFinalizer(() =>
+        Effect.sync(() => {
+            logger.info("Stopping BLE scanner");
+            stopScanning();
         })
     );
 
-    messages.subscribe((message) => {
-        logger.info("Received MQTT message %s", message);
-    });
-}
+    const selectedMode = yield* Match.value(mode).pipe(
+        Match.when("ble", () => Effect.succeed(bleMode)),
+        Match.when("gateway", () => Effect.succeed(gatewayMode)),
+        Match.when("mqtt", () => Effect.succeed(mqttMode)),
+        Match.orElse((m) => Effect.fail(`Unknown mode ${m}`))
+    );
+
+    return yield* selectedMode;
+});
+
+const configuredDevProgram = Effect.provide(Effect.scoped(devProgram), DevLive);
+NodeRuntime.runMain(configuredDevProgram);

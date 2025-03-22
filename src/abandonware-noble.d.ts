@@ -27,17 +27,12 @@ declare module "@abandonware/noble" {
         rssi: number;
     }
 
-    interface PeripheralWithManufacturerData extends Peripheral {
-        advertisement: Required<Advertisement>;
-    }
-
     export {
         Advertisement,
         Characteristic,
         Descriptor,
         on,
         Peripheral,
-        PeripheralWithManufacturerData,
         removeAllListeners,
         removeListener,
         Service,

@@ -1,69 +1,49 @@
 import type { Peripheral } from "@abandonware/noble";
-import type { Gateway } from "./ble-gateway";
+import { DeviceType, MessageType } from "../types";
+import { Config, GlobalConfiguration } from "../config";
+import { Effect, Layer, Stream } from "effect";
 
-class MockGateway implements Gateway {
-    public readonly manufacturerId: number;
-
-    public mockHandleBleAdvertisement = jest.fn();
-    public mockObserveUnavailableDevices = jest.fn();
-
-    constructor(manufacturerId: number) {
-        this.manufacturerId = manufacturerId;
-    }
-
-    public getGatewayId(): number {
-        return this.manufacturerId;
-    }
-
-    public handleBleAdvertisement(
-        peripheral: Peripheral
-    ): Observable<DeviceSensorMessage | DeviceAvailabilityMessage | null> {
-        return this.mockHandleBleAdvertisement(peripheral);
-    }
-
-    public observeUnavailableDevices(): Observable<DeviceAvailabilityMessage> {
-        return this.mockObserveUnavailableDevices();
-    }
-}
-
-const mockRuuvitagGateway = new MockGateway(0x0499);
-const mockMiFloraGateway = new MockGateway(0x95fe);
-const mockMiFloraConstructor = jest.fn().mockImplementation(() => mockMiFloraGateway);
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-expect-error
-mockMiFloraConstructor.isMiFloraPeripheral = jest.fn().mockImplementation((peripheral: Peripheral) => {
-    return peripheral.uuid === "miflora";
-});
+const mockRuuvitagMapMessageFn = jest.fn();
+const mockMiFloraMapMessageFn = jest.fn();
+const mockRuuviUnavailableDevices = jest.fn();
+const mockMiFloraUnavailableDevices = jest.fn();
+const mockRuuviRegisterDeviceStatusPublished = jest.fn();
+const mockMiFloraRegisterDeviceStatusPublished = jest.fn();
 
 jest.mock("./ruuvitag/ruuvitag-gateway", () => {
     return {
         __esModule: true,
-        RuuviTagGateway: jest.fn().mockImplementation(() => mockRuuvitagGateway),
+        makeRuuvitagGateway: jest.fn().mockImplementation(() => mockRuuvitagMapMessageFn),
+        makeRuuvitagDeviceRegistry: jest.fn().mockImplementation(() => ({
+            getUnavailableDevices: mockRuuviUnavailableDevices,
+            registerDeviceStatusPublished: mockRuuviRegisterDeviceStatusPublished,
+        })),
+        ruuviTagManufacturerId: 0x0499,
     };
 });
 
 jest.mock("./miflora/miflora-gateway", () => {
     return {
         __esModule: true,
-        MiFloraGateway: mockMiFloraConstructor,
+        makeMiFloraGateway: jest.fn().mockImplementation(() => mockMiFloraMapMessageFn),
+        makeMiFloraDeviceRegistry: jest.fn().mockImplementation(() => ({
+            getUnavailableDevices: mockMiFloraUnavailableDevices,
+            registerDeviceStatusPublished: mockMiFloraRegisterDeviceStatusPublished,
+        })),
+        mifloraGatewayId: 0x95fe,
+        isMiFloraPeripheral: jest.fn().mockImplementation((peripheral) => peripheral.uuid === "miflora"),
     };
 });
-jest.mock("../infra/ble-scanner", () => ({
-    __esModule: true,
-    scan: jest.fn(),
-}));
 
-import { BleGateway } from "./ble-gateway";
-import { EMPTY, from, Observable, take, toArray } from "rxjs";
-import { DeviceAvailabilityMessage, DeviceSensorMessage, DeviceType, MessageType } from "../types";
-import { Config } from "../config";
-import { scan } from "../infra/ble-scanner";
-import { TestScheduler } from "rxjs/testing";
-
-const mockBleScanner = scan as jest.Mock;
+import { makeBleGateway } from "./ble-gateway";
+import { makeRuuvitagGateway, makeRuuvitagDeviceRegistry } from "./ruuvitag/ruuvitag-gateway";
+import { makeMiFloraGateway, makeMiFloraDeviceRegistry } from "./miflora/miflora-gateway";
+import { DateTime } from "luxon";
+import { Logger } from "../infra/logger";
+import { mockLogger } from "../test/test-context";
 
 describe("BLE Gateway", () => {
-    const validGatewayConfiguration: Config["gateways"] = {
+    const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
         base_topic: "something",
         ruuvitag: {
             allow_unknown: false,
@@ -85,23 +65,26 @@ describe("BLE Gateway", () => {
             ],
         },
     };
+
     const ruuviPeripheral = {
         advertisement: {
             manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
+            serviceData: [],
         },
         address: "aa:aa",
         rssi: 23,
         uuid: "aa:aa",
-    };
+    } as unknown as Peripheral;
 
     const unknownPeripheral = {
         advertisement: {
             manufacturerData: Buffer.from("11110512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
+            serviceData: [],
         },
         address: "bbb:bbb",
         rssi: 23,
         uuid: "bbb:bbb",
-    };
+    } as unknown as Peripheral;
 
     const mifloraPeripheral = {
         uuid: "miflora",
@@ -122,78 +105,212 @@ describe("BLE Gateway", () => {
         },
     };
 
-    afterEach(() => {
-        mockRuuvitagGateway.mockObserveUnavailableDevices.mockReset();
-        mockRuuvitagGateway.mockHandleBleAdvertisement.mockReset();
-        mockMiFloraGateway.mockObserveUnavailableDevices.mockReset();
-        mockMiFloraGateway.mockHandleBleAdvertisement.mockReset();
+    const ruuviTag1UnavailableMessage = {
+        type: MessageType.Availability,
+        device: {
+            friendlyName: "fridge",
+            id: "aa:aa",
+            macAddress: "aa:aa",
+            type: DeviceType.Ruuvitag,
+            rssi: null,
+            timeout: undefined,
+        },
+        payload: {
+            state: "offline",
+        },
+    };
+
+    const ruuviTag2UnavailableMessage = {
+        type: MessageType.Availability,
+        device: {
+            friendlyName: "storage",
+            id: "bb:bb",
+            macAddress: "bb:bb",
+            rssi: null,
+            timeout: undefined,
+            type: DeviceType.Ruuvitag,
+        },
+        payload: {
+            state: "offline",
+        },
+    };
+
+    const miFlora1UnavailableMessage = {
+        type: MessageType.Availability,
+        device: {
+            friendlyName: "plant",
+            id: "bb",
+            macAddress: "bb",
+            rssi: null,
+            timeout: undefined,
+            type: DeviceType.MiFlora,
+        },
+        payload: {
+            state: "offline",
+        },
+    };
+
+    const miFlora2UnavailableMessage = {
+        type: MessageType.Availability,
+        device: {
+            friendlyName: "plant2",
+            id: "cc",
+            macAddress: "cc",
+            rssi: null,
+            timeout: undefined,
+            type: DeviceType.MiFlora,
+        },
+        payload: {
+            state: "offline",
+        },
+    };
+
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    it("should use the correct gateway for ruuvitag and miflora ble advertisements", (done) => {
-        const gateway = new BleGateway(validGatewayConfiguration);
-        mockBleScanner.mockReturnValue(from([ruuviPeripheral, ruuviPeripheral, mifloraPeripheral]));
-        mockRuuvitagGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
-        mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
-        mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
-        mockMiFloraGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
+    const TestLayer = Layer.mergeAll(
+        Layer.succeed(Logger, Logger.make(mockLogger)),
+        Layer.succeed(
+            Config,
+            Config.make({
+                gateways: validGatewayConfiguration,
+                homeassistant: {
+                    discovery_topic: "test",
+                },
+                log_level: "debug",
+                decimal_precision: 2,
+                gateway_name: "test",
+                unavailable_devices_check_interval_ms: 1000,
+                gateway_version: "1.0.0",
+                mqtt: {
+                    host: "test",
+                    port: 1883,
+                    username: "test",
+                    password: "test",
+                    client_id: "test",
+                    protocol: "mqtt",
+                },
+            })
+        )
+    );
 
-        gateway
-            .observeEvents()
-            .pipe(take(3), toArray())
-            .subscribe((messages) => {
-                expect(messages).toEqual([handledMessage, handledMessage, handledMessage]);
-                expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledTimes(2);
-                expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(ruuviPeripheral);
-                expect(mockMiFloraGateway.mockHandleBleAdvertisement).toHaveBeenCalledTimes(1);
-                expect(mockMiFloraGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(mifloraPeripheral);
-                done();
-            });
-    });
+    it("should use the correct gateway for ruuvitag and miflora ble advertisements", async () => {
+        mockRuuviUnavailableDevices.mockReturnValue([]);
+        mockMiFloraUnavailableDevices.mockReturnValue([]);
 
-    it("should filter away unknown advertisements", (done) => {
-        const gateway = new BleGateway(validGatewayConfiguration);
-        mockBleScanner.mockReturnValue(
-            from([ruuviPeripheral, unknownPeripheral, ruuviPeripheral, unknownPeripheral, unknownPeripheral])
+        mockRuuvitagMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+        mockMiFloraMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+
+        const program = Effect.gen(function* () {
+            const bleGateway = yield* makeBleGateway();
+            const eventStream = bleGateway(Stream.fromIterable([ruuviPeripheral, ruuviPeripheral, mifloraPeripheral]));
+            return yield* Stream.runCollect(Stream.take(eventStream, 3));
+        });
+
+        const messages = Array.from(await Effect.runPromise(Effect.provide(program, TestLayer)));
+
+        expect(messages).toHaveLength(3);
+        expect(messages).toEqual([handledMessage, handledMessage, handledMessage]);
+
+        expect(mockRuuvitagMapMessageFn).toHaveBeenCalledTimes(2);
+        expect(mockRuuvitagMapMessageFn).toHaveBeenCalledWith(ruuviPeripheral);
+        expect(mockMiFloraMapMessageFn).toHaveBeenCalledTimes(1);
+        expect(mockMiFloraMapMessageFn).toHaveBeenCalledWith(mifloraPeripheral);
+
+        expect(makeRuuvitagGateway).toHaveBeenCalledWith(validGatewayConfiguration.ruuvitag);
+        expect(makeRuuvitagDeviceRegistry).toHaveBeenCalledWith(
+            validGatewayConfiguration.ruuvitag,
+            expect.objectContaining({ defaultDecimalPrecision: expect.any(Number) })
         );
-        mockRuuvitagGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
-        mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(EMPTY);
-        mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
-
-        gateway
-            .observeEvents()
-            .pipe(take(5), toArray())
-            .subscribe((messages) => {
-                expect(messages).toEqual([handledMessage, handledMessage]);
-                expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledTimes(2);
-                expect(mockRuuvitagGateway.mockHandleBleAdvertisement).toHaveBeenCalledWith(ruuviPeripheral);
-                done();
-            });
+        expect(makeMiFloraGateway).toHaveBeenCalledWith(validGatewayConfiguration.miflora);
+        expect(makeMiFloraDeviceRegistry).toHaveBeenCalledWith(
+            validGatewayConfiguration.miflora,
+            expect.objectContaining({ defaultDecimalPrecision: expect.any(Number) })
+        );
     });
 
-    it("should also allow to observe unavailable device messages from gateways", (done) => {
-        mockBleScanner.mockReturnValue(from([ruuviPeripheral, ruuviPeripheral]));
-        mockRuuvitagGateway.mockObserveUnavailableDevices.mockReturnValue(from(["ruuvitag1", "ruuvitag2"]));
-        mockMiFloraGateway.mockObserveUnavailableDevices.mockReturnValue(from(["miflora1", "miflora2"]));
-        mockRuuvitagGateway.mockHandleBleAdvertisement.mockReturnValue(from([handledMessage]));
+    it("should filter away unknown advertisements", async () => {
+        const peripherals = [ruuviPeripheral, unknownPeripheral, unknownPeripheral, unknownPeripheral, ruuviPeripheral];
 
-        const gateway = new BleGateway(validGatewayConfiguration);
+        mockRuuviUnavailableDevices.mockReturnValue([]);
+        mockMiFloraUnavailableDevices.mockReturnValue([]);
 
-        const testScheduler = new TestScheduler((actual, expected) => {
-            expect(actual).toEqual(expected);
+        mockRuuvitagMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+        mockMiFloraMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+
+        const program = Effect.gen(function* () {
+            const bleGateway = yield* makeBleGateway();
+            const eventStream = bleGateway(Stream.fromIterable(peripherals));
+            return yield* Stream.runCollect(Stream.take(eventStream, 2));
         });
 
-        testScheduler.run((helpers) => {
-            helpers.expectObservable(gateway.observeEvents().pipe(take(6))).toBe("(abcdef|)", {
-                a: handledMessage,
-                b: handledMessage,
-                c: "ruuvitag1",
-                d: "ruuvitag2",
-                e: "miflora1",
-                f: "miflora2",
-            });
-            done();
+        const messages = Array.from(await Effect.runPromise(Effect.provide(program, TestLayer)));
+
+        expect(messages).toHaveLength(2);
+        expect(messages).toEqual([handledMessage, handledMessage]);
+
+        expect(mockRuuvitagMapMessageFn).toHaveBeenCalledTimes(2);
+        expect(mockRuuvitagMapMessageFn).toHaveBeenCalledWith(ruuviPeripheral);
+    });
+
+    it("should also allow to observe unavailable device messages from gateways", async () => {
+        const peripherals = [ruuviPeripheral, ruuviPeripheral];
+
+        mockRuuviUnavailableDevices.mockReturnValue([ruuviTag1UnavailableMessage, ruuviTag2UnavailableMessage]);
+        mockMiFloraUnavailableDevices.mockReturnValue([miFlora1UnavailableMessage, miFlora2UnavailableMessage]);
+
+        mockRuuvitagMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+        mockMiFloraMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+
+        const program = Effect.gen(function* () {
+            const bleGateway = yield* makeBleGateway();
+            const eventStream = bleGateway(Stream.fromIterable(peripherals));
+            return yield* Stream.runCollect(Stream.take(eventStream, 6));
         });
 
-        return;
+        const messages = Array.from(await Effect.runPromise(Effect.provide(program, TestLayer)));
+
+        expect(messages).toHaveLength(6);
+        expect(messages).toEqual(
+            expect.arrayContaining([expect.objectContaining(handledMessage), expect.objectContaining(handledMessage)])
+        );
+        expect(messages[2]).toEqual({
+            ...ruuviTag1UnavailableMessage,
+            id: expect.any(String),
+            time: expect.any(DateTime),
+        });
+        expect(messages[3]).toEqual({
+            ...ruuviTag2UnavailableMessage,
+            id: expect.any(String),
+            time: expect.any(DateTime),
+        });
+        expect(messages[4]).toEqual({
+            ...miFlora1UnavailableMessage,
+            id: expect.any(String),
+            time: expect.any(DateTime),
+        });
+        expect(messages[5]).toEqual({
+            ...miFlora2UnavailableMessage,
+            id: expect.any(String),
+            time: expect.any(DateTime),
+        });
+
+        expect(mockRuuviRegisterDeviceStatusPublished).toHaveBeenNthCalledWith(
+            1,
+            ruuviTag1UnavailableMessage.device.id
+        );
+        expect(mockRuuviRegisterDeviceStatusPublished).toHaveBeenNthCalledWith(
+            2,
+            ruuviTag2UnavailableMessage.device.id
+        );
+        expect(mockMiFloraRegisterDeviceStatusPublished).toHaveBeenNthCalledWith(
+            1,
+            miFlora1UnavailableMessage.device.id
+        );
+        expect(mockMiFloraRegisterDeviceStatusPublished).toHaveBeenNthCalledWith(
+            2,
+            miFlora2UnavailableMessage.device.id
+        );
     });
 });

@@ -5,34 +5,21 @@ import {
     HomeAssistantDeviceClass,
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
-    HomeAssistantSensorConfigurationForDeviceType,
     MessageType,
     MqttMessage,
 } from "../../types";
 import { ruuviTagSensorConfiguration } from "./device-discoverability-configurations/ruuvitag";
 import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../mqtt-topic-factory";
-import { Observable } from "rxjs";
-import { getConfiguration } from "../../config";
 import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora";
 import { capitalize, snakeCase } from "lodash";
+import { Effect, Match, Stream } from "effect";
+import { Config, ConfigurationError, GlobalConfiguration } from "../../config";
 
-const config = getConfiguration();
-const homeAssistantTopicBase = config.homeassistant.discovery_topic;
-
-const bleDeviceHAConfigurationMap = new Map<DeviceType, HomeAssistantSensorConfigurationForDeviceType<DeviceType>>([
-    [DeviceType.Ruuvitag, ruuviTagSensorConfiguration],
-    [DeviceType.MiFlora, miFloraSensorConfiguration],
-]);
-
-const getHASensorConfiguration = <T extends DeviceType>(type: T): HomeAssistantSensorConfigurationForDeviceType<T> => {
-    const configuration = bleDeviceHAConfigurationMap.get(type);
-
-    if (!configuration) {
-        throw new Error("No configuration for given type");
-    }
-
-    return configuration as HomeAssistantSensorConfigurationForDeviceType<T>;
-};
+const getHASensorConfiguration = Match.type<DeviceType>().pipe(
+    Match.when(Match.is(DeviceType.Ruuvitag), () => ruuviTagSensorConfiguration),
+    Match.when(Match.is(DeviceType.MiFlora), () => miFloraSensorConfiguration),
+    Match.exhaustive
+);
 
 const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSensorConfiguration) =>
     `${snakeCase(deviceMessage.device.friendlyName)}_${configEntry.uniqueId}`;
@@ -94,15 +81,19 @@ interface NullPayloadDiscoveryPayload {
 
 type HADiscoveryPayload = SensorHADiscoveryPayload | BinarySensorHADiscoveryPayload | NullPayloadDiscoveryPayload;
 
-const getSuggestedDecimalPrecision = (configEntry: HomeAssistantSensorConfiguration): number | undefined =>
+const getSuggestedDecimalPrecision = (
+    configEntry: HomeAssistantSensorConfiguration,
+    globalConfig: { decimal_precision: number }
+): number | undefined =>
     configEntry.suggestedDecimalPrecision === undefined
-        ? config.decimal_precision
+        ? globalConfig.decimal_precision
         : (configEntry.suggestedDecimalPrecision ?? undefined);
 
 const getHaDiscoveryPayload = (
     propertyName: string,
     configEntry: HomeAssistantSensorConfiguration,
-    deviceMessage: DeviceAvailabilityMessage
+    deviceMessage: DeviceAvailabilityMessage,
+    globalConfig: GlobalConfiguration
 ): HADiscoveryPayload => {
     if (deviceMessage.payload.state === "offline") {
         return {
@@ -117,7 +108,7 @@ const getHaDiscoveryPayload = (
         entity_category: configEntry.entityCategory,
         object_id: getObjectID(deviceMessage, configEntry),
         unique_id: getObjectID(deviceMessage, configEntry),
-        availability_topic: getDeviceAvailabilityTopic(deviceMessage.device),
+        availability_topic: getDeviceAvailabilityTopic(deviceMessage.device, globalConfig.gateways.base_topic),
         availability_template: "{{ value_json.state }}",
         expire_after: deviceMessage.device.timeout / 1000,
         icon: configEntry.icon,
@@ -128,10 +119,10 @@ const getHaDiscoveryPayload = (
             identifiers: [deviceMessage.device.id, deviceMessage.device.macAddress],
         },
         value_template: configEntry.valueTemplate ?? `{{ value_json.${propertyName} | default('None') }}`,
-        state_topic: getDeviceStateTopic(deviceMessage.device),
+        state_topic: getDeviceStateTopic(deviceMessage.device, globalConfig.gateways.base_topic),
         origin: {
-            name: config.gateway_name,
-            sw_version: config.gateway_version,
+            name: globalConfig.gateway_name,
+            sw_version: globalConfig.gateway_version,
             support_url: "https://github.com/lordthorzonus/ble2mqtt-gateway",
         },
     };
@@ -144,7 +135,7 @@ const getHaDiscoveryPayload = (
                     ...commonDiscoveryPayload,
                     unit_of_measurement: configEntry.unitOfMeasurement,
                     state_class: configEntry.stateClass,
-                    suggested_display_precision: getSuggestedDecimalPrecision(configEntry),
+                    suggested_display_precision: getSuggestedDecimalPrecision(configEntry, globalConfig),
                 },
             } satisfies SensorHADiscoveryPayload;
         case HomeAssistantMQTTComponent.BinarySensor:
@@ -159,15 +150,18 @@ const getHaDiscoveryPayload = (
     }
 };
 
-function* haDiscoverAdapter(deviceMessage: DeviceAvailabilityMessage): Generator<MqttMessage> {
+function* haDiscoverAdapter(
+    deviceMessage: DeviceAvailabilityMessage,
+    config: GlobalConfiguration
+): Generator<MqttMessage> {
     const configuration = getHASensorConfiguration(deviceMessage.device.type);
 
     for (const [propertyName, configEntry] of Object.entries(configuration)) {
-        const haDiscoveryPayload = getHaDiscoveryPayload(propertyName, configEntry, deviceMessage);
+        const haDiscoveryPayload = getHaDiscoveryPayload(propertyName, configEntry, deviceMessage, config);
         const payload = haDiscoveryPayload.payload;
 
         const message: MqttMessage = {
-            topic: `${homeAssistantTopicBase}/${haDiscoveryPayload.component}/${deviceMessage.device.id}/${getObjectID(
+            topic: `${config.homeassistant.discovery_topic}/${haDiscoveryPayload.component}/${deviceMessage.device.id}/${getObjectID(
                 deviceMessage,
                 configEntry
             )}/config`,
@@ -179,33 +173,36 @@ function* haDiscoverAdapter(deviceMessage: DeviceAvailabilityMessage): Generator
     }
 }
 
-const generateAvailabilityMessage = (deviceMessage: DeviceMessage): MqttMessage => ({
+const generateAvailabilityMessage = (deviceMessage: DeviceMessage, config: GlobalConfiguration): MqttMessage => ({
     retain: true,
-    topic: getDeviceAvailabilityTopic(deviceMessage.device),
+    topic: getDeviceAvailabilityTopic(deviceMessage.device, config.gateways.base_topic),
     payload: JSON.stringify(deviceMessage.payload),
 });
 
-const isAvailabilityMessage = (deviceMessage: DeviceMessage): deviceMessage is DeviceAvailabilityMessage =>
-    deviceMessage.type === MessageType.Availability;
-
-const generateStateMessage = (deviceMessage: DeviceMessage): MqttMessage => ({
+const generateStateMessage = (deviceMessage: DeviceMessage, config: GlobalConfiguration): MqttMessage => ({
     retain: false,
-    topic: getDeviceStateTopic(deviceMessage.device),
+    topic: getDeviceStateTopic(deviceMessage.device, config.gateways.base_topic),
     payload: JSON.stringify({ ...deviceMessage.payload, time: deviceMessage.time, id: deviceMessage.id }),
 });
 
-export function homeAssistantMqttMessageProducer(deviceMessage: DeviceMessage): Observable<MqttMessage> {
-    return new Observable((subscriber) => {
-        if (isAvailabilityMessage(deviceMessage)) {
-            for (const message of haDiscoverAdapter(deviceMessage)) {
-                subscriber.next(message);
-            }
+export const makeHomeAssistantMqttMessageProducer = (): Effect.Effect<
+    (deviceMessage: DeviceMessage) => Stream.Stream<MqttMessage>,
+    ConfigurationError,
+    Config
+> =>
+    Effect.gen(function* () {
+        const config = yield* Config;
 
-            subscriber.next(generateAvailabilityMessage(deviceMessage));
-            subscriber.complete();
-        }
-
-        subscriber.next(generateStateMessage(deviceMessage));
-        subscriber.complete();
+        return Match.type<DeviceMessage>().pipe(
+            Match.when({ type: MessageType.Availability }, (message) =>
+                Stream.concat(
+                    Stream.fromIterable(haDiscoverAdapter(message, config)),
+                    Stream.make(generateAvailabilityMessage(message, config))
+                )
+            ),
+            Match.when({ type: MessageType.SensorData }, (message) =>
+                Stream.make(generateStateMessage(message, config))
+            ),
+            Match.exhaustive
+        );
     });
-}
