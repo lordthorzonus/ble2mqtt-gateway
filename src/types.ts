@@ -69,7 +69,6 @@ export interface DeviceAvailabilityMessage {
 }
 
 export type DeviceMessage = DeviceAvailabilityMessage | DeviceSensorMessage;
-export type BleGatewayMessage = DeviceMessage;
 
 export interface MqttMessage {
     topic: string;

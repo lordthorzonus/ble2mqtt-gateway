@@ -1,12 +1,8 @@
 import { Peripheral, PeripheralWithManufacturerData } from "@abandonware/noble";
-import { concat, EMPTY, map, Observable } from "rxjs";
-import { DeviceAvailabilityMessage, DeviceSensorMessage, DeviceType } from "../types";
+import { DeviceAvailabilityMessage, DeviceMessage, DeviceSensorMessage, DeviceType } from "../types";
 import { generateAvailabilityMessage } from "./message-generators";
 import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry";
-import { Gateway } from "./ble-gateway";
 import { Data, Effect, Stream, Context, Option } from "effect";
-
-export type DeviceMessage = DeviceSensorMessage | DeviceAvailabilityMessage;
 
 export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")<{
     id: string;
@@ -64,7 +60,7 @@ export const handleBleAdvertisement = <TError>(
             const deviceRegistryEntry = deviceRegistry.get(id);
 
             if (deviceRegistryEntry === null) {
-                return yield* Effect.fail(new DeviceNotFoundError({ id }));
+                return yield* new DeviceNotFoundError({ id });
             }
 
             const availabilityMessage = yield* handleDeviceAvailability(peripheral, deviceType);
@@ -79,82 +75,81 @@ export const handleBleAdvertisement = <TError>(
         return [];
     });
 
-export const streamUnavailableDevices = (): Effect.Effect<
+export const streamUnavailableDevices: Effect.Effect<
     Stream.Stream<DeviceAvailabilityMessage>,
     never,
     DeviceRegistryService
-> =>
-    Effect.gen(function* () {
-        const deviceRegistry = yield* DeviceRegistryService;
-        return deviceRegistry
-            .streamUnavailableDevices()
-            .pipe(Stream.map((device) => generateAvailabilityMessage(device, "offline")));
-    });
+> = Effect.gen(function* () {
+    const deviceRegistry = yield* DeviceRegistryService;
+    return deviceRegistry
+        .streamUnavailableDevices()
+        .pipe(Stream.map((device) => generateAvailabilityMessage(device, "offline")));
+});
 
-export abstract class AbstractGateway implements Gateway {
-    protected readonly deviceRegistry: DeviceRegistry;
-    protected readonly unknownDevicesAllowed: boolean;
-    protected readonly deviceType: DeviceType;
+// export abstract class AbstractGateway implements Gateway {
+//     protected readonly deviceRegistry: DeviceRegistry;
+//     protected readonly unknownDevicesAllowed: boolean;
+//     protected readonly deviceType: DeviceType;
 
-    protected constructor(deviceRegistry: DeviceRegistry, unknownDevicesAllowed: boolean, deviceType: DeviceType) {
-        this.deviceRegistry = deviceRegistry;
-        this.unknownDevicesAllowed = unknownDevicesAllowed;
-        this.deviceType = deviceType;
-    }
+//     protected constructor(deviceRegistry: DeviceRegistry, unknownDevicesAllowed: boolean, deviceType: DeviceType) {
+//         this.deviceRegistry = deviceRegistry;
+//         this.unknownDevicesAllowed = unknownDevicesAllowed;
+//         this.deviceType = deviceType;
+//     }
 
-    protected handleDeviceAvailability(peripheral: Peripheral): Observable<DeviceAvailabilityMessage> {
-        const id = peripheral.uuid;
-        return new Observable((subscriber) => {
-            if (!this.deviceRegistry.has(id)) {
-                this.deviceRegistry.registerUnknownDevice(peripheral, this.deviceType);
-            }
+//     protected handleDeviceAvailability(peripheral: Peripheral): Observable<DeviceAvailabilityMessage> {
+//         const id = peripheral.uuid;
+//         return new Observable((subscriber) => {
+//             if (!this.deviceRegistry.has(id)) {
+//                 this.deviceRegistry.registerUnknownDevice(peripheral, this.deviceType);
+//             }
 
-            this.deviceRegistry.registerFoundAdvertisement(id);
-            const device = this.getDeviceRegistryEntry(id);
+//             this.deviceRegistry.registerFoundAdvertisement(id);
+//             const device = this.getDeviceRegistryEntry(id);
 
-            if (AbstractGateway.shouldDeviceAvailabilityBeBroadcast(device)) {
-                subscriber.next(generateAvailabilityMessage(device, "online", peripheral));
-                this.deviceRegistry.registerDeviceStatusPublished(id);
-            }
+//             if (AbstractGateway.shouldDeviceAvailabilityBeBroadcast(device)) {
+//                 subscriber.next(generateAvailabilityMessage(device, "online", peripheral));
+//                 this.deviceRegistry.registerDeviceStatusPublished(id);
+//             }
 
-            subscriber.complete();
-        });
-    }
+//             subscriber.complete();
+//         });
+//     }
 
-    protected getDeviceRegistryEntry(id: string): DeviceRegistryEntry {
-        const device = this.deviceRegistry.get(id);
+//     protected getDeviceRegistryEntry(id: string): DeviceRegistryEntry {
+//         const device = this.deviceRegistry.get(id);
 
-        if (!device) {
-            throw new Error(`Could not find ${this.deviceType} from registry with id: "${id}"`);
-        }
+//         if (!device) {
+//             throw new Error(`Could not find ${this.deviceType} from registry with id: "${id}"`);
+//         }
 
-        return device;
-    }
+//         return device;
+//     }
 
-    private static shouldDeviceAvailabilityBeBroadcast(deviceRegistryEntry: DeviceRegistryEntry) {
-        return deviceRegistryEntry.availability !== deviceRegistryEntry.lastPublishedAvailability;
-    }
+//     private static shouldDeviceAvailabilityBeBroadcast(deviceRegistryEntry: DeviceRegistryEntry) {
+//         return deviceRegistryEntry.availability !== deviceRegistryEntry.lastPublishedAvailability;
+//     }
 
-    abstract getGatewayId(): number;
+//     abstract getGatewayId(): number;
 
-    public handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceSensorMessage | DeviceAvailabilityMessage> {
-        const id = peripheral.uuid;
+//     public handleBleAdvertisement(peripheral: Peripheral): Observable<DeviceSensorMessage | DeviceAvailabilityMessage> {
+//         const id = peripheral.uuid;
 
-        if (this.deviceRegistry.has(id) || this.unknownDevicesAllowed) {
-            return concat(this.handleDeviceAvailability(peripheral), this.handleDeviceSensorData(peripheral));
-        }
+//         if (this.deviceRegistry.has(id) || this.unknownDevicesAllowed) {
+//             return concat(this.handleDeviceAvailability(peripheral), this.handleDeviceSensorData(peripheral));
+//         }
 
-        return EMPTY;
-    }
+//         return EMPTY;
+//     }
 
-    protected abstract handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceSensorMessage>;
+//     protected abstract handleDeviceSensorData(peripheral: Peripheral): Observable<DeviceSensorMessage>;
 
-    public observeUnavailableDevices(): Observable<DeviceAvailabilityMessage> {
-        return this.deviceRegistry.observeUnavailableDevices().pipe(
-            map((device) => {
-                this.deviceRegistry.registerDeviceStatusPublished(device.device.id);
-                return generateAvailabilityMessage(device, "offline");
-            })
-        );
-    }
-}
+//     public observeUnavailableDevices(): Observable<DeviceAvailabilityMessage> {
+//         return this.deviceRegistry.observeUnavailableDevices().pipe(
+//             map((device) => {
+//                 this.deviceRegistry.registerDeviceStatusPublished(device.device.id);
+//                 return generateAvailabilityMessage(device, "offline");
+//             })
+//         );
+//     }
+// }

@@ -39,11 +39,11 @@ const DataFormatParsingStrategyMap = new Map<RuuvitagSensorProtocolDataFormat, R
     [RuuvitagSensorProtocolDataFormat.DataFormat5, DataFormat5ParsingStrategy],
 ]);
 
-class NotValidRuuviManufacturerIdError extends Data.TaggedError("NotValidRuuviManufacturerIdError")<{
+export class NotValidRuuviManufacturerIdError extends Data.TaggedError("NotValidRuuviManufacturerIdError")<{
     manufacturerId: number;
 }> {}
 
-class UnsupportedDataFormatError extends Data.TaggedError("UnsupportedDataFormatError")<{
+export class UnsupportedDataFormatError extends Data.TaggedError("UnsupportedDataFormatError")<{
     dataFormat: number;
 }> {}
 
