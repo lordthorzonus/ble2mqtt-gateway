@@ -26,7 +26,6 @@
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
         "dotenv": "16.4.7",
-        "effect": "2.4.10",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",

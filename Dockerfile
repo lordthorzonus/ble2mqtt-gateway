@@ -21,7 +21,7 @@ RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 
 COPY package*.json ./
-COPY tsconfig.json .eslintrc .prettierrc ./
+COPY tsconfig.json eslint.config.mjs  .prettierrc ./
 RUN npm ci --audit false
 
 COPY --chown=node:node  . ./
