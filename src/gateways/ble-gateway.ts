@@ -8,11 +8,11 @@ import {
     mifloraGatewayId,
     makeMiFloraGateway,
 } from "./miflora/miflora-gateway";
-import { Effect, Stream, Option, pipe, Data } from "effect";
+import { Effect, Stream, Option, Data, pipe } from "effect";
 import { DeviceRegistry } from "./device-registry";
 import { ruuviTagManufacturerId } from "./ruuvitag/ruuvitag-parser/ruuvitag-validator";
 import { DeviceRegistryService, streamUnavailableDevices } from "./abstract-gateway";
-import { logger } from "../infra/logger";
+import { Logger } from "../infra/logger";
 
 export interface Gateway {
     mapMessage: MapMessage;
@@ -38,9 +38,9 @@ export class GatewayError extends Data.TaggedError("GatewayError")<{
     message: string;
 }> {}
 
-type MapMessage = (
+export type MapMessage = (
     peripheral: Peripheral
-) => Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService>;
+) => Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService | Logger>;
 
 const makeUnavailableDevicesStream = (gateways: Map<number, Gateway>): Stream.Stream<DeviceAvailabilityMessage> => {
     const gatewaysArray = Array.from(gateways.values());
@@ -53,135 +53,65 @@ const makeUnavailableDevicesStream = (gateways: Map<number, Gateway>): Stream.St
     });
 };
 
-const handleBlePeripheralMessage = (
+const resolveGatewayForPeripheral = (
     peripheral: Peripheral,
     configuredGateways: Map<number, Gateway>
-): Option.Option<Effect.Effect<Iterable<DeviceMessage>, GatewayError>> =>
-    pipe(
-        peripheral,
-        resolveGatewayId,
-        Option.flatMap((gatewayId) => Option.fromNullable(configuredGateways.get(gatewayId))),
-        Option.match({
-            onNone: () => Option.none(),
-            onSome: (gateway) =>
-                Option.some(
-                    Effect.provideService(gateway.mapMessage(peripheral), DeviceRegistryService, gateway.deviceRegistry)
+): Option.Option<{
+    peripheral: Peripheral;
+    gateway: Gateway;
+}> =>
+    Option.gen(function* () {
+        const gatewayId = yield* resolveGatewayId(peripheral);
+        const gateway = yield* Option.fromNullable(configuredGateways.get(gatewayId));
+
+        return {
+            gateway,
+            peripheral,
+        };
+    });
+
+export const makeBleGateway = () =>
+    Effect.gen(function* () {
+        const configuredGateways = new Map<number, Gateway>();
+        const { config } = yield* Config;
+        const { logger } = yield* Logger;
+
+        const globalDefaults = {
+            defaultDecimalPrecision: config.decimal_precision,
+        };
+
+        if (config.gateways.ruuvitag !== undefined) {
+            const ruuviGateway = makeRuuvitagGateway(config.gateways.ruuvitag);
+            configuredGateways.set(ruuviTagManufacturerId, {
+                mapMessage: ruuviGateway,
+                deviceRegistry: makeRuuvitagDeviceRegistry(config.gateways.ruuvitag, globalDefaults),
+            });
+            logger.info("configured gateway to work with RuuviTags");
+        }
+
+        if (config.gateways.miflora !== undefined) {
+            const miFloraGateway = makeMiFloraGateway(config.gateways.miflora);
+            configuredGateways.set(mifloraGatewayId, {
+                mapMessage: miFloraGateway,
+                deviceRegistry: makeMiFloraDeviceRegistry(config.gateways.miflora, globalDefaults),
+            });
+
+            logger.info("configured gateway to work with MiFlora");
+        }
+
+        return (peripheralMessage: Peripheral): Stream.Stream<DeviceMessage, GatewayError, Logger> =>
+            pipe(
+                Stream.make(peripheralMessage),
+                Stream.filterMap((p) => resolveGatewayForPeripheral(p, configuredGateways)),
+                Stream.flatMap(({ peripheral, gateway }) =>
+                    Stream.fromIterableEffect(
+                        Effect.provideService(
+                            gateway.mapMessage(peripheral),
+                            DeviceRegistryService,
+                            gateway.deviceRegistry
+                        )
+                    )
                 ),
-        })
-    );
-
-export const makeGateway = (
-    config: Config["gateways"]
-): ((peripheralStream: Stream.Stream<Peripheral>) => Stream.Stream<DeviceMessage, GatewayError>) => {
-    const configuredGateways = new Map<number, { mapMessage: MapMessage; deviceRegistry: DeviceRegistry }>();
-
-    if (config.ruuvitag !== undefined) {
-        const ruuviGateway = makeRuuvitagGateway(config.ruuvitag);
-        configuredGateways.set(ruuviTagManufacturerId, {
-            mapMessage: ruuviGateway,
-            deviceRegistry: makeRuuvitagDeviceRegistry(config.ruuvitag),
-        });
-        logger.info("configured gateway to work with RuuviTags");
-    }
-
-    if (config.miflora !== undefined) {
-        const miFloraGateway = makeMiFloraGateway(config.miflora);
-        configuredGateways.set(mifloraGatewayId, {
-            mapMessage: miFloraGateway,
-            deviceRegistry: makeMiFloraDeviceRegistry(config.miflora),
-        });
-
-        logger.info("configured gateway to work with MiFlora");
-    }
-
-    return (peripheralStream: Stream.Stream<Peripheral>) =>
-        peripheralStream.pipe(
-            Stream.map((peripheral) => handleBlePeripheralMessage(peripheral, configuredGateways)),
-            Stream.filter(Option.isSome),
-            Stream.mapEffect((option) => option.value),
-            Stream.flatMap((deviceMessages) => Stream.fromIterable(deviceMessages)),
-            Stream.merge(makeUnavailableDevicesStream(configuredGateways))
-        );
-};
-
-// export class BleGateway {
-//     private readonly configuredGateways: Map<number, Gateway>;
-//     private readonly defaultGateway: Gateway = new UnknownGateway();
-//     private miFloraGatewayId?: number;
-
-//     constructor(config: Config["gateways"]) {
-//         this.configuredGateways = new Map();
-//         this.configureGateways(config);
-//     }
-
-//     public observeEvents(): Observable<BleGatewayMessage> {
-//         return this.scanBleAdvertisements().pipe(mergeWith(this.observeUnavailableDevices()));
-//     }
-
-//     private configureGateways(config: Config["gateways"]) {
-//         if (config.ruuvitag !== undefined) {
-//             const ruuviGateway = new RuuviTagGateway(
-//                 config.ruuvitag.devices,
-//                 config.ruuvitag.timeout,
-//                 config.ruuvitag.allow_unknown
-//             );
-//             this.configuredGateways.set(ruuviGateway.getGatewayId(), ruuviGateway);
-//         }
-
-//         if (config.miflora !== undefined) {
-//             const miFloraGateway = new MiFloraGateway(config.miflora.devices, config.miflora.timeout);
-//             this.miFloraGatewayId = miFloraGateway.getGatewayId();
-//             this.configuredGateways.set(miFloraGateway.getGatewayId(), miFloraGateway);
-//         }
-//     }
-
-//     private getGatewayId(peripheral: Peripheral) {
-//         const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
-
-//         if (!manufacturerId && MiFloraGateway.isMiFloraPeripheral(peripheral)) {
-//             return this.miFloraGatewayId;
-//         }
-
-//         return manufacturerId;
-//     }
-
-//     private resolveGateway(peripheral: Peripheral) {
-//         const gatewayId = this.getGatewayId(peripheral);
-
-//         if (!gatewayId) {
-//             return this.defaultGateway;
-//         }
-
-//         const gateway = this.configuredGateways.get(gatewayId);
-
-//         if (!gateway) {
-//             return this.defaultGateway;
-//         }
-
-//         return gateway;
-//     }
-
-//     private scanBleAdvertisements(): Observable<DeviceSensorMessage | DeviceAvailabilityMessage> {
-//         return scan().pipe(
-//             mergeMap((peripheral) => {
-//                 const gateway = this.resolveGateway(peripheral);
-//                 return gateway
-//                     .handleBleAdvertisement(peripheral)
-//                     .pipe(
-//                         filter(
-//                             (message): message is DeviceSensorMessage | DeviceAvailabilityMessage => message !== null
-//                         )
-//                     );
-//             })
-//         );
-//     }
-
-//     private observeUnavailableDevices(): Observable<DeviceAvailabilityMessage> {
-//         const gateways = Array.from(this.configuredGateways.values());
-//         return merge(
-//             ...gateways.map((gateway) => {
-//                 return gateway.observeUnavailableDevices();
-//             })
-//         );
-//     }
-// }
+                Stream.merge(makeUnavailableDevicesStream(configuredGateways))
+            );
+    });

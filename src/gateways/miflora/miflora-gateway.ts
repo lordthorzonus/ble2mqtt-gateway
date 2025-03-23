@@ -1,15 +1,15 @@
 import { GatewayError } from "../ble-gateway";
 import { Peripheral } from "@abandonware/noble";
 import { DeviceMessage, DeviceType } from "../../types";
-import { Config } from "../../config";
+import { MiFloraGatewayConfiguration } from "../../config";
 import { DeviceRegistryService, handleBleAdvertisement } from "../abstract-gateway";
 import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry";
 import { MiFloraEventBuffer } from "./miflora-event-buffer";
 import { parseMiFloraPeripheralAdvertisement } from "./miflora-parser";
 import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer";
 import { Effect, Option, pipe } from "effect";
+import { Logger } from "../../infra/logger";
 
-export type ConfiguredMiFloraSensors = Required<Config["gateways"]>["miflora"]["devices"];
 export const mifloraGatewayId = 0x95fe;
 
 export const isMiFloraPeripheral = (peripheral: Peripheral): boolean => {
@@ -23,7 +23,14 @@ export const isMiFloraPeripheral = (peripheral: Peripheral): boolean => {
     );
 };
 
-export const makeMiFloraDeviceRegistry = (miFloraSettings: Required<Config["gateways"]>["miflora"]): DeviceRegistry => {
+export type ConfiguredMiFloraSensors = MiFloraGatewayConfiguration["devices"];
+
+export const makeMiFloraDeviceRegistry = (
+    miFloraSettings: MiFloraGatewayConfiguration,
+    globalDefalts: {
+        defaultDecimalPrecision: number;
+    }
+): DeviceRegistry => {
     const deviceSettings = miFloraSettings.devices.map((sensor) => ({
         device: {
             id: sensor.id,
@@ -33,7 +40,9 @@ export const makeMiFloraDeviceRegistry = (miFloraSettings: Required<Config["gate
         timeout: sensor.timeout,
     }));
 
-    return new DeviceRegistry(deviceSettings, miFloraSettings.timeout);
+    const defaultDecimalPrecision = miFloraSettings.decimal_precision ?? globalDefalts.defaultDecimalPrecision;
+
+    return new DeviceRegistry(deviceSettings, miFloraSettings.timeout, defaultDecimalPrecision);
 };
 
 const handleMifloraBleAdvertisement = (miFloraEventBuffer: MiFloraEventBuffer) =>
@@ -56,8 +65,8 @@ const handleMifloraBleAdvertisement = (miFloraEventBuffer: MiFloraEventBuffer) =
     );
 
 export const makeMiFloraGateway =
-    (miFloraSettings: Required<Config["gateways"]>["miflora"]) =>
-    (peripheral: Peripheral): Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService> => {
+    (miFloraSettings: MiFloraGatewayConfiguration) =>
+    (peripheral: Peripheral): Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService | Logger> => {
         const sensorEventBuffer = new MiFloraEventBuffer(miFloraSettings.devices);
 
         return handleBleAdvertisement(
@@ -85,53 +94,3 @@ export const makeMiFloraGateway =
             })
         );
     };
-
-// export class MiFloraGateway extends AbstractGateway implements Gateway {
-//     private readonly sensorEventBuffer: MiFloraEventBuffer;
-
-//     constructor(miFloraSettings: ConfiguredMiFloraSensors, defaultTimeout: number) {
-//         const deviceSettings = miFloraSettings.map((sensor) => ({
-//             device: {
-//                 id: sensor.id,
-//                 type: DeviceType.MiFlora,
-//                 friendlyName: sensor.name,
-//             },
-//             timeout: sensor.timeout,
-//         }));
-//         super(new DeviceRegistry(deviceSettings, defaultTimeout), false, DeviceType.MiFlora);
-
-//         this.sensorEventBuffer = new MiFloraEventBuffer(miFloraSettings);
-//     }
-
-//     public static isMiFloraPeripheral = (peripheral: Peripheral): boolean => {
-//         const knownMiFloraDeviceNames = ["flower care", "flower mate"];
-//         const MiFloraMacPrefix = "c4:7c:8d";
-//         const deviceLocalName = peripheral.advertisement.localName ?? "";
-
-//         return (
-//             knownMiFloraDeviceNames.includes(deviceLocalName.toLowerCase()) ||
-//             peripheral.address.startsWith(MiFloraMacPrefix)
-//         );
-//     };
-
-//     public getGatewayId(): number {
-//         return mifloraGatewayId;
-//     }
-
-//     protected handleDeviceSensorData(peripheral: Peripheral): Observable<MifloraSensorMessage> {
-//         const id = peripheral.uuid;
-
-//         return new Observable<MifloraSensorMessage>((subscriber) => {
-//             const miFloraMeasurementEvent = parseMiFloraPeripheralAdvertisement(peripheral);
-//             const buffer = this.sensorEventBuffer.bufferMeasurementEvent(id, miFloraMeasurementEvent);
-
-//             if (this.sensorEventBuffer.isBufferReady(buffer)) {
-//                 const deviceRegistryEntry = this.getDeviceRegistryEntry(id);
-//                 subscriber.next(transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer));
-//                 this.sensorEventBuffer.clearBuffer(id);
-//             }
-
-//             subscriber.complete();
-//         });
-//     }
-// }

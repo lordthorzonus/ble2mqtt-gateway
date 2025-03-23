@@ -5,6 +5,7 @@ import { getConfiguration } from "./config";
 import { BleGateway } from "./gateways/ble-gateway";
 import { publish } from "./infra/mqtt-client";
 import { logger } from "./infra/logger";
+import "@zod-plugin/effect";
 
 process.stdin.resume();
 

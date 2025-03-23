@@ -15,15 +15,26 @@ export interface RuuviTag {
     id: string;
     rssi: number;
 }
-const getSensorData = (data: Buffer): Effect.Effect<EnhancedRuuviTagSensorData, RuuviParsingError> =>
-    pipe(data, parse, Effect.map(decorateRuuviTagSensorDataWithCalculatedValues), Effect.map(formatSensorValues));
+const getSensorData = (
+    data: Buffer,
+    decimalPrecision: number
+): Effect.Effect<EnhancedRuuviTagSensorData, RuuviParsingError> =>
+    pipe(
+        data,
+        parse,
+        Effect.map(decorateRuuviTagSensorDataWithCalculatedValues),
+        Effect.map((decoratedSensorValues) => formatSensorValues(decoratedSensorValues, decimalPrecision))
+    );
 
 export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
     peripheral: PeripheralWithManufacturerData,
     deviceRegistryEntry: DeviceRegistryEntry
 ): Effect.Effect<Option.Option<RuuvitagSensorMessage>, RuuviParsingError> =>
     Effect.gen(function* () {
-        const sensorData = yield* getSensorData(peripheral.advertisement.manufacturerData);
+        const sensorData = yield* getSensorData(
+            peripheral.advertisement.manufacturerData,
+            deviceRegistryEntry.decimalPrecision
+        );
         const macAddress = sensorData.macAddress ?? peripheral.address;
 
         return Option.some({

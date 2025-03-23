@@ -2,11 +2,10 @@ import { DeviceRegistry } from "../device-registry";
 import { Peripheral, PeripheralWithManufacturerData } from "@abandonware/noble";
 import { DeviceType, DeviceMessage } from "../../types";
 import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
-import { Config } from "../../config";
-import { DeviceRegistryService, handleBleAdvertisement, DeviceNotFoundError } from "../abstract-gateway";
+import { RuuviTagGatewayConfiguration } from "../../config";
+import { DeviceRegistryService, handleBleAdvertisement } from "../abstract-gateway";
 import { Data, Effect } from "effect";
-import { GatewayError } from "../ble-gateway";
-import { logger } from "../../infra/logger";
+import { GatewayError, MapMessage } from "../ble-gateway";
 
 export class PeripheralWithoutManufacturerDataError extends Data.TaggedError("PeripheralWithoutManufacturerDataError")<{
     peripheral: Peripheral;
@@ -22,7 +21,10 @@ const validatePeripheral = (
 };
 
 export const makeRuuvitagDeviceRegistry = (
-    ruuviTagSettings: Required<Config["gateways"]>["ruuvitag"]
+    ruuviTagSettings: NonNullable<RuuviTagGatewayConfiguration>,
+    globalDefaults: {
+        defaultDecimalPrecision: number;
+    }
 ): DeviceRegistry => {
     const deviceSettings = ruuviTagSettings.devices.map((tag) => ({
         device: {
@@ -32,13 +34,14 @@ export const makeRuuvitagDeviceRegistry = (
         },
         timeout: tag.timeout,
     }));
+    const defaultDecimalPrecision = ruuviTagSettings.decimal_precision ?? globalDefaults.defaultDecimalPrecision;
 
-    return new DeviceRegistry(deviceSettings, ruuviTagSettings.timeout);
+    return new DeviceRegistry(deviceSettings, ruuviTagSettings.timeout, defaultDecimalPrecision);
 };
 
 export const makeRuuvitagGateway =
-    (ruuviTagSettings: Required<Config["gateways"]>["ruuvitag"]) =>
-    (peripheral: Peripheral): Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService> =>
+    (ruuviTagSettings: NonNullable<RuuviTagGatewayConfiguration>): MapMessage =>
+    (peripheral) =>
         Effect.flatMap(validatePeripheral(peripheral), (p) =>
             handleBleAdvertisement(
                 p,
@@ -70,40 +73,3 @@ export const makeRuuvitagGateway =
                     }),
             })
         );
-
-// export class RuuviTagGateway extends AbstractGateway implements Gateway {
-//     constructor(ruuviTagSettings: ConfiguredRuuviTags, defaultTimeout: number, unknownRuuviTagsAllowed: boolean) {
-//         const deviceSettings = ruuviTagSettings.map((tag) => ({
-//             device: {
-//                 id: tag.id,
-//                 type: DeviceType.Ruuvitag,
-//                 friendlyName: tag.name,
-//             },
-//             timeout: tag.timeout,
-//         }));
-
-//         super(new DeviceRegistry(deviceSettings, defaultTimeout), unknownRuuviTagsAllowed, DeviceType.Ruuvitag);
-//     }
-
-//     public getGatewayId(): number {
-//         return ruuviTagManufacturerId;
-//     }
-
-//     private validatePeripheral(peripheral: Peripheral): asserts peripheral is PeripheralWithManufacturerData {
-//         if (peripheral.advertisement.manufacturerData === undefined) {
-//             throw new Error(
-//                 `Somehow a peripheral without manufacturingData got into RuuviTagGateway: ${JSON.stringify(peripheral)}`
-//             );
-//         }
-//     }
-
-//     protected handleDeviceSensorData(peripheral: Peripheral): Observable<RuuvitagSensorMessage> {
-//         const id = peripheral.uuid;
-//         this.validatePeripheral(peripheral);
-//         return new Observable((subscriber) => {
-//             const device = this.getDeviceRegistryEntry(id);
-//             subscriber.next(transformPeripheralAdvertisementToSensorDataDeviceMessage(peripheral, device));
-//             subscriber.complete();
-//         });
-//     }
-// }

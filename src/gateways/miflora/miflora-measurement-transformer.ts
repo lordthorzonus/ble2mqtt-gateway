@@ -15,7 +15,7 @@ export interface MiFloraSensorData {
     lowBatteryWarning: boolean;
 }
 
-const getSensorData = (buffer: MiFloraSensorMeasurementBuffer) =>
+const getSensorData = (buffer: MiFloraSensorMeasurementBuffer, decimalPrecision: number) =>
     pipe(
         buffer,
         (buffer: MiFloraSensorMeasurementBuffer) => ({
@@ -26,10 +26,10 @@ const getSensorData = (buffer: MiFloraSensorMeasurementBuffer) =>
             lowBatteryWarning: buffer.lowBatteryEvent?.data === 1,
         }),
         (sensorData: MiFloraSensorData): MiFloraSensorData => ({
-            temperature: formatNumericSensorValue(sensorData.temperature),
-            moisture: formatNumericSensorValue(sensorData.moisture),
-            illuminance: formatNumericSensorValue(sensorData.illuminance),
-            soilConductivity: formatNumericSensorValue(sensorData.soilConductivity),
+            temperature: formatNumericSensorValue(sensorData.temperature, decimalPrecision),
+            moisture: formatNumericSensorValue(sensorData.moisture, decimalPrecision),
+            illuminance: formatNumericSensorValue(sensorData.illuminance, decimalPrecision),
+            soilConductivity: formatNumericSensorValue(sensorData.soilConductivity, decimalPrecision),
             lowBatteryWarning: sensorData.lowBatteryWarning,
         })
     );
@@ -39,7 +39,7 @@ export const transformMiFloraMeasurementsToDeviceMessage = (
     deviceRegistryEntry: DeviceRegistryEntry,
     miFloraSensorMeasurementBuffer: MiFloraSensorMeasurementBuffer
 ): MifloraSensorMessage => {
-    const sensorData = getSensorData(miFloraSensorMeasurementBuffer);
+    const sensorData = getSensorData(miFloraSensorMeasurementBuffer, deviceRegistryEntry.decimalPrecision);
 
     return {
         id: uuid(),

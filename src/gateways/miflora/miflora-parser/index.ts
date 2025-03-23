@@ -8,8 +8,8 @@ import {
     parseSoilConductivityEvent,
     parseTemperatureEvent,
 } from "./parsing-strategies";
-import { logger } from "../../../infra/logger";
-import { Data, Effect, pipe } from "effect";
+import { Data, Effect, Match } from "effect";
+import { Logger } from "../../../infra/logger";
 
 const XiaomiServiceId = "fe95";
 
@@ -50,20 +50,6 @@ export type SupportedMiFloraMeasurements =
     | MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent>
     | MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent>;
 
-type MiFloraMeasurementEventParsingStrategy = (data: Buffer) => SupportedMiFloraMeasurements;
-
-const MiFloraMeasurementEventParsingStrategyMap = new Map<
-    MifloraMeasurementEventType,
-    MiFloraMeasurementEventParsingStrategy
->([
-    [MifloraMeasurementEventType.Illuminance, parseIlluminanceEvent],
-    [MifloraMeasurementEventType.Moisture, parseMoistureEvent],
-    [MifloraMeasurementEventType.Temperature, parseTemperatureEvent],
-    [MifloraMeasurementEventType.SoilConductivity, parseSoilConductivityEvent],
-    [MifloraMeasurementEventType.LowBatteryEvent, parseLowBatteryEvent],
-    [MifloraMeasurementEventType.InvalidEvent, parseInvalidEvent],
-]);
-
 const isLowBatteryAdvertisement = (data: Buffer) => data.length === 12 && data[11] === 13;
 
 /**
@@ -82,29 +68,34 @@ const parseMiFloraEventType = (data: Buffer, peripheral: Peripheral) => {
             return MifloraMeasurementEventType.LowBatteryEvent;
         }
 
-        logger.warn("MiFlora sent invalid data: %s, peripheral: %s", data, peripheral);
-
         return MifloraMeasurementEventType.InvalidEvent;
     }
 };
 
-const resolveMiFloraParsingStrategy = (
-    data: Buffer,
-    peripheral: Peripheral
-): Effect.Effect<MiFloraMeasurementEventParsingStrategy, UnsupportedMiFloraEventError> => {
-    const eventType = parseMiFloraEventType(data, peripheral);
-    const parsingStrategy = MiFloraMeasurementEventParsingStrategyMap.get(eventType);
+const resolveMiFloraParsingStrategy = (data: Buffer, peripheral: Peripheral) =>
+    Effect.gen(function* () {
+        const eventType = parseMiFloraEventType(data, peripheral);
+        const { logger } = yield* Logger;
 
-    if (!parsingStrategy) {
-        return new UnsupportedMiFloraEventError({ eventType });
-    }
+        const parsingStrategy = yield* Match.value(eventType).pipe(
+            Match.when(MifloraMeasurementEventType.Illuminance, () => Effect.succeed(parseIlluminanceEvent)),
+            Match.when(MifloraMeasurementEventType.Moisture, () => Effect.succeed(parseMoistureEvent)),
+            Match.when(MifloraMeasurementEventType.Temperature, () => Effect.succeed(parseTemperatureEvent)),
+            Match.when(MifloraMeasurementEventType.SoilConductivity, () => Effect.succeed(parseSoilConductivityEvent)),
+            Match.when(MifloraMeasurementEventType.LowBatteryEvent, () => Effect.succeed(parseLowBatteryEvent)),
+            Match.when(MifloraMeasurementEventType.InvalidEvent, () => {
+                logger.warn("MiFlora sent invalid data: %s, peripheral: %s", data, peripheral);
+                return Effect.succeed(parseInvalidEvent);
+            }),
+            Match.orElse(() => Effect.fail(new UnsupportedMiFloraEventError({ eventType })))
+        );
 
-    return Effect.succeed(parsingStrategy);
-};
+        return parsingStrategy;
+    });
 
 export const parseMiFloraPeripheralAdvertisement = (
     peripheral: Peripheral
-): Effect.Effect<SupportedMiFloraMeasurements, MiFloraParsingError> =>
+): Effect.Effect<SupportedMiFloraMeasurements, MiFloraParsingError, Logger> =>
     Effect.gen(function* () {
         const serviceData = yield* getMiFloraServiceData(peripheral);
         const parsingStrategy = yield* resolveMiFloraParsingStrategy(serviceData, peripheral);

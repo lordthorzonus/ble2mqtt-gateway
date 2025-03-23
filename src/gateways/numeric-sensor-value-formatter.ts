@@ -1,9 +1,4 @@
-import { getConfiguration } from "../config";
-
-const config = getConfiguration();
-const decimalPrecision = config.decimal_precision;
-
-export const formatNumericSensorValue = (value: number | null): number | null => {
+export const formatNumericSensorValue = (value: number | null, decimalPrecision: number): number | null => {
     if (value === null) {
         return null;
     }
