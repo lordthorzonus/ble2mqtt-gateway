@@ -77,6 +77,7 @@ export class ConfigurationError extends Data.TaggedError("ConfigurationError")<{
 
 export type RuuviTagGatewayConfiguration = z.infer<typeof ruuvitagSchema>;
 export type MiFloraGatewayConfiguration = z.infer<typeof miFloraSchema>;
+export type GlobalConfiguration = z.infer<typeof configSchema>;
 
 const getConfiguration = (): Effect.Effect<z.infer<typeof configSchema>, ConfigurationError> =>
     Effect.gen(function* () {
@@ -88,14 +89,21 @@ const getConfiguration = (): Effect.Effect<z.infer<typeof configSchema>, Configu
             catch: (e) => new ConfigurationError({ message: "Failed to read configuration file", cause: e }),
         });
 
-        const config = Effect.try({
+        const config = yield* Effect.try({
             try: () => load(configurationFileContent),
             catch: (e) => new ConfigurationError({ message: "Failed to parse yaml", cause: e }),
         });
 
-        return yield* configSchema.effect
-            .parse(config)
-            .pipe(Effect.mapError((e) => new ConfigurationError({ message: produceErrorMessage(e), cause: e })));
+        const parsedConfig = configSchema.safeParse(config);
+
+        if (!parsedConfig.success) {
+            return yield* new ConfigurationError({
+                message: produceErrorMessage(parsedConfig.error),
+                cause: parsedConfig.error,
+            });
+        }
+
+        return yield* Effect.succeed(parsedConfig.data);
     });
 
 export class Config extends Context.Tag("Config")<Config, { config: z.infer<typeof configSchema> }>() {}

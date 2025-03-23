@@ -1,9 +1,10 @@
+import * as _zodPlugin from "@zod-plugin/effect";
 import { Config, ConfigLive, ConfigurationError } from "./config";
 import { GatewayError, makeBleGateway } from "./gateways/ble-gateway";
 import { scan } from "./infra/ble-scanner";
 import { Logger, LoggerLive } from "./infra/logger";
 import { DeviceType } from "./types";
-import { homeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
+import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
 import { Stream, Effect, pipe, Match, Layer } from "effect";
 
 const bleMode = Effect.gen(function* () {
@@ -57,6 +58,8 @@ const gatewayMode = Effect.gen(function* () {
 
 const mqttMode = Effect.gen(function* () {
     const { logger } = yield* Logger;
+    const bleGateway = yield* makeBleGateway();
+    const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
 
     const filterDeviceType: DeviceType | undefined = process.argv[3] as DeviceType | undefined;
 
@@ -64,17 +67,13 @@ const mqttMode = Effect.gen(function* () {
         logger.info("Filtering device type %s", filterDeviceType);
     }
 
-    return yield* Effect.gen(function* () {
-        const bleGateway = yield* makeBleGateway();
-
-        return yield* scan().pipe(
-            Stream.flatMap((peripheral) => bleGateway(peripheral)),
-            Stream.flatMap((message) => Stream.fromIterable(homeAssistantMqttMessageProducer(message))),
-            Stream.runForEach((message) =>
-                Effect.sync(() => logger.info("Received MQTT message %s", JSON.stringify(message)))
-            )
-        );
-    });
+    return scan().pipe(
+        Stream.flatMap((peripheral) => bleGateway(peripheral)),
+        Stream.flatMap((message) => homeAssistantMqttMessageProducer(message)),
+        Stream.runForEach((message) =>
+            Effect.sync(() => logger.info("Received MQTT message %s", JSON.stringify(message)))
+        )
+    );
 });
 
 const DevLayer = LoggerLive.pipe(Layer.provide(ConfigLive), Layer.provideMerge(ConfigLive));

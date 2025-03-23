@@ -1,11 +1,7 @@
 import { Device } from "../types";
-import { getConfiguration } from "../config";
 
-const config = getConfiguration();
-const mqttGatewayBaseTopic = config.gateways.base_topic;
-
-export const getDeviceStateTopic = (device: Device): string =>
+export const getDeviceStateTopic = (device: Device, mqttGatewayBaseTopic: string): string =>
     `${mqttGatewayBaseTopic}/${device.type}/${device.id}/state`;
-export const getDeviceAvailabilityTopic = (device: Device): string =>
+export const getDeviceAvailabilityTopic = (device: Device, mqttGatewayBaseTopic: string): string =>
     `${mqttGatewayBaseTopic}/${device.type}/${device.id}/availability`;
-export const getAnalyticsTopic = (): string => `${mqttGatewayBaseTopic}/gateway/analytics`;
+export const getAnalyticsTopic = (mqttGatewayBaseTopic: string): string => `${mqttGatewayBaseTopic}/gateway/analytics`;

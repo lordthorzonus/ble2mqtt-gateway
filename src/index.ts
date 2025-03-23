@@ -1,11 +1,9 @@
-import { catchError, mergeMap, retry } from "rxjs/operators";
-import { throwError } from "rxjs";
+import "@zod-plugin/effect";
 import { homeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
 import { getConfiguration } from "./config";
 import { BleGateway } from "./gateways/ble-gateway";
 import { publish } from "./infra/mqtt-client";
 import { logger } from "./infra/logger";
-import "@zod-plugin/effect";
 
 process.stdin.resume();
 
