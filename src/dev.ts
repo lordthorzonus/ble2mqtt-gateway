@@ -1,11 +1,11 @@
 import * as _zodPlugin from "@zod-plugin/effect";
-import { Config, ConfigLive, ConfigurationError } from "./config";
-import { GatewayError, makeBleGateway } from "./gateways/ble-gateway";
+import { ConfigLive } from "./config";
+import { makeBleGateway } from "./gateways/ble-gateway";
 import { scan } from "./infra/ble-scanner";
 import { Logger, LoggerLive } from "./infra/logger";
 import { DeviceType } from "./types";
 import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
-import { Stream, Effect, pipe, Match, Layer } from "effect";
+import { Stream, Effect, pipe, Match, Layer, Console } from "effect";
 
 const bleMode = Effect.gen(function* () {
     const { logger } = yield* Logger;
@@ -17,7 +17,7 @@ const bleMode = Effect.gen(function* () {
     }
 
     return yield* scan().pipe(
-        Stream.runForEach((peripheral) =>
+        Stream.tap((peripheral) =>
             Effect.sync(() => {
                 const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
 
@@ -27,7 +27,8 @@ const bleMode = Effect.gen(function* () {
 
                 logger.info("Received BLE advertisement %s", peripheral);
             })
-        )
+        ),
+        Stream.runDrain
     );
 });
 
@@ -43,16 +44,14 @@ const gatewayMode = Effect.gen(function* () {
     const bleGateway = yield* makeBleGateway();
 
     return yield* scan().pipe(
-        Stream.flatMap((peripheral) => bleGateway(peripheral)),
-        Stream.runForEach((message) =>
+        bleGateway,
+        Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType),
+        Stream.tap((message) =>
             Effect.sync(() => {
-                if (filterDeviceType && filterDeviceType !== message.device.type) {
-                    return;
-                }
-
                 logger.info("Received Device message %s", JSON.stringify(message));
             })
-        )
+        ),
+        Stream.runDrain
     );
 });
 
@@ -67,12 +66,12 @@ const mqttMode = Effect.gen(function* () {
         logger.info("Filtering device type %s", filterDeviceType);
     }
 
-    return scan().pipe(
-        Stream.flatMap((peripheral) => bleGateway(peripheral)),
+    return yield* scan().pipe(
+        bleGateway,
+        Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType),
         Stream.flatMap((message) => homeAssistantMqttMessageProducer(message)),
-        Stream.runForEach((message) =>
-            Effect.sync(() => logger.info("Received MQTT message %s", JSON.stringify(message)))
-        )
+        Stream.tap((message) => Effect.sync(() => logger.info("Received MQTT message %s", JSON.stringify(message)))),
+        Stream.runDrain
     );
 });
 
@@ -84,12 +83,14 @@ const devProgram = Effect.gen(function* () {
 
     logger.info("Dev mode: %s", mode);
 
-    return yield* Match.value(mode).pipe(
-        Match.when("ble", () => bleMode),
-        Match.when("gateway", () => gatewayMode),
-        Match.when("mqtt", () => mqttMode),
+    const selectedMode = yield* Match.value(mode).pipe(
+        Match.when("ble", () => Effect.succeed(bleMode)),
+        Match.when("gateway", () => Effect.succeed(gatewayMode)),
+        Match.when("mqtt", () => Effect.succeed(mqttMode)),
         Match.orElse((m) => Effect.fail(`Unknown mode ${m}`))
     );
+
+    return yield* selectedMode;
 });
 
 const configuredDevProgram = Effect.provide(devProgram, DevLayer);

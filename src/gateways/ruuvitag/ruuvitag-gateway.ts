@@ -1,11 +1,17 @@
 import { DeviceRegistry } from "../device-registry";
-import { Peripheral, PeripheralWithManufacturerData } from "@abandonware/noble";
-import { DeviceType, DeviceMessage } from "../../types";
+import { Peripheral } from "@abandonware/noble";
+import { DeviceType } from "../../types";
 import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
 import { RuuviTagGatewayConfiguration } from "../../config";
-import { DeviceRegistryService, handleBleAdvertisement } from "../abstract-gateway";
+import { handleBleAdvertisement } from "../abstract-gateway";
 import { Data, Effect } from "effect";
 import { GatewayError, MapMessage } from "../ble-gateway";
+
+export interface PeripheralWithManufacturerData extends Peripheral {
+    advertisement: Omit<Peripheral["advertisement"], "manufacturerData"> & {
+        manufacturerData: Buffer;
+    };
+}
 
 export class PeripheralWithoutManufacturerDataError extends Data.TaggedError("PeripheralWithoutManufacturerDataError")<{
     peripheral: Peripheral;
@@ -17,6 +23,7 @@ const validatePeripheral = (
     if (peripheral.advertisement.manufacturerData === undefined) {
         return new PeripheralWithoutManufacturerDataError({ peripheral });
     }
+
     return Effect.succeed(peripheral as PeripheralWithManufacturerData);
 };
 

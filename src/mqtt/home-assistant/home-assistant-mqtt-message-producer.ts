@@ -16,20 +16,11 @@ import { capitalize, snakeCase } from "lodash";
 import { Effect, Match, Stream } from "effect";
 import { Config, ConfigurationError, GlobalConfiguration } from "../../config";
 
-const bleDeviceHAConfigurationMap = new Map<DeviceType, HomeAssistantSensorConfigurationForDeviceType<DeviceType>>([
-    [DeviceType.Ruuvitag, ruuviTagSensorConfiguration],
-    [DeviceType.MiFlora, miFloraSensorConfiguration],
-]);
-
-const getHASensorConfiguration = <T extends DeviceType>(type: T): HomeAssistantSensorConfigurationForDeviceType<T> => {
-    const configuration = bleDeviceHAConfigurationMap.get(type);
-
-    if (!configuration) {
-        throw new Error("No configuration for given type");
-    }
-
-    return configuration as HomeAssistantSensorConfigurationForDeviceType<T>;
-};
+const getHASensorConfiguration = Match.type<DeviceType>().pipe(
+    Match.when(Match.is(DeviceType.Ruuvitag), () => ruuviTagSensorConfiguration),
+    Match.when(Match.is(DeviceType.MiFlora), () => miFloraSensorConfiguration),
+    Match.exhaustive
+);
 
 const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSensorConfiguration) =>
     `${snakeCase(deviceMessage.device.friendlyName)}_${configEntry.uniqueId}`;
@@ -103,7 +94,7 @@ const getHaDiscoveryPayload = (
     propertyName: string,
     configEntry: HomeAssistantSensorConfiguration,
     deviceMessage: DeviceAvailabilityMessage,
-    globalConfig: GlobalConfiguration,
+    globalConfig: GlobalConfiguration
 ): HADiscoveryPayload => {
     if (deviceMessage.payload.state === "offline") {
         return {
@@ -203,18 +194,16 @@ export const makeHomeAssistantMqttMessageProducer = (): Effect.Effect<
     Effect.gen(function* () {
         const { config } = yield* Config;
 
-        return (deviceMessage) => {
-            return Match.value(deviceMessage).pipe(
-                Match.when({ type: MessageType.Availability }, (message) =>
-                    Stream.concat(
-                        Stream.fromIterable(haDiscoverAdapter(message, config)),
-                        Stream.make(generateAvailabilityMessage(message, config))
-                    )
-                ),
-                Match.when({ type: MessageType.SensorData }, (message) =>
-                    Stream.make(generateStateMessage(message, config))
-                ),
-                Match.exhaustive
-            );
-        };
+        return Match.type<DeviceMessage>().pipe(
+            Match.when({ type: MessageType.Availability }, (message) =>
+                Stream.concat(
+                    Stream.fromIterable(haDiscoverAdapter(message, config)),
+                    Stream.make(generateAvailabilityMessage(message, config))
+                )
+            ),
+            Match.when({ type: MessageType.SensorData }, (message) =>
+                Stream.make(generateStateMessage(message, config))
+            ),
+            Match.exhaustive
+        );
     });

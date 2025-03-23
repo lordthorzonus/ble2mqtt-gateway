@@ -1,21 +1,13 @@
-jest.mock("./logger", () => ({
-    __esModule: true,
-    logger: {
-        info: jest.fn(),
-        debug: jest.fn(),
-    },
-}));
-
 import { EventEmitter } from "events";
+const mockNobleScanner = jest.fn();
+const mockNobleStopScanning = jest.fn();
+const mockRemoveAllListeners = jest.fn();
 const mockNobleEventEmitter = new EventEmitter();
 const mockNobleEventListener = jest
     .fn()
     .mockImplementation((eventName: string, callback: (event: string) => unknown) => {
         mockNobleEventEmitter.on(eventName, callback);
     });
-const mockNobleScanner = jest.fn();
-const mockNobleStopScanning = jest.fn();
-const mockRemoveAllListeners = jest.fn();
 
 jest.mock("@abandonware/noble", () => ({
     on: mockNobleEventListener,
@@ -23,9 +15,14 @@ jest.mock("@abandonware/noble", () => ({
     stopScanning: mockNobleStopScanning,
     removeAllListeners: mockRemoveAllListeners,
 }));
-
+import { Effect, Stream, Layer } from "effect";
+import { LoggerLive } from "./logger";
+import { ConfigLive } from "../config";
 import { scan, stopScanning } from "./ble-scanner";
-import { Effect, Stream, pipe } from "effect";
+
+// Mock declarations
+
+const TestLayer = LoggerLive.pipe(Layer.provide(ConfigLive));
 
 describe("BLE Scanner", () => {
     beforeEach(() => {
@@ -48,7 +45,7 @@ describe("BLE Scanner", () => {
             mockNobleEventEmitter.emit("discover", peripheral);
         }, 100);
 
-        await Effect.runPromise(stream);
+        await Effect.runPromise(Effect.provide(stream, TestLayer));
         expect(mockNobleEventListener).toHaveBeenCalledWith("discover", expect.any(Function));
         expect(mockNobleEventListener).toHaveBeenCalledWith("stateChange", expect.any(Function));
 
@@ -68,7 +65,7 @@ describe("BLE Scanner", () => {
             mockNobleEventEmitter.emit("discover", peripheral);
         }, 100);
 
-        await Effect.runPromise(stream);
+        await Effect.runPromise(Effect.provide(stream, TestLayer));
 
         expect(mockNobleScanner).toHaveBeenCalledWith([], true);
     });
@@ -81,7 +78,7 @@ describe("BLE Scanner", () => {
             mockNobleEventEmitter.emit("discover", peripheral);
         }, 100);
 
-        const result = await Effect.runPromise(pipe(stream, Stream.take(2), Stream.runCollect));
+        const result = await Effect.runPromise(Effect.provide(Stream.runCollect(Stream.take(stream, 2)), TestLayer));
 
         const advertisements = Array.from(result);
         expect(advertisements).toEqual([peripheral, peripheral]);

@@ -9,8 +9,8 @@ const startScanning = (logger: LoggerInterface) => {
 };
 
 export const scan = (): Stream.Stream<Peripheral, never, Logger> =>
-    Stream.async((emit) =>
-        Effect.gen(function* () {
+    Stream.asyncEffect<Peripheral, never, Logger>((emit) => {
+        return Effect.gen(function* () {
             const { logger } = yield* Logger;
 
             if (noble.state === "poweredOn") {
@@ -33,8 +33,8 @@ export const scan = (): Stream.Stream<Peripheral, never, Logger> =>
                     void emit(Effect.fail(Option.none()));
                 }
             });
-        })
-    );
+        });
+    });
 
 export const stopScanning = (): void => {
     noble.stopScanning();

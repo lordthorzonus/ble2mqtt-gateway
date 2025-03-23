@@ -99,9 +99,10 @@ export const makeBleGateway = () =>
             logger.info("configured gateway to work with MiFlora");
         }
 
-        return (peripheralMessage: Peripheral): Stream.Stream<DeviceMessage, GatewayError, Logger> =>
-            pipe(
-                Stream.make(peripheralMessage),
+        return (
+            peripheralMessage: Stream.Stream<Peripheral, never, Logger>
+        ): Stream.Stream<DeviceMessage, GatewayError, Logger> =>
+            peripheralMessage.pipe(
                 Stream.filterMap((p) => resolveGatewayForPeripheral(p, configuredGateways)),
                 Stream.flatMap(({ peripheral, gateway }) =>
                     Stream.fromIterableEffect(

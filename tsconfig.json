@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "ES2022",
+        "target": "ES2020",
         "strict": true,
         "moduleResolution": "node",
         "sourceMap": true,
@@ -10,5 +10,5 @@
         "noUncheckedIndexedAccess": true
     },
     "exclude": ["dist", "node_modules"],
-    "include": ["src/**/*.ts"]
+    "include": ["src/**/*.ts", "src/**/*.d.ts"]
 }

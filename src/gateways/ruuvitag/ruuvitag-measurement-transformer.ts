@@ -1,4 +1,3 @@
-import { PeripheralWithManufacturerData } from "@abandonware/noble";
 import { v4 as uuid } from "uuid";
 import { parse, RuuviParsingError } from "./ruuvitag-parser";
 import decorateRuuviTagSensorDataWithCalculatedValues, {
@@ -9,6 +8,7 @@ import { DateTime } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
 import { formatSensorValues } from "./ruuvitag-measurement-formatter";
 import { Effect, Option, pipe } from "effect";
+import { PeripheralWithManufacturerData } from "./ruuvitag-gateway";
 
 export interface RuuviTag {
     macAddress: string;

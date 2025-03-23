@@ -1,7 +1,7 @@
 import type { Peripheral } from "@abandonware/noble";
 import { DeviceType, MessageType } from "../types";
-import { Config } from "../config";
-import { Effect, Stream } from "effect";
+import { Config, GlobalConfiguration } from "../config";
+import { Effect, Layer, Stream } from "effect";
 
 const mockRuuvitagMapMessageFn = jest.fn();
 const mockMiFloraMapMessageFn = jest.fn();
@@ -31,13 +31,14 @@ jest.mock("./miflora/miflora-gateway", () => {
     };
 });
 
-import { makeGateway } from "./ble-gateway";
+import { makeBleGateway } from "./ble-gateway";
 import { makeRuuvitagGateway, makeRuuvitagDeviceRegistry } from "./ruuvitag/ruuvitag-gateway";
 import { makeMiFloraGateway, makeMiFloraDeviceRegistry } from "./miflora/miflora-gateway";
 import { DateTime } from "luxon";
+import { LoggerLive } from "../infra/logger";
 
 describe("BLE Gateway", () => {
-    const validGatewayConfiguration: Config["gateways"] = {
+    const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
         base_topic: "something",
         ruuvitag: {
             allow_unknown: false,
@@ -170,12 +171,37 @@ describe("BLE Gateway", () => {
         mockRuuvitagMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
         mockMiFloraMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
 
-        const gatewayFn = makeGateway(validGatewayConfiguration);
-        const eventStream = gatewayFn(Stream.fromIterable([ruuviPeripheral, ruuviPeripheral, mifloraPeripheral]));
-
-        const messages = await Effect.runPromise(
-            Stream.runCollect(eventStream).pipe(Effect.map((events) => Array.from(events)))
+        const TestLayer = Layer.provideMerge(
+            LoggerLive,
+            Layer.succeed(Config, {
+                config: {
+                    ...validGatewayConfiguration,
+                    homeassistant: {
+                        discovery_topic: "test",
+                    },
+                    log_level: "debug",
+                    decimal_precision: 2,
+                    gateway_name: "test",
+                    gateway_version: "1.0.0",
+                    mqtt: {
+                        host: "test",
+                        port: 1883,
+                        username: "test",
+                        password: "test",
+                        client_id: "test",
+                        protocol: "mqtt",
+                    },
+                },
+            })
         );
+
+        const program = Effect.gen(function* () {
+            const bleGateway = yield* makeBleGateway();
+            const eventStream = bleGateway(Stream.fromIterable([ruuviPeripheral, ruuviPeripheral, mifloraPeripheral]));
+            return yield* Stream.runCollect(eventStream);
+        }).pipe(Effect.provide(TestLayer));
+
+        const messages = await Effect.runPromise(program);
 
         expect(messages).toHaveLength(3);
         expect(messages).toEqual([handledMessage, handledMessage, handledMessage]);

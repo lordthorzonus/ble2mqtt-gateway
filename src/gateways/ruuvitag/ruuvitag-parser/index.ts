@@ -44,6 +44,12 @@ export class UnsupportedDataFormatError extends Data.TaggedError("UnsupportedDat
 
 export type RuuviParsingError = NotValidRuuviManufacturerIdError | UnsupportedDataFormatError;
 
+const resolveParsingStrategy = Match.type<number>().pipe(
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed(DataFormat3ParsingStrategy)),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat5, () => Effect.succeed(DataFormat5ParsingStrategy)),
+    Match.orElse((dataFormat) => Effect.fail(new UnsupportedDataFormatError({ dataFormat })))
+);
+
 export const parse = (rawRuuviTagData: Buffer): Effect.Effect<RuuviTagSensorData, RuuviParsingError> =>
     Effect.gen(function* () {
         const manufacturerId = rawRuuviTagData.readUInt16LE(RuuviTagDataOffsets.ManufacturedIdOffset);
@@ -54,11 +60,7 @@ export const parse = (rawRuuviTagData: Buffer): Effect.Effect<RuuviTagSensorData
 
         const dataFormat = rawRuuviTagData.readUInt8(RuuviTagDataOffsets.DataFormatOffset);
 
-        const parsingStrategy = yield* Match.value(dataFormat).pipe(
-            Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed(DataFormat3ParsingStrategy)),
-            Match.when(RuuvitagSensorProtocolDataFormat.DataFormat5, () => Effect.succeed(DataFormat5ParsingStrategy)),
-            Match.orElse((df) => Effect.fail(new UnsupportedDataFormatError({ dataFormat: df })))
-        );
+        const parsingStrategy = yield* resolveParsingStrategy(dataFormat);
 
         return yield* Effect.succeed(parsingStrategy.parse(rawRuuviTagData));
     });
