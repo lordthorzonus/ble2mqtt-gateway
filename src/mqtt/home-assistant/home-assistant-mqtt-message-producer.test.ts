@@ -1,5 +1,3 @@
-import { toArray } from "rxjs";
-
 jest.mock("../../config", () => ({
     __esModule: true,
     getConfiguration: jest.fn().mockReturnValue({
@@ -15,12 +13,14 @@ jest.mock("../../config", () => ({
 
 import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { DateTime } from "luxon";
-import { homeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
+import { makeHomeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
 import { EnhancedRuuviTagSensorData } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer";
+import { Effect, Stream } from "effect";
+import { testEffectWithContext } from "../../test/test-context";
 
 describe("HomeAssistant MQTT Message producer", () => {
-    it("should generate device state mqtt message if device sensor message is given", (done) => {
+    it("should generate device state mqtt message if device sensor message is given", async () => {
         const deviceMessage: DeviceSensorMessage = {
             id: "a",
             deviceType: DeviceType.Ruuvitag,
@@ -39,21 +39,25 @@ describe("HomeAssistant MQTT Message producer", () => {
             },
         };
 
-        homeAssistantMqttMessageProducer(deviceMessage).subscribe((message) => {
-            expect(message).toEqual({
-                payload: JSON.stringify({
-                    sensor1: "value",
-                    time: deviceMessage.time,
-                    id: deviceMessage.id,
-                }),
-                retain: false,
-                topic: "a_base_topic/ruuvitag/aa:bb/state",
-            });
-            done();
+        const testProgram = Effect.gen(function* () {
+            const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+            return yield* Stream.runCollect(homeAssistantMqttMessageProducer(deviceMessage));
+        });
+
+        const message = await Effect.runPromise(testEffectWithContext(testProgram));
+
+        expect(message).toEqual({
+            payload: JSON.stringify({
+                sensor1: "value",
+                time: deviceMessage.time,
+                id: deviceMessage.id,
+            }),
+            retain: false,
+            topic: "a_base_topic/ruuvitag/aa:bb/state",
         });
     });
 
-    it("should vary the state topic based on the device type", (done) => {
+    it("should vary the state topic based on the device type", async () => {
         const deviceMessage: DeviceSensorMessage = {
             id: "a",
             deviceType: DeviceType.MiFlora,
@@ -72,17 +76,20 @@ describe("HomeAssistant MQTT Message producer", () => {
             },
         };
 
-        homeAssistantMqttMessageProducer(deviceMessage).subscribe((message) => {
-            expect(message).toEqual({
-                payload: JSON.stringify({
-                    sensor1: "value",
-                    time: deviceMessage.time,
-                    id: deviceMessage.id,
-                }),
-                retain: false,
-                topic: "a_base_topic/miflora/aa:bb/state",
-            });
-            done();
+        const testProgram = Effect.gen(function* () {
+            const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+            return yield* Stream.runCollect(homeAssistantMqttMessageProducer(deviceMessage));
+        });
+
+        const message = await Effect.runPromise(testEffectWithContext(testProgram));
+        expect(message).toEqual({
+            payload: JSON.stringify({
+                sensor1: "value",
+                time: deviceMessage.time,
+                id: deviceMessage.id,
+            }),
+            retain: false,
+            topic: "a_base_topic/miflora/aa:bb/state",
         });
     });
 
@@ -158,12 +165,14 @@ describe("HomeAssistant MQTT Message producer", () => {
     ];
     it.each(availabilityTestCases)(
         "should generate corresponding discovery messages for given device in case of %s availability message is given",
-        (_, availabilityMessage) => {
-            homeAssistantMqttMessageProducer(availabilityMessage)
-                .pipe(toArray())
-                .subscribe((messages) => {
-                    expect(messages).toMatchSnapshot();
-                });
+        async (_, availabilityMessage) => {
+            const testProgram = Effect.gen(function* () {
+                const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+                return yield* Stream.runCollect(homeAssistantMqttMessageProducer(availabilityMessage));
+            });
+
+            const message = await Effect.runPromise(testEffectWithContext(testProgram));
+            expect(message).toMatchSnapshot();
         }
     );
 });

@@ -1,7 +1,7 @@
 import { load } from "js-yaml";
 import fs from "fs";
 import { z, ZodError } from "zod";
-import { Context, Data, Effect, Layer } from "effect";
+import { Data, Effect } from "effect";
 
 const mqttSchema = z.object({
     host: z.string(),
@@ -47,6 +47,7 @@ const configSchema = z.object({
     gateway_name: z.string().default("ble2mqtt"),
     gateway_version: z.string().default("development"),
     mqtt: mqttSchema,
+    unavailable_devices_check_interval_ms: z.number().int().default(10000),
     gateways: z.object({
         base_topic: z.string().default("ble2mqtt"),
         ruuvitag: ruuvitagSchema.optional(),

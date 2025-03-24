@@ -42,7 +42,9 @@ export type MapMessage = (
     peripheral: Peripheral
 ) => Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService | Logger>;
 
-const makeUnavailableDevicesStream = (gateways: Map<number, Gateway>): Stream.Stream<DeviceAvailabilityMessage> => {
+const makeUnavailableDevicesStream = (
+    gateways: Map<number, Gateway>
+): Stream.Stream<DeviceAvailabilityMessage, never, Config> => {
     const gatewaysArray = Array.from(gateways.values());
     const streams = gatewaysArray.map((gateway) =>
         Stream.unwrap(Effect.provideService(streamUnavailableDevices, DeviceRegistryService, gateway.deviceRegistry))
@@ -101,7 +103,7 @@ export const makeBleGateway = () =>
 
         return (
             peripheralMessage: Stream.Stream<Peripheral, never, Logger>
-        ): Stream.Stream<DeviceMessage, GatewayError, Logger> =>
+        ): Stream.Stream<DeviceMessage, GatewayError, Logger | Config> =>
             peripheralMessage.pipe(
                 Stream.filterMap((p) => resolveGatewayForPeripheral(p, configuredGateways)),
                 Stream.flatMap(({ peripheral, gateway }) =>

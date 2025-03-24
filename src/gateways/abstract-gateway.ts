@@ -4,6 +4,7 @@ import { generateAvailabilityMessage } from "./message-generators";
 import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry";
 import { Data, Effect, Stream, Context, Option, pipe, Schedule } from "effect";
 import { Logger } from "../infra/logger";
+import { Config } from "../config";
 
 export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")<{
     id: string;
@@ -85,12 +86,13 @@ export const handleBleAdvertisement = <TError, TPeripheral extends Peripheral>(
 export const streamUnavailableDevices: Effect.Effect<
     Stream.Stream<DeviceAvailabilityMessage>,
     never,
-    DeviceRegistryService
+    DeviceRegistryService | Config
 > = Effect.gen(function* () {
     const deviceRegistry = yield* DeviceRegistryService;
+    const config = yield* Config;
 
     return pipe(
-        Stream.fromSchedule(Schedule.spaced(10000)),
+        Stream.fromSchedule(Schedule.spaced(config.unavailable_devices_check_interval_ms)),
         Stream.flatMap(() => Stream.fromIterable(deviceRegistry.getUnavailableDevices())),
         Stream.map((device) => generateAvailabilityMessage(device, "offline"))
     );
