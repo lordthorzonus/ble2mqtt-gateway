@@ -56,7 +56,7 @@ const isLowBatteryAdvertisement = (data: Buffer) => data.length === 12 && data[1
  * MiFlora sensors seem to sometimes sent ble events that I'm not yet sure what they are.
  * They at least don't seem to follow the same structure as the expected sensors.
  */
-const parseMiFloraEventType = (data: Buffer, peripheral: Peripheral) => {
+const parseMiFloraEventType = (data: Buffer) => {
     try {
         return data.readUInt16LE(12);
     } catch (_e) {
@@ -74,8 +74,8 @@ const parseMiFloraEventType = (data: Buffer, peripheral: Peripheral) => {
 
 const resolveMiFloraParsingStrategy = (data: Buffer, peripheral: Peripheral) =>
     Effect.gen(function* () {
-        const eventType = parseMiFloraEventType(data, peripheral);
-        const { logger } = yield* Logger;
+        const eventType = parseMiFloraEventType(data);
+        const logger = yield* Logger;
 
         const parsingStrategy = yield* Match.value(eventType).pipe(
             Match.when(MifloraMeasurementEventType.Illuminance, () => Effect.succeed(parseIlluminanceEvent)),

@@ -6,8 +6,8 @@ import { Logger } from "./logger";
 import { Config } from "../config";
 
 const mqttClient = Effect.gen(function* () {
-    const { config } = yield* Config;
-    const { logger } = yield* Logger;
+    const config = yield* Config;
+    const logger = yield* Logger;
 
     const client = mqtt.connect({
         clientId: config.mqtt.client_id,
@@ -32,14 +32,14 @@ const mqttClient = Effect.gen(function* () {
         logger.error("MQTT client error", { error });
     });
 
+    yield* Effect.addFinalizer(() => Effect.sync(() => client.end()));
+
     return client;
 });
 
 export class MqttClient extends Effect.Service<MqttClient>()("MqttClient", {
-    effect: Effect.gen(function* () {
-        const client = yield* mqttClient;
-        return client;
-    }),
+    scoped: mqttClient,
+    dependencies: [Config.Default, Logger.Default],
 }) {}
 
 export class MqttClientError extends Data.TaggedError("MqttClientError")<{
@@ -51,10 +51,10 @@ export class MqttClientError extends Data.TaggedError("MqttClientError")<{
 export const publish = (message: MqttMessage): Effect.Effect<void, MqttClientError, MqttClient | Logger> =>
     Effect.gen(function* () {
         const client = yield* MqttClient;
-        const { logger } = yield* Logger;
+        const logger = yield* Logger;
 
         logger.debug("Publishing MQTT Message", { message });
-        return yield* Effect.async<unknown, MqttClientError, MqttClient>((resume) => {
+        return yield* Effect.async<undefined, MqttClientError, MqttClient>((resume) => {
             client.publish(
                 message.topic,
                 message.payload,

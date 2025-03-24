@@ -73,8 +73,8 @@ const resolveGatewayForPeripheral = (
 export const makeBleGateway = () =>
     Effect.gen(function* () {
         const configuredGateways = new Map<number, Gateway>();
-        const { config } = yield* Config;
-        const { logger } = yield* Logger;
+        const config = yield* Config;
+        const logger = yield* Logger;
 
         const globalDefaults = {
             defaultDecimalPrecision: config.decimal_precision,

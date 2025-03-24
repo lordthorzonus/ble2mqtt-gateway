@@ -1,14 +1,15 @@
 import * as _zodPlugin from "@zod-plugin/effect";
-import { ConfigLive } from "./config";
 import { makeBleGateway } from "./gateways/ble-gateway";
-import { scan } from "./infra/ble-scanner";
-import { Logger, LoggerLive } from "./infra/logger";
+import { scan, stopScanning } from "./infra/ble-scanner";
+import { Logger } from "./infra/logger";
 import { DeviceType } from "./types";
 import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
-import { Stream, Effect, pipe, Match, Layer, Console } from "effect";
+import { Stream, Effect, Match, Layer } from "effect";
+import { Config } from "./config";
+import { NodeRuntime } from "@effect/platform-node";
 
 const bleMode = Effect.gen(function* () {
-    const { logger } = yield* Logger;
+    const logger = yield* Logger;
 
     const filterManufacturerId = Number(process.argv[3]);
 
@@ -33,7 +34,7 @@ const bleMode = Effect.gen(function* () {
 });
 
 const gatewayMode = Effect.gen(function* () {
-    const { logger } = yield* Logger;
+    const logger = yield* Logger;
 
     const filterDeviceType: DeviceType | undefined = process.argv[3] as DeviceType | undefined;
 
@@ -56,7 +57,7 @@ const gatewayMode = Effect.gen(function* () {
 });
 
 const mqttMode = Effect.gen(function* () {
-    const { logger } = yield* Logger;
+    const logger = yield* Logger;
     const bleGateway = yield* makeBleGateway();
     const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
 
@@ -75,13 +76,20 @@ const mqttMode = Effect.gen(function* () {
     );
 });
 
-const DevLayer = LoggerLive.pipe(Layer.provide(ConfigLive), Layer.provideMerge(ConfigLive));
+const DevLive = Layer.mergeAll(Config.Default, Logger.Default);
 
 const devProgram = Effect.gen(function* () {
-    const { logger } = yield* Logger;
+    const logger = yield* Logger;
     const mode: string | undefined = process.argv[2];
 
     logger.info("Dev mode: %s", mode);
+
+    yield* Effect.addFinalizer(() =>
+        Effect.sync(() => {
+            logger.info("Stopping BLE scanner");
+            stopScanning();
+        })
+    );
 
     const selectedMode = yield* Match.value(mode).pipe(
         Match.when("ble", () => Effect.succeed(bleMode)),
@@ -93,5 +101,5 @@ const devProgram = Effect.gen(function* () {
     return yield* selectedMode;
 });
 
-const configuredDevProgram = Effect.provide(devProgram, DevLayer);
-void Effect.runPromise(configuredDevProgram);
+const configuredDevProgram = Effect.provide(Effect.scoped(devProgram), DevLive);
+NodeRuntime.runMain(configuredDevProgram);

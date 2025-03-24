@@ -5,7 +5,6 @@ import {
     HomeAssistantDeviceClass,
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
-    HomeAssistantSensorConfigurationForDeviceType,
     MessageType,
     MqttMessage,
 } from "../../types";
@@ -192,7 +191,7 @@ export const makeHomeAssistantMqttMessageProducer = (): Effect.Effect<
     Config
 > =>
     Effect.gen(function* () {
-        const { config } = yield* Config;
+        const config = yield* Config;
 
         return Match.type<DeviceMessage>().pipe(
             Match.when({ type: MessageType.Availability }, (message) =>

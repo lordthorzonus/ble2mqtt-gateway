@@ -79,39 +79,31 @@ export type RuuviTagGatewayConfiguration = z.infer<typeof ruuvitagSchema>;
 export type MiFloraGatewayConfiguration = z.infer<typeof miFloraSchema>;
 export type GlobalConfiguration = z.infer<typeof configSchema>;
 
-const getConfiguration = (): Effect.Effect<z.infer<typeof configSchema>, ConfigurationError> =>
-    Effect.gen(function* () {
-        const configurationFileLocation =
-            process.env.CONFIG_FILE_LOCATION ?? `${__dirname}/../config/configuration.yaml`;
+const getConfiguration: Effect.Effect<z.infer<typeof configSchema>, ConfigurationError> = Effect.gen(function* () {
+    const configurationFileLocation = process.env.CONFIG_FILE_LOCATION ?? `${__dirname}/../config/configuration.yaml`;
 
-        const configurationFileContent = yield* Effect.try({
-            try: () => fs.readFileSync(configurationFileLocation, "utf-8"),
-            catch: (e) => new ConfigurationError({ message: "Failed to read configuration file", cause: e }),
-        });
-
-        const config = yield* Effect.try({
-            try: () => load(configurationFileContent),
-            catch: (e) => new ConfigurationError({ message: "Failed to parse yaml", cause: e }),
-        });
-
-        const parsedConfig = configSchema.safeParse(config);
-
-        if (!parsedConfig.success) {
-            return yield* new ConfigurationError({
-                message: produceErrorMessage(parsedConfig.error),
-                cause: parsedConfig.error,
-            });
-        }
-
-        return yield* Effect.succeed(parsedConfig.data);
+    const configurationFileContent = yield* Effect.try({
+        try: () => fs.readFileSync(configurationFileLocation, "utf-8"),
+        catch: (e) => new ConfigurationError({ message: "Failed to read configuration file", cause: e }),
     });
 
-export class Config extends Context.Tag("Config")<Config, { config: z.infer<typeof configSchema> }>() {}
+    const config = yield* Effect.try({
+        try: () => load(configurationFileContent),
+        catch: (e) => new ConfigurationError({ message: "Failed to parse yaml", cause: e }),
+    });
 
-export const ConfigLive = Layer.effect(
-    Config,
-    Effect.gen(function* () {
-        const configuration = yield* getConfiguration();
-        return { config: configuration };
-    })
-);
+    const parsedConfig = configSchema.safeParse(config);
+
+    if (!parsedConfig.success) {
+        return yield* new ConfigurationError({
+            message: produceErrorMessage(parsedConfig.error),
+            cause: parsedConfig.error,
+        });
+    }
+
+    return yield* Effect.succeed(parsedConfig.data);
+});
+
+export class Config extends Effect.Service<Config>()("Config", {
+    effect: getConfiguration,
+}) {}

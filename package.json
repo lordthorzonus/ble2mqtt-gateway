@@ -25,6 +25,7 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
+        "@effect/platform-node": "^0.76.4",
         "@zod-plugin/effect": "^0.1.0",
         "dotenv": "16.4.7",
         "effect": "3.14.1",
