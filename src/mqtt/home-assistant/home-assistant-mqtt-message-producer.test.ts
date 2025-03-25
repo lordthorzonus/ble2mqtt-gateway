@@ -1,22 +1,9 @@
-jest.mock("../../config", () => ({
-    __esModule: true,
-    getConfiguration: jest.fn().mockReturnValue({
-        decimal_precision: 2,
-        gateways: {
-            base_topic: "a_base_topic",
-        },
-        homeassistant: {
-            discovery_topic: "homeassistant",
-        },
-    }),
-}));
-
 import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { DateTime } from "luxon";
 import { makeHomeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
 import { EnhancedRuuviTagSensorData } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer";
-import { Effect, Stream } from "effect";
+import { Chunk, Effect, Stream } from "effect";
 import { testEffectWithContext } from "../../test/test-context";
 
 describe("HomeAssistant MQTT Message producer", () => {
@@ -46,14 +33,14 @@ describe("HomeAssistant MQTT Message producer", () => {
 
         const message = await Effect.runPromise(testEffectWithContext(testProgram));
 
-        expect(message).toEqual({
+        expect(Chunk.toArray(message)[0]).toEqual({
             payload: JSON.stringify({
                 sensor1: "value",
                 time: deviceMessage.time,
                 id: deviceMessage.id,
             }),
             retain: false,
-            topic: "a_base_topic/ruuvitag/aa:bb/state",
+            topic: "test/ruuvitag/aa:bb/state",
         });
     });
 
@@ -82,14 +69,14 @@ describe("HomeAssistant MQTT Message producer", () => {
         });
 
         const message = await Effect.runPromise(testEffectWithContext(testProgram));
-        expect(message).toEqual({
+        expect(Chunk.toArray(message)[0]).toEqual({
             payload: JSON.stringify({
                 sensor1: "value",
                 time: deviceMessage.time,
                 id: deviceMessage.id,
             }),
             retain: false,
-            topic: "a_base_topic/miflora/aa:bb/state",
+            topic: "test/miflora/aa:bb/state",
         });
     });
 
@@ -171,8 +158,8 @@ describe("HomeAssistant MQTT Message producer", () => {
                 return yield* Stream.runCollect(homeAssistantMqttMessageProducer(availabilityMessage));
             });
 
-            const message = await Effect.runPromise(testEffectWithContext(testProgram));
-            expect(message).toMatchSnapshot();
+            const messages = await Effect.runPromise(testEffectWithContext(testProgram));
+            expect(Chunk.toArray(messages)).toMatchSnapshot();
         }
     );
 });
