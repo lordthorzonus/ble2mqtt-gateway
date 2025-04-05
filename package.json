@@ -7,7 +7,7 @@
         "dev": "ts-node --files src/dev.ts",
         "build": "tsc -p tsconfig.json",
         "start": "node dist/index.js",
-        "start:dev": "ts-node src/index.ts",
+        "start:dev": "ts-node --files src/index.ts",
         "lint": "eslint src/"
     },
     "keywords": [
@@ -25,13 +25,14 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
+        "@effect/platform-node": "0.76.4",
         "dotenv": "16.4.7",
+        "effect": "3.14.1",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",
         "luxon": "3.6.1",
         "mqtt": "5.10.4",
-        "rxjs": "7.8.2",
         "uuid": "11.1.0",
         "winston": "3.17.0",
         "zod": "3.24.2"

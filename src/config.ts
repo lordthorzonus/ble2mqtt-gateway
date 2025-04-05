@@ -1,6 +1,7 @@
 import { load } from "js-yaml";
 import fs from "fs";
 import { z, ZodError } from "zod";
+import { Data, Effect } from "effect";
 
 const mqttSchema = z.object({
     host: z.string(),
@@ -11,36 +12,34 @@ const mqttSchema = z.object({
     protocol: z.union([z.literal("mqtt"), z.literal("mqtts"), z.literal("tcp"), z.literal("ssl")]).default("mqtt"),
 });
 
-const ruuvitagSchema = z
-    .object({
-        allow_unknown: z.boolean().default(false),
-        timeout: z.number().int().default(30000),
-        devices: z
-            .array(
-                z.object({
-                    name: z.string(),
-                    id: z.string(),
-                    timeout: z.number().int().optional(),
-                })
-            )
-            .min(0),
-    })
-    .optional();
+const ruuvitagSchema = z.object({
+    allow_unknown: z.boolean().default(false),
+    timeout: z.number().int().default(30000),
+    decimal_precision: z.number().int().optional(),
+    devices: z
+        .array(
+            z.object({
+                name: z.string(),
+                id: z.string(),
+                timeout: z.number().int().optional(),
+            })
+        )
+        .min(0),
+});
 
-const miFloraSchema = z
-    .object({
-        timeout: z.number().int().default(60000),
-        devices: z
-            .array(
-                z.object({
-                    name: z.string(),
-                    id: z.string(),
-                    timeout: z.number().int().optional(),
-                })
-            )
-            .min(0),
-    })
-    .optional();
+const miFloraSchema = z.object({
+    timeout: z.number().int().default(60000),
+    decimal_precision: z.number().int().optional(),
+    devices: z
+        .array(
+            z.object({
+                name: z.string(),
+                id: z.string(),
+                timeout: z.number().int().optional(),
+            })
+        )
+        .min(0),
+});
 
 const configSchema = z.object({
     log_level: z.union([z.literal("info"), z.literal("debug"), z.literal("error")]).default("info"),
@@ -48,10 +47,11 @@ const configSchema = z.object({
     gateway_name: z.string().default("ble2mqtt"),
     gateway_version: z.string().default("development"),
     mqtt: mqttSchema,
+    unavailable_devices_check_interval_ms: z.number().int().default(10000),
     gateways: z.object({
         base_topic: z.string().default("ble2mqtt"),
-        ruuvitag: ruuvitagSchema,
-        miflora: miFloraSchema,
+        ruuvitag: ruuvitagSchema.optional(),
+        miflora: miFloraSchema.optional(),
     }),
     homeassistant: z
         .object({
@@ -71,20 +71,40 @@ const produceErrorMessage = (error: ZodError) => {
     }, errorMessage);
 };
 
-const configurationFileLocation = process.env.CONFIG_FILE_LOCATION ?? `${__dirname}/../config/configuration.yaml`;
-const configurationFileContent = fs.readFileSync(configurationFileLocation, "utf-8");
-const config = load(configurationFileContent);
+export class ConfigurationError extends Data.TaggedError("ConfigurationError")<{
+    message: string;
+    cause: unknown;
+}> {}
 
-export type Config = z.infer<typeof configSchema>;
+export type RuuviTagGatewayConfiguration = z.infer<typeof ruuvitagSchema>;
+export type MiFloraGatewayConfiguration = z.infer<typeof miFloraSchema>;
+export type GlobalConfiguration = z.infer<typeof configSchema>;
 
-export const getConfiguration = (): Config => {
-    try {
-        return configSchema.parse(config);
-    } catch (e) {
-        if (e instanceof ZodError) {
-            console.error(produceErrorMessage(e));
-        }
+const getConfiguration: Effect.Effect<z.infer<typeof configSchema>, ConfigurationError> = Effect.gen(function* () {
+    const configurationFileLocation = process.env.CONFIG_FILE_LOCATION ?? `${__dirname}/../config/configuration.yaml`;
 
-        throw e;
+    const configurationFileContent = yield* Effect.try({
+        try: () => fs.readFileSync(configurationFileLocation, "utf-8"),
+        catch: (e) => new ConfigurationError({ message: "Failed to read configuration file", cause: e }),
+    });
+
+    const config = yield* Effect.try({
+        try: () => load(configurationFileContent),
+        catch: (e) => new ConfigurationError({ message: "Failed to parse yaml", cause: e }),
+    });
+
+    const parsedConfig = configSchema.safeParse(config);
+
+    if (!parsedConfig.success) {
+        return yield* new ConfigurationError({
+            message: produceErrorMessage(parsedConfig.error),
+            cause: parsedConfig.error,
+        });
     }
-};
+
+    return yield* Effect.succeed(parsedConfig.data);
+});
+
+export class Config extends Effect.Service<Config>()("Config", {
+    effect: getConfiguration,
+}) {}

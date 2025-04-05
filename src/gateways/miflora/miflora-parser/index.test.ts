@@ -2,15 +2,12 @@ import {
     MifloraMeasurementEventType,
     parseMiFloraPeripheralAdvertisement,
     SupportedMiFloraMeasurements,
+    InvalidMiFloraAdvertisementError,
+    UnsupportedMiFloraEventError,
 } from "./index";
 import { Peripheral } from "@abandonware/noble";
-
-jest.mock("../../../infra/logger", () => ({
-    __esModule: true,
-    logger: {
-        warn: jest.fn(),
-    },
-}));
+import { Effect } from "effect";
+import { testEffectWithContext } from "../../../test/test-context";
 
 export const getStubPeripheralWithServiceData = (serviceData: string, id = "a"): Peripheral => {
     return {
@@ -51,24 +48,46 @@ describe("parseMiFloraPeripheralAdvertisement()", () => {
         ],
     ];
 
-    it.each(testCases)("should parse %j service data with correct strategy", (peripheral, expectedResult) => {
-        expect(parseMiFloraPeripheralAdvertisement(peripheral)).toEqual(expectedResult);
-    });
+    it.each(testCases)(
+        "should parse %j service data with correct strategy",
+        (peripheral: Peripheral, expectedResult: SupportedMiFloraMeasurements) => {
+            return Effect.runPromise(
+                testEffectWithContext(
+                    Effect.gen(function* () {
+                        const result = yield* parseMiFloraPeripheralAdvertisement(peripheral);
+                        expect(result).toEqual(expectedResult);
+                    })
+                )
+            );
+        }
+    );
 
     it("should throw an error if a invalid peripheral is given", () => {
-        const properPeripheral = getStubPeripheralWithServiceData("");
-        const peripheral = {
-            ...properPeripheral,
-            advertisement: { ...properPeripheral.advertisement, serviceData: [] },
-        } as unknown as Peripheral;
+        return Effect.runPromise(
+            testEffectWithContext(
+                Effect.gen(function* () {
+                    const properPeripheral = getStubPeripheralWithServiceData("");
+                    const peripheral = {
+                        ...properPeripheral,
+                        advertisement: { ...properPeripheral.advertisement, serviceData: [] },
+                    } as unknown as Peripheral;
 
-        expect(() => parseMiFloraPeripheralAdvertisement(peripheral)).toThrow(
-            'Not a valid MiFlora device advertisement. Could not find a service with uuid: "fe95"'
+                    const result = yield* Effect.flip(parseMiFloraPeripheralAdvertisement(peripheral));
+                    expect(result).toStrictEqual(new InvalidMiFloraAdvertisementError({ peripheral }));
+                })
+            )
         );
     });
 
     it("should throw an error if unknown xiaomi service data event is given", () => {
-        const peripheral = getStubPeripheralWithServiceData("5020aa01b064aed0a8654c0d1004d9006001");
-        expect(() => parseMiFloraPeripheralAdvertisement(peripheral)).toThrow("Unsupported MiFlora event got: 1040");
+        return Effect.runPromise(
+            testEffectWithContext(
+                Effect.gen(function* () {
+                    const peripheral = getStubPeripheralWithServiceData("5020aa01b064aed0a8654c0d1004d9006001");
+                    const result = yield* Effect.flip(parseMiFloraPeripheralAdvertisement(peripheral));
+                    expect(result).toStrictEqual(new UnsupportedMiFloraEventError({ eventType: 1040 }));
+                })
+            )
+        );
     });
 });

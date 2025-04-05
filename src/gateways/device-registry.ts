@@ -1,12 +1,11 @@
 import { Device, DeviceType } from "../types";
-import { from, interval, map, mergeMap, Observable } from "rxjs";
-import { filter } from "rxjs/operators";
 import { Peripheral } from "@abandonware/noble";
 import { DateTime } from "luxon";
 
 export interface DeviceSettings {
     device: Device;
     timeout?: number;
+    decimalPrecision?: number;
 }
 
 export interface DeviceRegistryEntry extends DeviceSettings {
@@ -14,13 +13,15 @@ export interface DeviceRegistryEntry extends DeviceSettings {
     availability: "online" | "offline";
     lastPublishedAvailability: "online" | "offline";
     timeout: number;
+    decimalPrecision: number;
 }
 
 export class DeviceRegistry {
     private readonly devices = new Map<string, DeviceRegistryEntry>();
     private readonly defaultTimeout: number;
+    private readonly defaultDecimalPrecision: number;
 
-    public constructor(settings: DeviceSettings[], defaultTimeout: number) {
+    public constructor(settings: DeviceSettings[], defaultTimeout: number, defaultDecimalPrecision: number) {
         settings.forEach((setting) =>
             this.devices.set(setting.device.id, {
                 ...setting,
@@ -28,10 +29,12 @@ export class DeviceRegistry {
                 availability: "offline",
                 lastPublishedAvailability: "offline",
                 timeout: setting.timeout ?? defaultTimeout,
+                decimalPrecision: setting.decimalPrecision ?? defaultDecimalPrecision,
             })
         );
 
         this.defaultTimeout = defaultTimeout;
+        this.defaultDecimalPrecision = defaultDecimalPrecision;
     }
 
     public get(id: string): DeviceRegistryEntry | null {
@@ -52,6 +55,7 @@ export class DeviceRegistry {
             availability: "offline",
             lastSeen: null,
             timeout: this.defaultTimeout,
+            decimalPrecision: this.defaultDecimalPrecision,
             lastPublishedAvailability: "offline",
         };
         this.devices.set(peripheral.uuid, deviceRegistryEntry);
@@ -115,17 +119,10 @@ export class DeviceRegistry {
         return difference > device.timeout;
     }
 
-    public observeUnavailableDevices(): Observable<DeviceRegistryEntry> {
-        return interval(10000).pipe(
-            mergeMap(() => {
-                return from(this.devices.values()).pipe(
-                    filter((device) => DeviceRegistry.isDeviceUnavailable(device)),
-                    filter((device) => device.availability === "online"),
-                    map((device) => {
-                        return this.registerDeviceAsUnavailable(device);
-                    })
-                );
-            })
-        );
+    public getUnavailableDevices(): DeviceRegistryEntry[] {
+        return Array.from(this.devices.values())
+            .filter((device) => DeviceRegistry.isDeviceUnavailable(device))
+            .filter((device) => device.availability === "online")
+            .map((device) => this.registerDeviceAsUnavailable(device));
     }
 }

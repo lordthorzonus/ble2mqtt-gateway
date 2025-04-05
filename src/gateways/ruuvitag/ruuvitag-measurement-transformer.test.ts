@@ -1,22 +1,15 @@
-jest.mock("../../config", () => ({
-    __esModule: true,
-    getConfiguration: jest.fn().mockImplementation(() => {
-        return {
-            decimal_precision: 2,
-        };
-    }),
-}));
-
 import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
-import parse from "./ruuvitag-parser";
+import { parse } from "./ruuvitag-parser";
 import decorateRuuviTagSensorDataWithCalculatedValues, {
     EnhancedRuuviTagSensorData,
 } from "./ruuvitag-sensor-data-decorator";
 import { v4 as uuid } from "uuid";
-import { PeripheralWithManufacturerData } from "@abandonware/noble";
+import { PeripheralWithManufacturerData } from "./ruuvitag-gateway";
 import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
 import { DateTime, Settings } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
+import { Effect } from "effect";
+import { testEffectWithContext } from "../../test/test-context";
 
 Settings.defaultZone = "UTC";
 const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
@@ -60,6 +53,7 @@ describe("RuuviTag Measurement Transformer", () => {
         };
 
         const device: DeviceRegistryEntry = {
+            decimalPrecision: 2,
             device: {
                 id: "1234a",
                 type: DeviceType.Ruuvitag,
@@ -114,45 +108,53 @@ describe("RuuviTag Measurement Transformer", () => {
             },
         };
 
-        it("should transform the given peripheral advertisement into RuuviTagMeasurement", () => {
-            const dummyParsedData = "parsedRuuviTagData";
-            mockedParse.mockReturnValue(dummyParsedData);
-            mockedRuuviTagDecorator.mockReturnValue(sensorData);
-            mockedUuid.mockReturnValue(mockId);
+        it("should transform the given peripheral advertisement into RuuviTagMeasurement", () =>
+            Effect.runPromise(
+                testEffectWithContext(
+                    Effect.gen(function* () {
+                        const dummyParsedData = "parsedRuuviTagData";
+                        mockedParse.mockReturnValue(Effect.succeed(dummyParsedData));
+                        mockedRuuviTagDecorator.mockReturnValue(sensorData);
+                        mockedUuid.mockReturnValue(mockId);
 
-            expect(
-                transformPeripheralAdvertisementToSensorDataDeviceMessage(
-                    peripheral as PeripheralWithManufacturerData,
-                    device
+                        const result = yield* yield* transformPeripheralAdvertisementToSensorDataDeviceMessage(
+                            peripheral as PeripheralWithManufacturerData,
+                            device
+                        );
+                        expect(result).toStrictEqual(expectedMessage);
+
+                        expect(mockedParse).toHaveBeenCalledWith(peripheral.advertisement.manufacturerData);
+                        expect(mockedRuuviTagDecorator).toHaveBeenCalledWith(dummyParsedData);
+                        expect(mockedUuid).toHaveBeenCalledTimes(1);
+                    })
                 )
-            ).toEqual(expectedMessage);
+            ));
 
-            expect(mockedParse).toHaveBeenCalledWith(peripheral.advertisement.manufacturerData);
-            expect(mockedRuuviTagDecorator).toHaveBeenCalledWith(dummyParsedData);
-            expect(mockedUuid).toHaveBeenCalledTimes(1);
-        });
+        it("should use the mac address from the peripheral advertisement if one is not available in sensor data", () =>
+            Effect.runPromise(
+                testEffectWithContext(
+                    Effect.gen(function* () {
+                        const sensorDataWithoutMacAddress = {
+                            ...expectedMessage.payload,
+                            macAddress: null,
+                        };
+                        mockedRuuviTagDecorator.mockReturnValue(sensorDataWithoutMacAddress);
+                        mockedUuid.mockReturnValue(mockId);
 
-        it("should use the mac address from the peripheral advertisement if one is not available in sensor data", () => {
-            const sensorDataWithoutMacAddress = {
-                ...expectedMessage.payload,
-                macAddress: null,
-            };
-            mockedRuuviTagDecorator.mockReturnValue(sensorDataWithoutMacAddress);
-            mockedUuid.mockReturnValue(mockId);
-
-            expect(
-                transformPeripheralAdvertisementToSensorDataDeviceMessage(
-                    peripheral as PeripheralWithManufacturerData,
-                    device
+                        const result = yield* yield* transformPeripheralAdvertisementToSensorDataDeviceMessage(
+                            peripheral as PeripheralWithManufacturerData,
+                            device
+                        );
+                        expect(result).toStrictEqual({
+                            ...expectedMessage,
+                            device: {
+                                ...expectedMessage.device,
+                                macAddress: peripheral.address,
+                            },
+                            payload: { ...sensorDataWithoutMacAddress },
+                        });
+                    })
                 )
-            ).toEqual({
-                ...expectedMessage,
-                device: {
-                    ...expectedMessage.device,
-                    macAddress: peripheral.address,
-                },
-                payload: { ...sensorDataWithoutMacAddress },
-            });
-        });
+            ));
     });
 });

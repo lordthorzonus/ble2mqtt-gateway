@@ -4,8 +4,8 @@ import { MessageType, DeviceType, MifloraSensorMessage } from "../../types";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 import { MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
-import { flow } from "lodash";
 import { formatNumericSensorValue } from "../numeric-sensor-value-formatter";
+import { pipe } from "effect";
 
 export interface MiFloraSensorData {
     temperature: number | null;
@@ -15,29 +15,31 @@ export interface MiFloraSensorData {
     lowBatteryWarning: boolean;
 }
 
-const getSensorData = flow(
-    (buffer: MiFloraSensorMeasurementBuffer) => ({
-        temperature: buffer.temperatureEvent?.data ?? null,
-        moisture: buffer.moistureEvent?.data ?? null,
-        illuminance: buffer.illuminanceEvent?.data ?? null,
-        soilConductivity: buffer.soilConductivityEvent?.data ?? null,
-        lowBatteryWarning: buffer.lowBatteryEvent?.data === 1,
-    }),
-    (sensorData: MiFloraSensorData): MiFloraSensorData => ({
-        temperature: formatNumericSensorValue(sensorData.temperature),
-        moisture: formatNumericSensorValue(sensorData.moisture),
-        illuminance: formatNumericSensorValue(sensorData.illuminance),
-        soilConductivity: formatNumericSensorValue(sensorData.soilConductivity),
-        lowBatteryWarning: sensorData.lowBatteryWarning,
-    })
-);
+const getSensorData = (buffer: MiFloraSensorMeasurementBuffer, decimalPrecision: number) =>
+    pipe(
+        buffer,
+        (buffer: MiFloraSensorMeasurementBuffer) => ({
+            temperature: buffer.temperatureEvent?.data ?? null,
+            moisture: buffer.moistureEvent?.data ?? null,
+            illuminance: buffer.illuminanceEvent?.data ?? null,
+            soilConductivity: buffer.soilConductivityEvent?.data ?? null,
+            lowBatteryWarning: buffer.lowBatteryEvent?.data === 1,
+        }),
+        (sensorData: MiFloraSensorData): MiFloraSensorData => ({
+            temperature: formatNumericSensorValue(sensorData.temperature, decimalPrecision),
+            moisture: formatNumericSensorValue(sensorData.moisture, decimalPrecision),
+            illuminance: formatNumericSensorValue(sensorData.illuminance, decimalPrecision),
+            soilConductivity: formatNumericSensorValue(sensorData.soilConductivity, decimalPrecision),
+            lowBatteryWarning: sensorData.lowBatteryWarning,
+        })
+    );
 
 export const transformMiFloraMeasurementsToDeviceMessage = (
     peripheral: Peripheral,
     deviceRegistryEntry: DeviceRegistryEntry,
     miFloraSensorMeasurementBuffer: MiFloraSensorMeasurementBuffer
 ): MifloraSensorMessage => {
-    const sensorData = getSensorData(miFloraSensorMeasurementBuffer);
+    const sensorData = getSensorData(miFloraSensorMeasurementBuffer, deviceRegistryEntry.decimalPrecision);
 
     return {
         id: uuid(),

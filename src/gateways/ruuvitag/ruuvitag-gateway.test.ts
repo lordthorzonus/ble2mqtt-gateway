@@ -1,37 +1,46 @@
-jest.mock("../../config", () => ({
-    __esModule: true,
-    getConfiguration: jest.fn().mockImplementation(() => {
-        return {
-            decimal_precision: 2,
-        };
-    }),
-}));
-
-import { RuuviTagGateway } from "./ruuvitag-gateway";
-import { Peripheral } from "@abandonware/noble";
-import { take, toArray } from "rxjs";
-import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType } from "../../types";
-import { DateTime, Settings } from "luxon";
+import { Effect, Layer } from "effect";
+import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag-gateway";
+import { Settings } from "luxon";
 import { v4 as uuid } from "uuid";
-import { TestScheduler } from "rxjs/testing";
-
-const ruuviTagUuid = "a1:b2";
-const defaultTimeout = 30000;
-const makeRuuviTagGateway = (allowUnkownRuuviTags = false) => {
-    return new RuuviTagGateway(
-        [
-            {
-                id: ruuviTagUuid,
-                name: "my_ruuvitag",
-            },
-        ],
-        defaultTimeout,
-        allowUnkownRuuviTags
-    );
-};
+import { Peripheral } from "@abandonware/noble";
+import { Logger } from "../../infra/logger";
+import { Config, GlobalConfiguration } from "../../config";
+import { DeviceRegistryService } from "../gateway-helpers";
+import { getTestConfig } from "../../test/test-context";
 
 jest.mock("uuid");
 const mockedUuid = uuid as jest.Mock;
+const defaultTimeout = 30000;
+
+const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
+    base_topic: "test",
+    ruuvitag: {
+        timeout: defaultTimeout,
+        allow_unknown: false,
+        devices: [
+            {
+                id: "a1:b2",
+                name: "my_ruuvitag",
+            },
+        ],
+    },
+};
+
+const ruuviTagSettings = validGatewayConfiguration.ruuvitag;
+
+if (!ruuviTagSettings) {
+    throw new Error("RuuviTag configuration is required for this test");
+}
+
+const TestLayer = Layer.provideMerge(
+    Logger.DefaultWithoutDependencies,
+    Layer.succeed(
+        Config,
+        getTestConfig({
+            gateways: validGatewayConfiguration,
+        })
+    )
+);
 
 describe("RuuviTag Gateway", () => {
     const originalNow = Settings.now;
@@ -39,122 +48,141 @@ describe("RuuviTag Gateway", () => {
         advertisement: {
             manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
         },
-        address: ruuviTagUuid,
+        address: "a1:b2",
         rssi: 23,
-        uuid: ruuviTagUuid,
+        uuid: "a1:b2",
     } as Peripheral;
 
-    describe("handleBleAdvertisement()", () => {
-        beforeEach(() => {
-            Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
-            Settings.defaultZone = "UTC";
-            mockedUuid.mockReturnValue("mock-uuid");
+    beforeEach(() => {
+        Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
+        Settings.defaultZone = "UTC";
+        mockedUuid.mockReturnValue("mock-uuid");
+    });
+
+    afterEach(() => {
+        Settings.now = originalNow;
+        jest.resetAllMocks();
+    });
+
+    const testWithFreshDeviceRegistry = <A, E, R extends Config | Logger | DeviceRegistryService>(
+        program: Effect.Effect<A, E, R>
+    ) => {
+        const deviceRegistry = makeRuuvitagDeviceRegistry(ruuviTagSettings, {
+            defaultDecimalPrecision: 2,
         });
 
-        afterEach(() => {
-            Settings.now = originalNow;
-            jest.resetAllMocks();
-        });
+        const TestLayerWithDeviceRegistry = Layer.merge(
+            TestLayer,
+            Layer.succeed(DeviceRegistryService, deviceRegistry)
+        );
 
-        it("should produce a availability and a payload message for a found ruuvitag advertisement", (done) => {
-            const gateway = makeRuuviTagGateway();
+        return Effect.provide(
+            Effect.gen(function* () {
+                return yield* program;
+            }),
+            TestLayerWithDeviceRegistry
+        );
+    };
 
-            gateway
-                .handleBleAdvertisement(peripheral)
-                .pipe(toArray())
-                .subscribe((messages) => {
-                    expect(messages).toMatchSnapshot();
-                    done();
-                });
-        });
-
-        it("should complete if unknown ruuvitags arent allowed and the ruuvitag that is advertising is not configured", (done) => {
-            const gateway = makeRuuviTagGateway();
-            const testScheduler = new TestScheduler((actual, expected) => {
-                expect(actual).toEqual(expected);
+    describe("ruuvitagGateway()", () => {
+        it("should produce a availability and a payload message for a found ruuvitag advertisement", async () => {
+            const program = Effect.gen(function* () {
+                const gateway = makeRuuvitagGateway(ruuviTagSettings);
+                const messages = yield* gateway(peripheral);
+                return Array.from(messages);
             });
 
-            testScheduler.run((helpers) => {
-                helpers
-                    .expectObservable(
-                        gateway.handleBleAdvertisement({ ...peripheral, uuid: "no-such-ruuvitag" } as Peripheral)
-                    )
-                    .toBe("|");
-                done();
-            });
-
-            return;
+            const messages = await Effect.runPromise(testWithFreshDeviceRegistry(program));
+            expect(messages).toMatchSnapshot();
         });
 
-        it("should not produce the availability message twice if the ruuvitag availability has not changed", () => {
-            const gateway = makeRuuviTagGateway();
-            const observedMessages: (DeviceSensorMessage | DeviceAvailabilityMessage | null)[] = [];
-
-            gateway.handleBleAdvertisement(peripheral).subscribe((message) => {
-                observedMessages.push(message);
+        it("should complete without emitting messages if unknown ruuvitag advertisement is received", async () => {
+            const program = Effect.gen(function* () {
+                const gateway = makeRuuvitagGateway(ruuviTagSettings);
+                const messages = yield* gateway({
+                    ...peripheral,
+                    uuid: "no-such-ruuvitag",
+                } as Peripheral);
+                return Array.from(messages);
             });
 
-            gateway.handleBleAdvertisement(peripheral).subscribe((message) => {
-                observedMessages.push(message);
-            });
-
-            expect(observedMessages).toHaveLength(3);
-            expect(observedMessages[0]?.type).toEqual(MessageType.Availability);
-            expect(observedMessages[1]?.type).toEqual(MessageType.SensorData);
-            expect(observedMessages[2]?.type).toEqual(MessageType.SensorData);
+            const messages = await Effect.runPromise(testWithFreshDeviceRegistry(program));
+            expect(messages).toHaveLength(0);
         });
 
-        it("should handle unknown ruuvitags normally if unknown ruuvitags are allowed", () => {
+        it("should not emit the device message until all sensor events are received once", async () =>
+            Effect.runPromise(
+                testWithFreshDeviceRegistry(
+                    Effect.gen(function* () {
+                        const gateway = makeRuuvitagGateway(ruuviTagSettings);
+
+                        // First message should be availability
+                        const firstMessages = yield* gateway(peripheral);
+                        const firstMessage = Array.from(firstMessages)[0];
+                        expect(firstMessage).toEqual(expect.objectContaining({ type: "availability" }));
+
+                        // Subsequent messages should be sensor data
+                        const secondMessages = yield* gateway(peripheral);
+                        const secondMessage = Array.from(secondMessages)[0];
+                        expect(secondMessage).toEqual(expect.objectContaining({ type: "sensor-data" }));
+                    })
+                )
+            ));
+
+        it("should handle unknown ruuvitags normally if unknown ruuvitags are allowed", async () => {
             const unknownPeripheral = {
                 ...peripheral,
                 uuid: "unknown",
             } as Peripheral;
 
-            const gateway = makeRuuviTagGateway(true);
-            const observedMessages: (DeviceSensorMessage | DeviceAvailabilityMessage | null)[] = [];
+            const program = Effect.gen(function* () {
+                const gateway = makeRuuvitagGateway({ ...ruuviTagSettings, allow_unknown: true });
+                // First call to get availability message
+                const firstMessages = yield* gateway(unknownPeripheral);
 
-            gateway.handleBleAdvertisement(unknownPeripheral).subscribe((message) => {
-                observedMessages.push(message);
+                // Second call to get sensor data
+                const secondMessages = yield* gateway(unknownPeripheral);
+                return [...Array.from(firstMessages), ...Array.from(secondMessages)];
             });
 
-            gateway.handleBleAdvertisement(unknownPeripheral).subscribe((message) => {
-                observedMessages.push(message);
-            });
-
-            expect(observedMessages).toMatchSnapshot();
+            const messages = await Effect.runPromise(testWithFreshDeviceRegistry(program));
+            expect(messages).toMatchSnapshot();
         });
     });
 
-    describe("observeUnavailableDevices()", () => {
+    describe("getUnavailableDevices()", () => {
         beforeEach(() => {
             jest.useFakeTimers();
             mockedUuid.mockReturnValue("mock-uuid");
+            Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
         });
 
         afterEach(() => {
             jest.useRealTimers();
+            Settings.now = originalNow;
         });
 
-        it("should produce unavailability messages for ruuvitags that haven't been observed inside timeout", (done) => {
-            const gateway = makeRuuviTagGateway();
-            gateway
-                .handleBleAdvertisement(peripheral)
-                .pipe(toArray())
-                .subscribe((messages) => {
-                    expect(messages).toHaveLength(2);
-                });
+        it("should produce unavailability messages for ruuvitags that haven't been observed inside timeout", async () => {
+            const deviceRegistry = makeRuuvitagDeviceRegistry(ruuviTagSettings, {
+                defaultDecimalPrecision: 2,
+            });
 
-            gateway
-                .observeUnavailableDevices()
-                .pipe(take(1))
-                .subscribe((message) => {
-                    expect(message).toMatchSnapshot({
-                        time: expect.any(DateTime),
-                    });
-                    done();
-                });
+            const program = Effect.gen(function* () {
+                const gateway = makeRuuvitagGateway(ruuviTagSettings);
+                const messages = yield* gateway(peripheral);
+                expect(Array.from(messages)).toHaveLength(2);
+            });
 
-            jest.advanceTimersByTime(defaultTimeout + 10000);
+            const TestLayerWithDeviceRegistry = Layer.merge(
+                TestLayer,
+                Layer.succeed(DeviceRegistryService, deviceRegistry)
+            );
+
+            await Effect.runPromise(Effect.provide(program, TestLayerWithDeviceRegistry));
+
+            Settings.now = () => new Date("2019-10-10T00:01:00.000Z").valueOf(); // Advance 1 minute
+            const unavailableDevices = deviceRegistry.getUnavailableDevices();
+            expect(unavailableDevices).toMatchSnapshot();
         });
     });
 });

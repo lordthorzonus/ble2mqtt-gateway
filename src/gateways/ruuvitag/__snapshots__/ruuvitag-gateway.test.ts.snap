@@ -1,155 +1,153 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RuuviTag Gateway handleBleAdvertisement() should handle unknown ruuvitags normally if unknown ruuvitags are allowed 1`] = `
+exports[`RuuviTag Gateway getUnavailableDevices() should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
 [
   {
-    "device": {
-      "friendlyName": "unknown",
-      "id": "unknown",
-      "macAddress": "a1:b2",
-      "rssi": 23,
-      "timeout": 30000,
-      "type": "ruuvitag",
-    },
-    "id": "mock-uuid",
-    "payload": {
-      "state": "online",
-    },
-    "time": "2019-10-10T00:00:00.000Z",
-    "type": "availability",
-  },
-  {
-    "device": {
-      "friendlyName": "unknown",
-      "id": "unknown",
-      "macAddress": "CB:B8:33:4C:88:4F",
-      "rssi": 23,
-      "timeout": 30000,
-      "type": "ruuvitag",
-    },
-    "deviceType": "ruuvitag",
-    "id": "mock-uuid",
-    "payload": {
-      "absoluteHumidity": 11.84,
-      "accelerationX": 0,
-      "accelerationY": -0,
-      "accelerationZ": 1.04,
-      "batteryVoltage": 2.98,
-      "dewPoint": 14.2,
-      "heatIndex": 26,
-      "humidex": 28,
-      "macAddress": "CB:B8:33:4C:88:4F",
-      "measurementSequence": 205,
-      "movementCounter": 66,
-      "pressure": 100044,
-      "relativeHumidityPercentage": 53.49,
-      "temperature": 24.3,
-      "txPower": 4,
-    },
-    "time": "2019-10-10T00:00:00.000Z",
-    "type": "sensor-data",
-  },
-  {
-    "device": {
-      "friendlyName": "unknown",
-      "id": "unknown",
-      "macAddress": "CB:B8:33:4C:88:4F",
-      "rssi": 23,
-      "timeout": 30000,
-      "type": "ruuvitag",
-    },
-    "deviceType": "ruuvitag",
-    "id": "mock-uuid",
-    "payload": {
-      "absoluteHumidity": 11.84,
-      "accelerationX": 0,
-      "accelerationY": -0,
-      "accelerationZ": 1.04,
-      "batteryVoltage": 2.98,
-      "dewPoint": 14.2,
-      "heatIndex": 26,
-      "humidex": 28,
-      "macAddress": "CB:B8:33:4C:88:4F",
-      "measurementSequence": 205,
-      "movementCounter": 66,
-      "pressure": 100044,
-      "relativeHumidityPercentage": 53.49,
-      "temperature": 24.3,
-      "txPower": 4,
-    },
-    "time": "2019-10-10T00:00:00.000Z",
-    "type": "sensor-data",
-  },
-]
-`;
-
-exports[`RuuviTag Gateway handleBleAdvertisement() should produce a availability and a payload message for a found ruuvitag advertisement 1`] = `
-[
-  {
+    "availability": "offline",
+    "decimalPrecision": 2,
     "device": {
       "friendlyName": "my_ruuvitag",
       "id": "a1:b2",
-      "macAddress": "a1:b2",
-      "rssi": 23,
-      "timeout": 30000,
       "type": "ruuvitag",
     },
-    "id": "mock-uuid",
-    "payload": {
-      "state": "online",
-    },
-    "time": "2019-10-10T00:00:00.000Z",
-    "type": "availability",
-  },
-  {
-    "device": {
-      "friendlyName": "my_ruuvitag",
-      "id": "a1:b2",
-      "macAddress": "CB:B8:33:4C:88:4F",
-      "rssi": 23,
-      "timeout": 30000,
-      "type": "ruuvitag",
-    },
-    "deviceType": "ruuvitag",
-    "id": "mock-uuid",
-    "payload": {
-      "absoluteHumidity": 11.84,
-      "accelerationX": 0,
-      "accelerationY": -0,
-      "accelerationZ": 1.04,
-      "batteryVoltage": 2.98,
-      "dewPoint": 14.2,
-      "heatIndex": 26,
-      "humidex": 28,
-      "macAddress": "CB:B8:33:4C:88:4F",
-      "measurementSequence": 205,
-      "movementCounter": 66,
-      "pressure": 100044,
-      "relativeHumidityPercentage": 53.49,
-      "temperature": 24.3,
-      "txPower": 4,
-    },
-    "time": "2019-10-10T00:00:00.000Z",
-    "type": "sensor-data",
-  },
-]
-`;
-
-exports[`RuuviTag Gateway observeUnavailableDevices() should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
-{
-  "device": {
-    "friendlyName": "my_ruuvitag",
-    "id": "a1:b2",
-    "macAddress": "a1:b2",
-    "rssi": null,
+    "lastPublishedAvailability": "online",
+    "lastSeen": "2019-10-10T00:00:00.000Z",
     "timeout": 30000,
-    "type": "ruuvitag",
   },
-  "id": "mock-uuid",
-  "payload": {
-    "state": "offline",
+]
+`;
+
+exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags normally if unknown ruuvitags are allowed 1`] = `
+[
+  {
+    "device": {
+      "friendlyName": "unknown",
+      "id": "unknown",
+      "macAddress": "a1:b2",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": {
+      "state": "online",
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "availability",
   },
-  "time": Any<DateTime>,
-  "type": "availability",
-}
+  {
+    "device": {
+      "friendlyName": "unknown",
+      "id": "unknown",
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "deviceType": "ruuvitag",
+    "id": "mock-uuid",
+    "payload": {
+      "absoluteHumidity": 11.84,
+      "accelerationX": 0,
+      "accelerationY": -0,
+      "accelerationZ": 1.04,
+      "batteryVoltage": 2.98,
+      "dewPoint": 14.2,
+      "heatIndex": 26,
+      "humidex": 28,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "measurementSequence": 205,
+      "movementCounter": 66,
+      "pressure": 100044,
+      "relativeHumidityPercentage": 53.49,
+      "temperature": 24.3,
+      "txPower": 4,
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "sensor-data",
+  },
+  {
+    "device": {
+      "friendlyName": "unknown",
+      "id": "unknown",
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "deviceType": "ruuvitag",
+    "id": "mock-uuid",
+    "payload": {
+      "absoluteHumidity": 11.84,
+      "accelerationX": 0,
+      "accelerationY": -0,
+      "accelerationZ": 1.04,
+      "batteryVoltage": 2.98,
+      "dewPoint": 14.2,
+      "heatIndex": 26,
+      "humidex": 28,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "measurementSequence": 205,
+      "movementCounter": 66,
+      "pressure": 100044,
+      "relativeHumidityPercentage": 53.49,
+      "temperature": 24.3,
+      "txPower": 4,
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "sensor-data",
+  },
+]
+`;
+
+exports[`RuuviTag Gateway ruuvitagGateway() should produce a availability and a payload message for a found ruuvitag advertisement 1`] = `
+[
+  {
+    "device": {
+      "friendlyName": "my_ruuvitag",
+      "id": "a1:b2",
+      "macAddress": "a1:b2",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": {
+      "state": "online",
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "availability",
+  },
+  {
+    "device": {
+      "friendlyName": "my_ruuvitag",
+      "id": "a1:b2",
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "deviceType": "ruuvitag",
+    "id": "mock-uuid",
+    "payload": {
+      "absoluteHumidity": 11.84,
+      "accelerationX": 0,
+      "accelerationY": -0,
+      "accelerationZ": 1.04,
+      "batteryVoltage": 2.98,
+      "dewPoint": 14.2,
+      "heatIndex": 26,
+      "humidex": 28,
+      "macAddress": "CB:B8:33:4C:88:4F",
+      "measurementSequence": 205,
+      "movementCounter": 66,
+      "pressure": 100044,
+      "relativeHumidityPercentage": 53.49,
+      "temperature": 24.3,
+      "txPower": 4,
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "sensor-data",
+  },
+]
 `;

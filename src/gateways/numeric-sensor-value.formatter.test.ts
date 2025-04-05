@@ -25,26 +25,20 @@ describe("formatNumericSensorValue", () => {
     });
 
     it.each(testCases)(
-        "should format the value to %d when the configured decimal_precision is %d",
+        "should format the value to %d when the decimal precision is %d",
         (expectedValue, decimalPrecision, givenValue) => {
-            mockGetConfiguration.mockReturnValue({
-                decimal_precision: decimalPrecision,
-            });
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const formatNumericSensorValue = require("./numeric-sensor-value-formatter").formatNumericSensorValue;
 
-            expect(formatNumericSensorValue(givenValue)).toBe(expectedValue);
+            expect(formatNumericSensorValue(givenValue, decimalPrecision)).toBe(expectedValue);
         }
     );
 
     it("should handle zero and null", () => {
-        mockGetConfiguration.mockReturnValue({
-            decimal_precision: 2,
-        });
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const formatNumericSensorValue = require("./numeric-sensor-value-formatter").formatNumericSensorValue;
 
-        expect(formatNumericSensorValue(0)).toBe(0);
-        expect(formatNumericSensorValue(null)).toBeNull();
+        expect(formatNumericSensorValue(0, 2)).toBe(0);
+        expect(formatNumericSensorValue(null, 2)).toBeNull();
     });
 });

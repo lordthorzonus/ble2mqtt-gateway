@@ -1,6 +1,6 @@
 import DataFormat3ParsingStrategy from "./parsing-strategies/data-format-3-parsing-strategy";
 import DataFormat5ParsingStrategy from "./parsing-strategies/data-format-5-parsing-strategy";
-import { ruuviTagManufacturerId, validateRuuviTag } from "./ruuvitag-validator";
+import { Data, Effect, Match } from "effect";
 
 type Nullable<T> = T | null;
 
@@ -34,41 +34,47 @@ enum RuuviTagDataOffsets {
     DataFormatOffset = 2,
 }
 
-const DataFormatParsingStrategyMap = new Map<RuuvitagSensorProtocolDataFormat, RuuviTagParsingStrategy>([
-    [RuuvitagSensorProtocolDataFormat.DataFormat3, DataFormat3ParsingStrategy],
-    [RuuvitagSensorProtocolDataFormat.DataFormat5, DataFormat5ParsingStrategy],
-]);
+export const ruuviTagManufacturerId = 0x0499;
 
-const throwNotValidManufacturerIdError = (manufacturerId: number) => {
-    throw Error(
-        `Not a valid RuuviTag payload. Got manufacturerId: 0x${manufacturerId
-            .toString(16)
-            .padStart(4, "0")}, expected: 0x${ruuviTagManufacturerId.toString(16).padStart(4, "0")}`
-    );
-};
-
-const validate = (rawRuuviTagData: Buffer) => {
-    const manufacturerId = rawRuuviTagData.readUInt16LE(RuuviTagDataOffsets.ManufacturedIdOffset);
-
-    if (!validateRuuviTag(rawRuuviTagData)) {
-        throwNotValidManufacturerIdError(manufacturerId);
-    }
-};
-
-const resolveParsingStrategy = (rawRuuviTagData: Buffer): RuuviTagParsingStrategy => {
-    const dataFormat = rawRuuviTagData.readUInt8(RuuviTagDataOffsets.DataFormatOffset);
-    const parsingStrategy = DataFormatParsingStrategyMap.get(dataFormat);
-
-    if (!parsingStrategy) {
-        throw Error(`Unsupported data format, got a payload containing data format: ${dataFormat}`);
+/**
+ * Checks if the given manufacturerData contains the correct manufacturerId 0x0499 The least significant byte first.
+ */
+const validateRuuviTag = (manufacturerData?: Buffer): boolean => {
+    if (!manufacturerData) {
+        return false;
     }
 
-    return parsingStrategy;
+    const manufacturerId = manufacturerData.readUInt16LE(0);
+
+    return manufacturerId === ruuviTagManufacturerId;
 };
 
-const parse = (rawRuuviTagData: Buffer): RuuviTagSensorData => {
-    validate(rawRuuviTagData);
-    return resolveParsingStrategy(rawRuuviTagData).parse(rawRuuviTagData);
-};
+export class NotValidRuuviManufacturerIdError extends Data.TaggedError("NotValidRuuviManufacturerIdError")<{
+    manufacturerId: number;
+}> {}
 
-export default parse;
+export class UnsupportedDataFormatError extends Data.TaggedError("UnsupportedDataFormatError")<{
+    dataFormat: number;
+}> {}
+
+export type RuuviParsingError = NotValidRuuviManufacturerIdError | UnsupportedDataFormatError;
+
+const resolveParsingStrategy = Match.type<number>().pipe(
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed(DataFormat3ParsingStrategy)),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat5, () => Effect.succeed(DataFormat5ParsingStrategy)),
+    Match.orElse((dataFormat) => new UnsupportedDataFormatError({ dataFormat }))
+);
+
+export const parse = (rawRuuviTagData: Buffer): Effect.Effect<RuuviTagSensorData, RuuviParsingError> =>
+    Effect.gen(function* () {
+        const manufacturerId = rawRuuviTagData.readUInt16LE(RuuviTagDataOffsets.ManufacturedIdOffset);
+
+        if (!validateRuuviTag(rawRuuviTagData)) {
+            return yield* new NotValidRuuviManufacturerIdError({ manufacturerId });
+        }
+
+        const dataFormat = rawRuuviTagData.readUInt8(RuuviTagDataOffsets.DataFormatOffset);
+        const parsingStrategy = yield* resolveParsingStrategy(dataFormat);
+
+        return parsingStrategy.parse(rawRuuviTagData);
+    });

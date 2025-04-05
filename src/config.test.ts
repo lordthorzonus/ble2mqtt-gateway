@@ -1,5 +1,8 @@
+import { Config } from "./config";
+
 jest.mock("fs");
 
+import { Effect } from "effect";
 import { readFileSync } from "fs";
 
 const mockReadFileSync = readFileSync as jest.Mock;
@@ -42,12 +45,19 @@ describe("Config", () => {
         jest.restoreAllMocks();
     });
 
-    describe("getConfiguration()", () => {
+    describe("Config", () => {
         it("should return the proper configuration given in the env variable", () => {
             process.env.CONFIG_FILE_LOCATION = "test";
             mockReadFileSync.mockReturnValue(exampleConfiguration);
-            expect(jest.requireActual("./config").getConfiguration()).toMatchSnapshot();
-            expect(mockReadFileSync).toHaveBeenCalledWith("test", "utf-8");
+
+            const configProgram = Effect.gen(function* () {
+                const configuration = yield* Config;
+
+                expect(configuration).toMatchSnapshot();
+                expect(mockReadFileSync).toHaveBeenCalledWith("test", "utf-8");
+            });
+
+            return Effect.runPromise(Effect.provide(configProgram, Config.Default));
         });
     });
 });

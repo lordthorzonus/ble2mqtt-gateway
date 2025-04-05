@@ -1,7 +1,6 @@
 import { DeviceRegistry, DeviceSettings } from "./device-registry";
 import { DeviceType } from "../types";
 import { Settings } from "luxon";
-import { take, toArray } from "rxjs";
 import { Peripheral } from "@abandonware/noble";
 
 const defaultRuuviTagId = "da21045d81a8";
@@ -18,7 +17,8 @@ function makeDeviceRegistry(settings: DeviceSettings[] = []) {
             },
             ...settings,
         ],
-        defaultTimeout
+        defaultTimeout,
+        2
     );
 }
 
@@ -38,6 +38,7 @@ describe("Device Registry", () => {
         it("should return the given deviceRegistry entry with given id", () => {
             expect(deviceRegistry.get(defaultRuuviTagId)).toEqual({
                 availability: "offline",
+                decimalPrecision: 2,
                 device: {
                     friendlyName: "fridge_ruuvitag",
                     id: defaultRuuviTagId,
@@ -112,7 +113,7 @@ describe("Device Registry", () => {
         });
     });
 
-    describe("observeUnavailableDevices()", () => {
+    describe("getUnavailableDevices()", () => {
         beforeEach(() => {
             jest.useFakeTimers();
         });
@@ -121,24 +122,23 @@ describe("Device Registry", () => {
             jest.useRealTimers();
         });
 
-        it("should publish the device registry entry after the default timeout", (done) => {
+        it("should publish the device registry entry after the default timeout", () => {
             const deviceRegistry = makeDeviceRegistry();
-            const unavailableObservable = deviceRegistry.observeUnavailableDevices();
 
             expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toBe("offline");
             deviceRegistry.registerFoundAdvertisement(defaultRuuviTagId);
             expect(deviceRegistry.get(defaultRuuviTagId)?.availability).toBe("online");
 
-            unavailableObservable.pipe(take(1)).subscribe((deviceRegistryEntry) => {
-                expect(deviceRegistryEntry.device.id).toEqual(defaultRuuviTagId);
-                expect(deviceRegistryEntry.lastPublishedAvailability).toBe("offline");
-                expect(deviceRegistryEntry.availability).toBe("offline");
-                done();
-            });
             jest.advanceTimersByTime(defaultTimeout + 10000);
+
+            const unavailableDevices = deviceRegistry.getUnavailableDevices();
+            const deviceRegistryEntry = unavailableDevices[0];
+            expect(deviceRegistryEntry?.device.id).toEqual(defaultRuuviTagId);
+            expect(deviceRegistryEntry?.lastPublishedAvailability).toBe("offline");
+            expect(deviceRegistryEntry?.availability).toBe("offline");
         });
 
-        it("should respect the timeout given to individual devices", (done) => {
+        it("should respect the timeout given to individual devices", () => {
             const customTimeoutDeviceId = "da21045d81a9";
             const deviceRegistryWithIndividualTimeouts = makeDeviceRegistry([
                 {
@@ -155,19 +155,15 @@ describe("Device Registry", () => {
             deviceRegistryWithIndividualTimeouts.registerFoundAdvertisement(customTimeoutDeviceId);
             expect(deviceRegistryWithIndividualTimeouts.get(customTimeoutDeviceId)?.availability).toBe("online");
 
-            deviceRegistryWithIndividualTimeouts
-                .observeUnavailableDevices()
-                .pipe(take(1))
-                .subscribe((deviceRegistry) => {
-                    expect(deviceRegistry.device.id).toEqual(customTimeoutDeviceId);
-                    expect(deviceRegistry.lastPublishedAvailability).toBe("offline");
-                    expect(deviceRegistry.availability).toBe("offline");
-                    done();
-                });
             jest.advanceTimersByTime(20000);
+            const unavailableDevices = deviceRegistryWithIndividualTimeouts.getUnavailableDevices();
+            const deviceRegistry = unavailableDevices[0];
+            expect(deviceRegistry?.device.id).toEqual(customTimeoutDeviceId);
+            expect(deviceRegistry?.lastPublishedAvailability).toBe("offline");
+            expect(deviceRegistry?.availability).toBe("offline");
         });
 
-        it("should work correctly with multiple devices", (done) => {
+        it("should work correctly with multiple devices", () => {
             const deviceRegistry = makeDeviceRegistry([
                 {
                     device: {
@@ -188,16 +184,11 @@ describe("Device Registry", () => {
             deviceRegistry.registerFoundAdvertisement("a");
             deviceRegistry.registerFoundAdvertisement("b");
 
-            deviceRegistry
-                .observeUnavailableDevices()
-                .pipe(take(2), toArray())
-                .subscribe((observedDevices) => {
-                    expect(observedDevices[0]?.device.id).toBe("a");
-                    expect(observedDevices[1]?.device.id).toBe("b");
-                    done();
-                });
-
-            jest.runAllTimers();
+            jest.advanceTimersByTime(defaultTimeout + 10000);
+            const unavailableDevices = deviceRegistry.getUnavailableDevices();
+            expect(unavailableDevices).toHaveLength(2);
+            expect(unavailableDevices[0]?.device.id).toBe("a");
+            expect(unavailableDevices[1]?.device.id).toBe("b");
         });
     });
 
