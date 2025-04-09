@@ -25,9 +25,9 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.76.11",
+        "@effect/platform-node": "0.76.12",
         "dotenv": "16.4.7",
-        "effect": "3.14.6",
+        "effect": "3.14.7",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",
