@@ -25,7 +25,7 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.76.22",
+        "@effect/platform-node": "0.77.0",
         "dotenv": "16.5.0",
         "effect": "3.14.12",
         "js-yaml": "4.1.0",
