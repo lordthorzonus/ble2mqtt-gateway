@@ -25,9 +25,9 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.77.6",
+        "@effect/platform-node": "0.77.8",
         "dotenv": "16.5.0",
-        "effect": "3.14.18",
+        "effect": "3.14.19",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",
@@ -45,7 +45,7 @@
         "@types/lodash.snakecase": "4.1.9",
         "@types/luxon": "3.6.2",
         "@types/noble": "0.0.44",
-        "@types/node": "22.15.3",
+        "@types/node": "22.15.12",
         "@types/uuid": "10.0.0",
         "@types/ws": "8.18.1",
         "eslint": "9.26.0",
@@ -57,7 +57,7 @@
         "ts-jest": "29.3.2",
         "ts-node": "10.9.2",
         "typescript": "5.8.3",
-        "typescript-eslint": "8.31.1"
+        "typescript-eslint": "8.32.0"
     },
     "jest": {
         "moduleFileExtensions": [
