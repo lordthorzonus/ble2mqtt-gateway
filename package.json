@@ -25,7 +25,7 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.85.12",
+        "@effect/platform-node": "0.85.13",
         "dotenv": "16.5.0",
         "effect": "3.16.5",
         "js-yaml": "4.1.0",
@@ -35,7 +35,7 @@
         "mqtt": "5.13.1",
         "uuid": "11.1.0",
         "winston": "3.17.0",
-        "zod": "3.25.56"
+        "zod": "3.25.57"
     },
     "devDependencies": {
         "@eslint/js": "9.28.0",
@@ -45,7 +45,7 @@
         "@types/lodash.snakecase": "4.1.9",
         "@types/luxon": "3.6.2",
         "@types/noble": "0.0.44",
-        "@types/node": "22.15.30",
+        "@types/node": "22.15.31",
         "@types/uuid": "10.0.0",
         "@types/ws": "8.18.1",
         "eslint": "9.28.0",
