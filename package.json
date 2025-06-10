@@ -25,7 +25,7 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.85.11",
+        "@effect/platform-node": "0.85.12",
         "dotenv": "16.5.0",
         "effect": "3.16.5",
         "js-yaml": "4.1.0",
@@ -57,7 +57,7 @@
         "ts-jest": "29.3.4",
         "ts-node": "10.9.2",
         "typescript": "5.8.3",
-        "typescript-eslint": "8.33.1"
+        "typescript-eslint": "8.34.0"
     },
     "jest": {
         "moduleFileExtensions": [
