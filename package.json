@@ -25,7 +25,7 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.85.13",
+        "@effect/platform-node": "0.85.14",
         "dotenv": "16.5.0",
         "effect": "3.16.5",
         "js-yaml": "4.1.0",
@@ -35,7 +35,7 @@
         "mqtt": "5.13.1",
         "uuid": "11.1.0",
         "winston": "3.17.0",
-        "zod": "3.25.57"
+        "zod": "3.25.58"
     },
     "devDependencies": {
         "@eslint/js": "9.28.0",
@@ -50,7 +50,7 @@
         "@types/ws": "8.18.1",
         "eslint": "9.28.0",
         "eslint-config-prettier": "10.1.5",
-        "eslint-plugin-jest": "28.13.0",
+        "eslint-plugin-jest": "28.13.3",
         "eslint-plugin-prettier": "5.4.1",
         "jest": "29.7.0",
         "prettier": "3.5.3",
