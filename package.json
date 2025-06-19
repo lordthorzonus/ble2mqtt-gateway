@@ -25,7 +25,7 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.86.2",
+        "@effect/platform-node": "0.86.4",
         "dotenv": "16.5.0",
         "effect": "3.16.8",
         "js-yaml": "4.1.0",
@@ -52,7 +52,7 @@
         "eslint-config-prettier": "10.1.5",
         "eslint-plugin-jest": "29.0.1",
         "eslint-plugin-prettier": "5.5.0",
-        "jest": "30.0.0",
+        "jest": "30.0.1",
         "prettier": "3.5.3",
         "ts-jest": "29.4.0",
         "ts-node": "10.9.2",
