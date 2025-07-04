@@ -25,7 +25,7 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.88.10",
+        "@effect/platform-node": "0.88.11",
         "dotenv": "17.0.1",
         "effect": "3.16.12",
         "js-yaml": "4.1.0",
@@ -35,7 +35,7 @@
         "mqtt": "5.13.1",
         "uuid": "11.1.0",
         "winston": "3.17.0",
-        "zod": "3.25.71"
+        "zod": "3.25.72"
     },
     "devDependencies": {
         "@eslint/js": "9.30.1",
