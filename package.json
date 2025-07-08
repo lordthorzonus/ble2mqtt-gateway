@@ -26,7 +26,7 @@
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
         "@effect/platform-node": "0.89.2",
-        "dotenv": "17.0.1",
+        "dotenv": "17.1.0",
         "effect": "3.16.12",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
