@@ -25,9 +25,9 @@
     "license": "MIT",
     "dependencies": {
         "@abandonware/noble": "1.9.2-26",
-        "@effect/platform-node": "0.91.0",
+        "@effect/platform-node": "0.92.0",
         "dotenv": "17.2.0",
-        "effect": "3.16.16",
+        "effect": "3.17.0",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",
@@ -52,12 +52,12 @@
         "eslint-config-prettier": "10.1.8",
         "eslint-plugin-jest": "29.0.1",
         "eslint-plugin-prettier": "5.5.3",
-        "jest": "30.0.4",
+        "jest": "30.0.5",
         "prettier": "3.6.2",
         "ts-jest": "29.4.0",
         "ts-node": "10.9.2",
         "typescript": "5.8.3",
-        "typescript-eslint": "8.37.0"
+        "typescript-eslint": "8.38.0"
     },
     "jest": {
         "moduleFileExtensions": [
