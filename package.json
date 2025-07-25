@@ -27,7 +27,7 @@
         "@abandonware/noble": "1.9.2-26",
         "@effect/platform-node": "0.94.0",
         "dotenv": "17.2.1",
-        "effect": "3.17.1",
+        "effect": "3.17.2",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",
@@ -38,7 +38,7 @@
         "zod": "4.0.10"
     },
     "devDependencies": {
-        "@eslint/js": "9.31.0",
+        "@eslint/js": "9.32.0",
         "@types/jest": "30.0.0",
         "@types/js-yaml": "4.0.9",
         "@types/lodash": "4.17.20",
@@ -48,7 +48,7 @@
         "@types/node": "22.16.5",
         "@types/uuid": "10.0.0",
         "@types/ws": "8.18.1",
-        "eslint": "9.31.0",
+        "eslint": "9.32.0",
         "eslint-config-prettier": "10.1.8",
         "eslint-plugin-jest": "29.0.1",
         "eslint-plugin-prettier": "5.5.3",
