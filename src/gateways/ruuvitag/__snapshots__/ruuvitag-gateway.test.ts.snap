@@ -25,7 +25,7 @@ exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags norm
       "friendlyName": "unknown",
       "id": "unknown",
       "macAddress": "a1:b2",
-      "model": "air-quality",
+      "model": "environmental",
       "rssi": 23,
       "timeout": 30000,
       "type": "ruuvitag",

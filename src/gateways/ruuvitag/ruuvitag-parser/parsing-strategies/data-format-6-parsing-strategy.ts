@@ -1,205 +1,29 @@
 import { RuuviTagAirQualityParsingStrategy } from "../index";
+import {
+    parseTemperature,
+    parseRelativeHumidity,
+    parsePressure,
+    parseParticulateMatter,
+    parseCO2,
+    parseVOC,
+    parseNOX,
+    parseCalibrationInProgress,
+} from "./common-parsing-strategy-utils";
 
 enum DataFormatV6Offset {
-    Temperature = 1,
-    Humidity = 3,
-    Pressure = 5,
-    PM25 = 7,
-    CO2 = 9,
-    VOC = 11,
-    NOX = 12,
-    Luminosity = 13,
-    Reserved = 14,
-    MeasurementSequence = 15,
-    Flags = 16,
-    MacAddress = 17,
+    Temperature = 3,
+    Humidity = 5,
+    Pressure = 7,
+    PM25 = 9,
+    CO2 = 11,
+    VOC = 13,
+    NOX = 14,
+    Luminosity = 15,
+    Reserved = 16,
+    MeasurementSequence = 17,
+    Flags = 18,
+    MacAddress = 19,
 }
-
-const isInvalidMeasurementForSigned16BitInteger = (value: number): boolean => {
-    return value === 0x8000 || value === -0x8000;
-};
-
-const isInvalidMeasurementForUnsigned16BitInteger = (value: number) => {
-    return value === 0xffff;
-};
-
-/**
- * Parses the temperature from the advertisement.
- * Values supported: -163.835 °C to +163.835 °C in 0.005 °C increments.
- *
- * Example:
- * Value    Measurement
- * 0x0000   0 °C
- * 0x01C3   +2.255 °C
- * 0xFE3D   -2.255 °C
- * 0x8000   Invalid / not available
- *
- * @return Returns the value in Celsius (°C).
- */
-const parseTemperature = (rawData: Buffer): number | null => {
-    const temperature = rawData.readInt16BE(DataFormatV6Offset.Temperature);
-    const degreeIncrements = 0.005;
-
-    if (isInvalidMeasurementForSigned16BitInteger(temperature)) {
-        return null;
-    }
-
-    return temperature * degreeIncrements;
-};
-
-/**
- * Parses the humidity from the advertisement.
- * Values supported: 0.0 % to 100 % in 0.0025 % increments.
- * Higher values than 100 % are possible, but they generally indicate a faulty or miscalibrated sensor.
- *
- * Example:
- * Value    Measurement
- * 0        0%
- * 10010    25.025%
- * 40000    100.0%
- * 65535    Invalid / not available
- *
- * @return Returns the value in percents (%).
- */
-const parseRelativeHumidity = (rawData: Buffer): number | null => {
-    const humidity = rawData.readUInt16BE(DataFormatV6Offset.Humidity);
-    const percentageIncrements = 0.0025;
-
-    if (isInvalidMeasurementForUnsigned16BitInteger(humidity)) {
-        return null;
-    }
-
-    return humidity * percentageIncrements;
-};
-
-/**
- * Parses the atmospheric pressure from the advertisement.
- * Values supported: 50000 Pa to 115534 Pa in 1 Pa increments.
- *
- * Example:
- * Value    Measurement
- * 00000    50000 Pa
- * 51325    101325 Pa (average sea-level pressure)
- * 65534    115534 Pa
- * 65535    Invalid / not available
- *
- * @return Returns the pressure in Pascals (Pa).
- */
-const parsePressure = (rawData: Buffer): number | null => {
-    const pressure = rawData.readUInt16BE(DataFormatV6Offset.Pressure);
-    const minimumSupportedPascalMeasurement = 50000;
-
-    if (isInvalidMeasurementForUnsigned16BitInteger(pressure)) {
-        return null;
-    }
-
-    return pressure + minimumSupportedPascalMeasurement;
-};
-
-/**
- * Parses the PM 2.5 (particulate matter) concentration from the advertisement.
- * Values supported: 0 to 6553.4 (μg/m³), however the sensor on Ruuvi supports only 1000 μg/m³.
- * Resolution is 0.1 per bit.
- *
- * Example:
- * Value    Measurement
- * 0x0000   0 μg/m³
- * 0x03E8   100.0 μg/m³
- * 0xFFFF   Invalid / not available
- *
- * @return Returns the value in micrograms per cubic meter (μg/m³).
- */
-const parsePM25 = (rawData: Buffer): number | null => {
-    const pm25 = rawData.readUInt16BE(DataFormatV6Offset.PM25);
-    const resolution = 0.1;
-
-    if (isInvalidMeasurementForUnsigned16BitInteger(pm25)) {
-        return null;
-    }
-
-    return pm25 * resolution;
-};
-
-/**
- * Parses the CO2 concentration from the advertisement.
- * Values supported: 0 to 65534 (ppm), however the sensor on Ruuvi supports only 40000 ppm.
- * In natural environment CO2 is always at least around 400 ppm. Resolution is 1 per bit.
- *
- * Example:
- * Value    Measurement
- * 0x0000   0 ppm
- * 0x03E8   1000 ppm
- * 0xFFFF   Invalid / not available
- *
- * @return Returns the value in parts per million (ppm).
- */
-const parseCO2 = (rawData: Buffer): number | null => {
-    const co2 = rawData.readUInt16BE(DataFormatV6Offset.CO2);
-
-    if (isInvalidMeasurementForUnsigned16BitInteger(co2)) {
-        return null;
-    }
-
-    return co2;
-};
-
-/**
- * Parses the VOC (Volatile Organic Compounds) index from the advertisement.
- * VOC is a unitless index which learns the installation environment and tracks changes over time.
- * The index average is 100, i.e. values under 100 mean the air quality is improving and
- * values over 100 mean the air quality is getting worse.
- * Uses 9 bits, with the least significant bit stored in the Flags byte (bit 6).
- *
- * Example:
- * Value    Measurement
- * 0x000    0
- * 0x0E8    232
- * 0x1FF    Invalid / not available
- *
- * @return Returns the VOC index (unitless).
- */
-const parseVOC = (rawData: Buffer): number | null => {
-    const vocLower8Bits = rawData.readUInt8(DataFormatV6Offset.VOC);
-    const flags = rawData.readUInt8(DataFormatV6Offset.Flags);
-    const vocUpperBit = (flags & 0b01000000) >> 6;
-    const voc = (vocUpperBit << 8) | vocLower8Bits;
-    const max9BitValue = 0x1ff;
-
-    if (voc === max9BitValue) {
-        return null;
-    }
-
-    return voc;
-};
-
-/**
- * Parses the NOX (Nitrogen Oxides) index from the advertisement.
- * NOX is a unitless index which learns the installation environment and tracks changes over time.
- * The index has a base value of 1, values higher than 1 meaning there's more nitrogen oxides
- * in the air than usual.
- * Uses 9 bits, with the least significant bit stored in the Flags byte (bit 7).
- *
- * Example:
- * Value    Measurement
- * 0x000    0
- * 0x0E8    232
- * 0x1FF    Invalid / not available
- *
- * @return Returns the NOX index (unitless).
- */
-const parseNOX = (rawData: Buffer): number | null => {
-    const noxLower8Bits = rawData.readUInt8(DataFormatV6Offset.NOX);
-    const flags = rawData.readUInt8(DataFormatV6Offset.Flags);
-    const noxUpperBit = (flags & 0b10000000) >> 7;
-    const nox = (noxUpperBit << 8) | noxLower8Bits;
-    const max9BitValue = 0x1ff;
-
-    if (nox === max9BitValue) {
-        return null;
-    }
-
-    return nox;
-};
 
 /**
  * Parses the luminosity from the advertisement.
@@ -223,10 +47,12 @@ const parseNOX = (rawData: Buffer): number | null => {
  * 0xFE     65535.00 lux
  * 0xFF     Invalid / not available
  *
- * @return Returns the value in Lux.
+ * @param rawData - The raw buffer data
+ * @param offset - Byte offset to read from
+ * @returns The value in Lux.
  */
-const parseLuminosity = (rawData: Buffer): number | null => {
-    const code = rawData.readUInt8(DataFormatV6Offset.Luminosity);
+const parseLuminosity = (rawData: Buffer, offset: number): number | null => {
+    const code = rawData.readUInt8(offset);
     const maxCode = 254;
 
     if (code === 255) {
@@ -259,25 +85,12 @@ const parseLuminosity = (rawData: Buffer): number | null => {
  * 0x10     10 counts
  * 0xFF     255 counts
  *
- * @return Returns the measurement sequence as number.
+ * @param rawData - The raw buffer data
+ * @param offset - Byte offset to read from
+ * @returns The measurement sequence as number.
  */
-const parseMeasurementSequence = (rawData: Buffer): number | null => {
-    const measurementSequence = rawData.readUInt8(DataFormatV6Offset.MeasurementSequence);
-    return measurementSequence;
-};
-
-/**
- * Parses the calibration status from the flags byte.
- * Flags byte contains additional information and is interpreted bit-by-bit.
- * Bit 0 (least significant) indicates calibration status:
- * 1 -> Calibration in progress, sensor data not fully accurate yet
- * 0 -> Calibration complete
- *
- * @return Returns true if calibration is in progress, false if complete.
- */
-const parseCalibrationInProgress = (rawData: Buffer): boolean => {
-    const flags = rawData.readUInt8(DataFormatV6Offset.Flags);
-    return (flags & 0b00000001) === 1;
+const parseMeasurementSequence = (rawData: Buffer, offset: number): number => {
+    return rawData.readUInt8(offset);
 };
 
 /**
@@ -291,10 +104,12 @@ const parseCalibrationInProgress = (rawData: Buffer): boolean => {
  * Hence iOS devices should use these 24 bits as a static identifier of the device.
  * In case that all the bits are set for the mac address we'll assume it's invalid/not available.
  *
- * @return Returns the 24-bit MAC address as string (3 bytes).
+ * @param rawData - The raw buffer data
+ * @param offset - Byte offset to read from
+ * @returns The 24-bit MAC address as string (3 bytes).
  */
-const parseMacAddress = (rawData: Buffer): string | null => {
-    const macAddressData = rawData.readUIntBE(DataFormatV6Offset.MacAddress, 3);
+const parseMacAddress = (rawData: Buffer, offset: number): string | null => {
+    const macAddressData = rawData.readUIntBE(offset, 3);
     const invalidMacAddress = "ffffff";
     const macAddress = macAddressData.toString(16).padStart(6, "0");
 
@@ -335,16 +150,19 @@ const parseMacAddress = (rawData: Buffer): string | null => {
 export const DataFormat6ParsingStrategy: RuuviTagAirQualityParsingStrategy = (rawRuuviTagData) => {
     return {
         type: "air-quality",
-        temperature: parseTemperature(rawRuuviTagData),
-        relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData),
-        pressure: parsePressure(rawRuuviTagData),
-        pm25: parsePM25(rawRuuviTagData),
-        co2: parseCO2(rawRuuviTagData),
-        voc: parseVOC(rawRuuviTagData),
-        nox: parseNOX(rawRuuviTagData),
-        luminosity: parseLuminosity(rawRuuviTagData),
-        measurementSequence: parseMeasurementSequence(rawRuuviTagData),
-        macAddress: parseMacAddress(rawRuuviTagData),
-        calibrationInProgress: parseCalibrationInProgress(rawRuuviTagData),
+        temperature: parseTemperature(rawRuuviTagData, DataFormatV6Offset.Temperature),
+        relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData, DataFormatV6Offset.Humidity),
+        pressure: parsePressure(rawRuuviTagData, DataFormatV6Offset.Pressure),
+        pm1: null,
+        pm2_5: parseParticulateMatter(rawRuuviTagData, DataFormatV6Offset.PM25),
+        pm4: null,
+        pm10: null,
+        co2: parseCO2(rawRuuviTagData, DataFormatV6Offset.CO2),
+        voc: parseVOC(rawRuuviTagData, DataFormatV6Offset.VOC, DataFormatV6Offset.Flags),
+        nox: parseNOX(rawRuuviTagData, DataFormatV6Offset.NOX, DataFormatV6Offset.Flags),
+        luminosity: parseLuminosity(rawRuuviTagData, DataFormatV6Offset.Luminosity),
+        measurementSequence: parseMeasurementSequence(rawRuuviTagData, DataFormatV6Offset.MeasurementSequence),
+        macAddress: parseMacAddress(rawRuuviTagData, DataFormatV6Offset.MacAddress),
+        calibrationInProgress: parseCalibrationInProgress(rawRuuviTagData, DataFormatV6Offset.Flags),
     };
 };

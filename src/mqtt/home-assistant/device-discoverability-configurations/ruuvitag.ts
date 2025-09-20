@@ -106,12 +106,36 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
         absoluteHumidity: absoluteHumiditySensorConfiguration,
         temperature: temperatureSensorConfiguration,
         pressure: pressureSensorConfiguration,
-        pm25: {
+        pm1: {
+            component: HomeAssistantMQTTComponent.Sensor,
+            deviceClass: HomeAssistantDeviceClass.PM1,
+            name: "PM1.0",
+            unitOfMeasurement: "µg/m³",
+            uniqueId: "pm1",
+            device: ruuviTagDeviceConfiguration,
+        },
+        pm2_5: {
             component: HomeAssistantMQTTComponent.Sensor,
             deviceClass: HomeAssistantDeviceClass.PM25,
             name: "PM2.5",
             unitOfMeasurement: "µg/m³",
-            uniqueId: "pm25",
+            uniqueId: "pm2_5",
+            device: ruuviTagDeviceConfiguration,
+        },
+        pm4: {
+            component: HomeAssistantMQTTComponent.Sensor,
+            deviceClass: HomeAssistantDeviceClass.None,
+            name: "PM4.0",
+            unitOfMeasurement: "µg/m³",
+            uniqueId: "pm4",
+            device: ruuviTagDeviceConfiguration,
+        },
+        pm10: {
+            component: HomeAssistantMQTTComponent.Sensor,
+            deviceClass: HomeAssistantDeviceClass.PM10,
+            name: "PM10.0",
+            unitOfMeasurement: "µg/m³",
+            uniqueId: "pm10",
             device: ruuviTagDeviceConfiguration,
         },
         co2: {

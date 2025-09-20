@@ -80,6 +80,7 @@ export enum HomeAssistantDeviceClass {
     Battery = "battery",
     None = "none",
     Illuminance = "illuminance",
+    PM1 = "pm1",
     PM25 = "pm25",
     PM10 = "pm10",
     CarbonDioxide = "carbon_dioxide",

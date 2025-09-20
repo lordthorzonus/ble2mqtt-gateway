@@ -2,6 +2,7 @@ import { RuuviModel } from "../../../types";
 import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
 import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
 import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy";
+import { DataFormatE1ParsingStrategy } from "./parsing-strategies/data-format-e1-parsing-strategy";
 import { Data, Effect, Match } from "effect";
 
 type Nullable<T> = T | null;
@@ -26,7 +27,10 @@ export interface RuuviTagAirQualitySensorData {
     temperature: Nullable<number>;
     relativeHumidityPercentage: Nullable<number>;
     pressure: Nullable<number>;
-    pm25: Nullable<number>;
+    pm1: Nullable<number>;
+    pm2_5: Nullable<number>;
+    pm4: Nullable<number>;
+    pm10: Nullable<number>;
     co2: Nullable<number>;
     voc: Nullable<number>;
     nox: Nullable<number>;
@@ -46,6 +50,7 @@ enum RuuvitagSensorProtocolDataFormat {
     DataFormat2And4 = 0x04,
     DataFormat5 = 0x05,
     DataFormat6 = 0x06,
+    DataFormatE1 = 0xe1,
 }
 
 enum RuuviTagDataOffsets {
@@ -82,13 +87,16 @@ const resolveParsingStrategy = Match.type<number>().pipe(
     Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed(DataFormat3ParsingStrategy)),
     Match.when(RuuvitagSensorProtocolDataFormat.DataFormat5, () => Effect.succeed(DataFormat5ParsingStrategy)),
     Match.when(RuuvitagSensorProtocolDataFormat.DataFormat6, () => Effect.succeed(DataFormat6ParsingStrategy)),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormatE1, () => Effect.succeed(DataFormatE1ParsingStrategy)),
     Match.orElse((dataFormat) => new UnsupportedDataFormatError({ dataFormat }))
 );
 
 const resolveDeviceModel = Match.type<number>().pipe(
     Match.withReturnType<Effect.Effect<RuuviModel, UnsupportedDataFormatError>>(),
     Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed("environmental" as const)),
-    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat5, () => Effect.succeed("air-quality" as const)),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat5, () => Effect.succeed("environmental" as const)),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat6, () => Effect.succeed("air-quality" as const)),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormatE1, () => Effect.succeed("air-quality" as const)),
     Match.orElse((dataFormat) => new UnsupportedDataFormatError({ dataFormat }))
 );
 
