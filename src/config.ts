@@ -22,6 +22,7 @@ const ruuvitagSchema = z.object({
                 name: z.string(),
                 id: z.string(),
                 timeout: z.number().int().optional(),
+                model: z.enum(["environmental", "air-quality"]).optional().default("environmental"),
             })
         )
         .min(0),

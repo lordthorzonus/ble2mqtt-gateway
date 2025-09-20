@@ -20,14 +20,15 @@ const shouldDeviceAvailabilityBeBroadcast = (deviceRegistryEntry: DeviceRegistry
 
 const handleDeviceAvailability = (
     peripheral: Peripheral,
-    deviceType: DeviceType
+    deviceType: DeviceType,
+    deviceModel: string
 ): Effect.Effect<Option.Option<DeviceAvailabilityMessage>, DeviceNotFoundError, DeviceRegistryService> =>
     Effect.gen(function* () {
         const id = peripheral.uuid;
         const deviceRegistry = yield* DeviceRegistryService;
 
         if (!deviceRegistry.has(id)) {
-            deviceRegistry.registerUnknownDevice(peripheral, deviceType);
+            deviceRegistry.registerUnknownDevice(peripheral, deviceType, deviceModel);
         }
 
         deviceRegistry.registerFoundAdvertisement(id);
@@ -45,10 +46,11 @@ const handleDeviceAvailability = (
         return Option.none();
     });
 
-export const handleBleAdvertisement = <TError, TPeripheral extends Peripheral>(
+export const handleBleAdvertisement = <TError, TPeripheral extends Peripheral, TDeviceModel extends string>(
     peripheral: TPeripheral,
     deviceType: DeviceType,
     unknownDevicesAllowed: boolean,
+    resolveDeviceModel: (peripheral: TPeripheral) => Effect.Effect<TDeviceModel, TError>,
     handleDeviceSensorData: (
         peripheral: TPeripheral,
         deviceRegistryEntry: DeviceRegistryEntry
@@ -59,7 +61,8 @@ export const handleBleAdvertisement = <TError, TPeripheral extends Peripheral>(
         const deviceRegistry = yield* DeviceRegistryService;
 
         if (deviceRegistry.has(id) || unknownDevicesAllowed) {
-            const availabilityMessage = yield* handleDeviceAvailability(peripheral, deviceType);
+            const deviceModel = yield* resolveDeviceModel(peripheral);
+            const availabilityMessage = yield* handleDeviceAvailability(peripheral, deviceType, deviceModel);
             const deviceRegistryEntry = deviceRegistry.get(id);
 
             if (deviceRegistryEntry === null) {

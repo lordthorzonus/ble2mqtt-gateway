@@ -36,6 +36,7 @@ const mockConfig: GlobalConfiguration = {
                 {
                     name: "test",
                     id: "test",
+                    model: "environmental",
                 },
             ],
         },

@@ -1,0 +1,204 @@
+import {
+    EnhancedRuuviTagEnvironmentalSensorData,
+    EnhancedRuuviTagAirQualitySensorData,
+} from "./ruuvitag-sensor-data-decorator";
+import { formatEnvironmentalSensorValues, formatAirQualitySensorValues } from "./ruuvitag-measurement-formatter";
+
+describe("RuuviTag measurement formatter", () => {
+    describe("Environmental sensor data formatting", () => {
+        it("should format environmental sensor values with specified decimal precision", () => {
+            const sensorData: EnhancedRuuviTagEnvironmentalSensorData = {
+                type: "environmental",
+                temperature: 24.31234,
+                relativeHumidityPercentage: 53.49876,
+                pressure: 100044.789,
+                accelerationX: 0.004567,
+                accelerationY: -0.009876,
+                accelerationZ: 1.036543,
+                batteryVoltage: 2.977654,
+                txPower: 4,
+                movementCounter: 66,
+                measurementSequence: 205,
+                macAddress: "CB:B8:33:4C:88:4F",
+                dewPoint: 15.23456,
+                heatIndex: 27.89012,
+                humidex: 30.45678,
+                absoluteHumidity: 12.34567,
+            };
+
+            const formatted = formatEnvironmentalSensorValues(sensorData, 2);
+
+            expect(formatted).toEqual({
+                type: "environmental",
+                temperature: 24.31,
+                relativeHumidityPercentage: 53.5,
+                pressure: 100044.79,
+                accelerationX: 0,
+                accelerationY: -0.01,
+                accelerationZ: 1.04,
+                batteryVoltage: 2.98,
+                txPower: 4,
+                movementCounter: 66,
+                measurementSequence: 205,
+                macAddress: "CB:B8:33:4C:88:4F",
+                dewPoint: 15.23,
+                heatIndex: 27.89012,
+                humidex: 30.45678,
+                absoluteHumidity: 12.35,
+            });
+        });
+
+        it("should handle null values in environmental sensor data", () => {
+            const sensorData: EnhancedRuuviTagEnvironmentalSensorData = {
+                type: "environmental",
+                temperature: null,
+                relativeHumidityPercentage: null,
+                pressure: null,
+                accelerationX: null,
+                accelerationY: null,
+                accelerationZ: null,
+                batteryVoltage: null,
+                txPower: null,
+                movementCounter: null,
+                measurementSequence: null,
+                macAddress: null,
+                dewPoint: null,
+                heatIndex: null,
+                humidex: null,
+                absoluteHumidity: null,
+            };
+
+            const formatted = formatEnvironmentalSensorValues(sensorData, 2);
+
+            expect(formatted).toEqual(sensorData);
+        });
+    });
+
+    describe("Air quality sensor data formatting", () => {
+        it("should format air quality sensor values with specified decimal precision", () => {
+            const sensorData: EnhancedRuuviTagAirQualitySensorData = {
+                type: "air-quality",
+                temperature: 29.50123,
+                relativeHumidityPercentage: 55.30456,
+                pressure: 101102.789,
+                pm25: 11.23456,
+                co2: 201,
+                voc: 10,
+                nox: 2,
+                luminosity: 13026.6789,
+                measurementSequence: 205,
+                macAddress: "4C:88:4F",
+                calibrationInProgress: false,
+                dewPoint: 15.23456,
+                heatIndex: 30.54321,
+                humidex: 32.10987,
+                absoluteHumidity: 14.87654,
+            };
+
+            const formatted = formatAirQualitySensorValues(sensorData, 2);
+
+            expect(formatted).toEqual({
+                type: "air-quality",
+                temperature: 29.5,
+                relativeHumidityPercentage: 55.3,
+                pressure: 101102.79,
+                pm25: 11.23,
+                co2: 201,
+                voc: 10,
+                nox: 2,
+                luminosity: 13026.68,
+                measurementSequence: 205,
+                macAddress: "4C:88:4F",
+                calibrationInProgress: false,
+                dewPoint: 15.23,
+                heatIndex: 30.54321,
+                humidex: 32.10987,
+                absoluteHumidity: 14.88,
+            });
+        });
+
+        it("should handle null values in air quality sensor data", () => {
+            const sensorData: EnhancedRuuviTagAirQualitySensorData = {
+                type: "air-quality",
+                temperature: null,
+                relativeHumidityPercentage: null,
+                pressure: null,
+                pm25: null,
+                co2: null,
+                voc: null,
+                nox: null,
+                luminosity: null,
+                measurementSequence: 255,
+                macAddress: null,
+                calibrationInProgress: true,
+                dewPoint: null,
+                heatIndex: null,
+                humidex: null,
+                absoluteHumidity: null,
+            };
+
+            const formatted = formatAirQualitySensorValues(sensorData, 2);
+
+            expect(formatted).toEqual({
+                type: "air-quality",
+                temperature: null,
+                relativeHumidityPercentage: null,
+                pressure: null,
+                pm25: null,
+                co2: null,
+                voc: null,
+                nox: null,
+                luminosity: null,
+                measurementSequence: 255,
+                macAddress: null,
+                calibrationInProgress: true,
+                dewPoint: null,
+                heatIndex: null,
+                humidex: null,
+                absoluteHumidity: null,
+            });
+        });
+
+        it("should format air quality sensor values with different decimal precision", () => {
+            const sensorData: EnhancedRuuviTagAirQualitySensorData = {
+                type: "air-quality",
+                temperature: 29.50123,
+                relativeHumidityPercentage: 55.30456,
+                pressure: 101102.789,
+                pm25: 11.23456,
+                co2: 201,
+                voc: 10,
+                nox: 2,
+                luminosity: 13026.6789,
+                measurementSequence: 205,
+                macAddress: "4C:88:4F",
+                calibrationInProgress: false,
+                dewPoint: 15.23456,
+                heatIndex: 30.54321,
+                humidex: 32.10987,
+                absoluteHumidity: 14.87654,
+            };
+
+            const formatted = formatAirQualitySensorValues(sensorData, 0);
+
+            expect(formatted).toEqual({
+                type: "air-quality",
+                temperature: 30,
+                relativeHumidityPercentage: 55,
+                pressure: 101103,
+                pm25: 11,
+                co2: 201,
+                voc: 10,
+                nox: 2,
+                luminosity: 13027,
+                measurementSequence: 205,
+                macAddress: "4C:88:4F",
+                calibrationInProgress: false,
+                dewPoint: 15,
+                heatIndex: 30.54321,
+                humidex: 32.10987,
+                absoluteHumidity: 15,
+            });
+        });
+    });
+});

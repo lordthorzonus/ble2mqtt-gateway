@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Config Config should return the proper configuration given in the env variable 1`] = `
 Config {
@@ -25,10 +25,12 @@ Config {
       "devices": [
         {
           "id": "da21045d81a8",
+          "model": "environmental",
           "name": "Fridge Ruuvitag",
         },
         {
           "id": "641cae0910b5",
+          "model": "environmental",
           "name": "balcony_ruuvitag",
         },
       ],

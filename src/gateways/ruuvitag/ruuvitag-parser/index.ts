@@ -1,3 +1,4 @@
+import { RuuviModel } from "../../../types";
 import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
 import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
 import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy";
@@ -84,6 +85,13 @@ const resolveParsingStrategy = Match.type<number>().pipe(
     Match.orElse((dataFormat) => new UnsupportedDataFormatError({ dataFormat }))
 );
 
+const resolveDeviceModel = Match.type<number>().pipe(
+    Match.withReturnType<Effect.Effect<RuuviModel, UnsupportedDataFormatError>>(),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed("environmental" as const)),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat5, () => Effect.succeed("air-quality" as const)),
+    Match.orElse((dataFormat) => new UnsupportedDataFormatError({ dataFormat }))
+);
+
 export const parse = (rawRuuviTagData: Buffer): Effect.Effect<RuuviTagSensorData, RuuviParsingError> =>
     Effect.gen(function* () {
         const manufacturerId = rawRuuviTagData.readUInt16LE(RuuviTagDataOffsets.ManufacturedIdOffset);
@@ -96,4 +104,16 @@ export const parse = (rawRuuviTagData: Buffer): Effect.Effect<RuuviTagSensorData
         const parsingStrategy = yield* resolveParsingStrategy(dataFormat);
 
         return parsingStrategy(rawRuuviTagData);
+    });
+
+export const parseRuuviDeviceModel = (rawRuuviTagData: Buffer): Effect.Effect<RuuviModel, RuuviParsingError> =>
+    Effect.gen(function* () {
+        const manufacturerId = rawRuuviTagData.readUInt16LE(RuuviTagDataOffsets.ManufacturedIdOffset);
+
+        if (!validateRuuviTag(rawRuuviTagData)) {
+            return yield* new NotValidRuuviManufacturerIdError({ manufacturerId });
+        }
+
+        const dataFormat = rawRuuviTagData.readUInt8(RuuviTagDataOffsets.DataFormatOffset);
+        return yield* resolveDeviceModel(dataFormat);
     });

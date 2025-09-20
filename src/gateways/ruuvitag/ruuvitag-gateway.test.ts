@@ -21,6 +21,7 @@ const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
             {
                 id: "a1:b2",
                 name: "my_ruuvitag",
+                model: "environmental",
             },
         ],
     },

@@ -43,7 +43,6 @@ export const transformMiFloraMeasurementsToDeviceMessage = (
 
     return {
         id: uuid(),
-        deviceType: DeviceType.MiFlora,
         device: {
             macAddress: peripheral.address,
             rssi: peripheral.rssi,
@@ -51,6 +50,7 @@ export const transformMiFloraMeasurementsToDeviceMessage = (
             type: DeviceType.MiFlora,
             friendlyName: deviceRegistryEntry.device.friendlyName,
             timeout: deviceRegistryEntry.timeout,
+            model: "miflora",
         },
         time: DateTime.now(),
         type: MessageType.SensorData,

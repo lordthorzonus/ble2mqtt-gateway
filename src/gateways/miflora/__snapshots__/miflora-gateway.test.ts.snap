@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Illuminance event as the first advertisement from the sensor 1`] = `
 [
@@ -7,6 +7,7 @@ exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability
       "friendlyName": "flower",
       "id": "a",
       "macAddress": "aa:bb",
+      "model": "miflora",
       "rssi": 43,
       "timeout": 30000,
       "type": "miflora",
@@ -28,6 +29,7 @@ exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability
       "friendlyName": "flower",
       "id": "a",
       "macAddress": "aa:bb",
+      "model": "miflora",
       "rssi": 43,
       "timeout": 30000,
       "type": "miflora",
@@ -49,6 +51,7 @@ exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability
       "friendlyName": "flower",
       "id": "a",
       "macAddress": "aa:bb",
+      "model": "miflora",
       "rssi": 43,
       "timeout": 30000,
       "type": "miflora",
@@ -70,6 +73,7 @@ exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability
       "friendlyName": "flower",
       "id": "a",
       "macAddress": "aa:bb",
+      "model": "miflora",
       "rssi": 43,
       "timeout": 30000,
       "type": "miflora",

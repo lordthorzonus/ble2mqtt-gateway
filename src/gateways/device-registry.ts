@@ -45,12 +45,13 @@ export class DeviceRegistry {
         return this.devices.has(id);
     }
 
-    public registerUnknownDevice(peripheral: Peripheral, deviceType: DeviceType): void {
+    public registerUnknownDevice(peripheral: Peripheral, deviceType: DeviceType, deviceModel: string): void {
         const deviceRegistryEntry: DeviceRegistryEntry = {
             device: {
                 id: peripheral.uuid,
                 type: deviceType,
                 friendlyName: peripheral.uuid,
+                model: deviceModel,
             },
             availability: "offline",
             lastSeen: null,

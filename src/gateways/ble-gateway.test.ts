@@ -51,6 +51,7 @@ describe("BLE Gateway", () => {
                 {
                     id: "aa:aa",
                     name: "fridge",
+                    model: "environmental",
                 },
             ],
             timeout: 10000,

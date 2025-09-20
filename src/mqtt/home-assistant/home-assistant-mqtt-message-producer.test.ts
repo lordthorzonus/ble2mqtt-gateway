@@ -1,7 +1,7 @@
 import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { DateTime } from "luxon";
 import { makeHomeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
-import { EnhancedRuuviTagSensorData } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
+import { EnhancedRuuviTagEnvironmentalSensorData } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer";
 import { Chunk, Effect, Stream } from "effect";
 import { testEffectWithContext } from "../../test/test-context";
@@ -10,10 +10,9 @@ describe("HomeAssistant MQTT Message producer", () => {
     it("should generate device state mqtt message if device sensor message is given", async () => {
         const deviceMessage: DeviceSensorMessage = {
             id: "a",
-            deviceType: DeviceType.Ruuvitag,
             payload: {
                 sensor1: "value",
-            } as unknown as EnhancedRuuviTagSensorData,
+            } as unknown as EnhancedRuuviTagEnvironmentalSensorData,
             type: MessageType.SensorData,
             time: DateTime.now(),
             device: {
@@ -22,6 +21,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 friendlyName: "Fridge friend",
                 rssi: 23,
                 type: DeviceType.Ruuvitag,
+                model: "environmental",
                 timeout: 10000,
             },
         };
@@ -47,7 +47,6 @@ describe("HomeAssistant MQTT Message producer", () => {
     it("should vary the state topic based on the device type", async () => {
         const deviceMessage: DeviceSensorMessage = {
             id: "a",
-            deviceType: DeviceType.MiFlora,
             payload: {
                 sensor1: "value",
             } as unknown as MiFloraSensorData,
@@ -59,6 +58,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 friendlyName: "My Plant",
                 rssi: 44,
                 type: DeviceType.MiFlora,
+                model: "miflora",
                 timeout: 10000,
             },
         };
@@ -94,6 +94,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                     friendlyName: "My Fridge",
                     rssi: 23,
                     type: DeviceType.Ruuvitag,
+                    model: "environmental",
                     timeout: 10000,
                 },
             },
@@ -111,6 +112,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                     friendlyName: "fridge",
                     rssi: 23,
                     type: DeviceType.Ruuvitag,
+                    model: "environmental",
                     timeout: 30000,
                 },
             },
@@ -128,6 +130,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                     friendlyName: "Super Plant",
                     rssi: 23,
                     type: DeviceType.MiFlora,
+                    model: "miflora",
                     timeout: 30000,
                 },
             },
@@ -145,6 +148,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                     friendlyName: "plant",
                     rssi: 23,
                     type: DeviceType.MiFlora,
+                    model: "miflora",
                     timeout: 30000,
                 },
             },

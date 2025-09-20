@@ -1,7 +1,7 @@
 import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { parse } from "./ruuvitag-parser";
 import {
-    decorateRuuviTagSensorDataWithCalculatedValues,
+    decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues,
     decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
     EnhancedRuuviTagEnvironmentalSensorData,
     EnhancedRuuviTagAirQualitySensorData,
@@ -23,7 +23,7 @@ const mockedParse = parse as jest.Mock;
 
 jest.mock("./ruuvitag-sensor-data-decorator");
 
-const mockedRuuviTagDecorator = decorateRuuviTagSensorDataWithCalculatedValues as jest.Mock;
+const mockedRuuviTagDecorator = decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues as jest.Mock;
 const mockedRuuviTagAirQualityDecorator = decorateRuuviTagAirQualitySensorDataWithCalculatedValues as jest.Mock;
 
 jest.mock("uuid");
@@ -62,6 +62,7 @@ describe("RuuviTag Measurement Transformer", () => {
                 id: "1234a",
                 type: DeviceType.Ruuvitag,
                 friendlyName: "friendly_name",
+                model: "environmental",
             },
             timeout: 10000,
             availability: "offline",
@@ -93,13 +94,13 @@ describe("RuuviTag Measurement Transformer", () => {
         const expectedMessage: DeviceSensorMessage = {
             id: mockId,
             type: MessageType.SensorData,
-            deviceType: DeviceType.Ruuvitag,
             device: {
                 type: DeviceType.Ruuvitag,
                 friendlyName: device.device.friendlyName,
                 id: device.device.id,
                 macAddress: sensorData.macAddress ?? "no-mac-address",
                 rssi: peripheral.rssi,
+                model: "environmental",
                 timeout: 10000,
             },
             time: mockedTime,
@@ -202,13 +203,13 @@ describe("RuuviTag Measurement Transformer", () => {
                         const expectedAirQualityMessage: DeviceSensorMessage = {
                             id: mockId,
                             type: MessageType.SensorData,
-                            deviceType: DeviceType.Ruuvitag,
                             device: {
                                 type: DeviceType.Ruuvitag,
                                 friendlyName: device.device.friendlyName,
                                 id: device.device.id,
                                 macAddress: airQualitySensorData.macAddress ?? "no-mac-address",
                                 rssi: airQualityPeripheral.rssi,
+                                model: "air-quality",
                                 timeout: 10000,
                             },
                             time: mockedTime,

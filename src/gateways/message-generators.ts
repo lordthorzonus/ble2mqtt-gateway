@@ -19,6 +19,7 @@ export const generateAvailabilityMessage = (
             friendlyName: friendlyName,
             type: deviceRegistryEntry.device.type,
             rssi: peripheral?.rssi ?? null,
+            model: deviceRegistryEntry.device.model,
             timeout: deviceRegistryEntry.timeout,
         },
         time: DateTime.now(),

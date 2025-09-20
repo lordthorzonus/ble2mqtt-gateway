@@ -1,7 +1,10 @@
 import { DeviceRegistry } from "../device-registry";
 import { Peripheral } from "@abandonware/noble";
 import { DeviceType } from "../../types";
-import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
+import {
+    resolveDeviceModel,
+    transformPeripheralAdvertisementToSensorDataDeviceMessage,
+} from "./ruuvitag-measurement-transformer";
 import { RuuviTagGatewayConfiguration } from "../../config";
 import { handleBleAdvertisement } from "../gateway-helpers";
 import { Data, Effect } from "effect";
@@ -38,6 +41,7 @@ export const makeRuuvitagDeviceRegistry = (
             id: tag.id,
             type: DeviceType.Ruuvitag,
             friendlyName: tag.name,
+            model: tag.model,
         },
         timeout: tag.timeout,
     }));
@@ -54,6 +58,7 @@ export const makeRuuvitagGateway =
                 p,
                 DeviceType.Ruuvitag,
                 ruuviTagSettings.allow_unknown,
+                resolveDeviceModel,
                 transformPeripheralAdvertisementToSensorDataDeviceMessage
             )
         ).pipe(

@@ -13,6 +13,7 @@ function makeDeviceRegistry(settings: DeviceSettings[] = []) {
                     id: defaultRuuviTagId,
                     type: DeviceType.Ruuvitag,
                     friendlyName: "fridge_ruuvitag",
+                    model: "environmental",
                 },
             },
             ...settings,
@@ -43,6 +44,7 @@ describe("Device Registry", () => {
                     friendlyName: "fridge_ruuvitag",
                     id: defaultRuuviTagId,
                     type: DeviceType.Ruuvitag,
+                    model: "environmental",
                 },
                 lastPublishedAvailability: "offline",
                 lastSeen: null,
@@ -146,6 +148,7 @@ describe("Device Registry", () => {
                         id: customTimeoutDeviceId,
                         type: DeviceType.Ruuvitag,
                         friendlyName: "living_room_ruuvitag",
+                        model: "environmental",
                     },
                     timeout: 10000,
                 },
@@ -170,6 +173,7 @@ describe("Device Registry", () => {
                         id: "a",
                         type: DeviceType.Ruuvitag,
                         friendlyName: "a",
+                        model: "environmental",
                     },
                 },
                 {
@@ -177,6 +181,7 @@ describe("Device Registry", () => {
                         id: "b",
                         type: DeviceType.Ruuvitag,
                         friendlyName: "b",
+                        model: "environmental",
                     },
                 },
             ]);
@@ -202,7 +207,7 @@ describe("Device Registry", () => {
                 uuid: id,
             };
 
-            deviceRegistry.registerUnknownDevice(peripheral as Peripheral, DeviceType.Ruuvitag);
+            deviceRegistry.registerUnknownDevice(peripheral as Peripheral, DeviceType.Ruuvitag, "environmental");
 
             expect(deviceRegistry.get(id)?.device.id).toEqual(id);
             expect(deviceRegistry.get(id)?.device.type).toEqual(DeviceType.Ruuvitag);
