@@ -1,8 +1,10 @@
 import { RuuviTagAirQualitySensorData, RuuviTagEnvironmentalSensorData } from "../ruuvitag-parser";
 import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calculator";
+import { RuuviAQIDescription, calculateRuuviAQI } from "./calculators/ruuvi-aqi-calculator";
 import { calculateDewPoint } from "./calculators/dew-point-calculator";
 import { calculateHeatIndex } from "./calculators/heat-index-calculator";
 import { calculateHumidex } from "./calculators/humidex-calculator";
+import { AQI } from "../../units";
 
 interface SharedEnhancedRuuviTagSensorData {
     humidex: number | null;
@@ -14,7 +16,8 @@ interface SharedEnhancedRuuviTagSensorData {
 export type EnhancedRuuviTagEnvironmentalSensorData = SharedEnhancedRuuviTagSensorData &
     RuuviTagEnvironmentalSensorData;
 
-export type EnhancedRuuviTagAirQualitySensorData = SharedEnhancedRuuviTagSensorData & RuuviTagAirQualitySensorData;
+export type EnhancedRuuviTagAirQualitySensorData = SharedEnhancedRuuviTagSensorData &
+    RuuviTagAirQualitySensorData & { ruuviAQI: AQI | null; ruuviAQIDescription: RuuviAQIDescription | null };
 
 export type EnhancedRuuviTagSensorData = EnhancedRuuviTagEnvironmentalSensorData | EnhancedRuuviTagAirQualitySensorData;
 
@@ -25,6 +28,13 @@ export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
         ruuviTagAirQualitySensorData.temperature,
         ruuviTagAirQualitySensorData.relativeHumidityPercentage
     );
+    const ruuviAQICalculationResult = calculateRuuviAQI({
+        pm25: ruuviTagAirQualitySensorData.pm2_5,
+        co2: ruuviTagAirQualitySensorData.co2,
+        voc: ruuviTagAirQualitySensorData.voc,
+        nox: ruuviTagAirQualitySensorData.nox,
+    });
+
     return {
         ...ruuviTagAirQualitySensorData,
         humidex: calculateHumidex(ruuviTagAirQualitySensorData.temperature, dewPoint),
@@ -37,6 +47,8 @@ export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
             ruuviTagAirQualitySensorData.temperature,
             ruuviTagAirQualitySensorData.relativeHumidityPercentage
         ),
+        ruuviAQI: ruuviAQICalculationResult?.index ?? null,
+        ruuviAQIDescription: ruuviAQICalculationResult?.description ?? null,
     };
 };
 

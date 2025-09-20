@@ -9,10 +9,6 @@ import {
     CO2Ppm,
     NOXIndex,
     Pascal,
-    PM1,
-    PM10,
-    PM2_5,
-    PM4,
     RelativeHumidity,
     VOCIndex,
 } from "../../../units";

@@ -38,3 +38,6 @@ export const asSoilMoisture = Brand.nominal<SoilMoisture>();
 
 export type SoilConductivity = number & Brand.Brand<"SoilConductivity">;
 export const asSoilConductivity = Brand.nominal<SoilConductivity>();
+
+export type AQI = number & Brand.Brand<"AQI">;
+export const asAQI = Brand.nominal<AQI>();

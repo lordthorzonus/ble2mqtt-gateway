@@ -3,15 +3,28 @@ import {
     EnhancedRuuviTagAirQualitySensorData,
 } from "./ruuvitag-sensor-data-decorator";
 import { formatEnvironmentalSensorValues, formatAirQualitySensorValues } from "./ruuvitag-measurement-formatter";
+import {
+    asCelsius,
+    asCO2Ppm,
+    asLux,
+    asNOXIndex,
+    asPascal,
+    asPM1,
+    asPM10,
+    asPM2_5,
+    asPM4,
+    asRelativeHumidity,
+    asVOCIndex,
+} from "../units";
 
 describe("RuuviTag measurement formatter", () => {
     describe("Environmental sensor data formatting", () => {
         it("should format environmental sensor values with specified decimal precision", () => {
             const sensorData: EnhancedRuuviTagEnvironmentalSensorData = {
                 type: "environmental",
-                temperature: 24.31234,
-                relativeHumidityPercentage: 53.49876,
-                pressure: 100044.789,
+                temperature: asCelsius(24.31234),
+                relativeHumidityPercentage: asRelativeHumidity(53.49876),
+                pressure: asPascal(100044.789),
                 accelerationX: 0.004567,
                 accelerationY: -0.009876,
                 accelerationZ: 1.036543,
@@ -78,17 +91,17 @@ describe("RuuviTag measurement formatter", () => {
         it("should format air quality sensor values with specified decimal precision", () => {
             const sensorData: EnhancedRuuviTagAirQualitySensorData = {
                 type: "air-quality",
-                temperature: 29.50123,
-                relativeHumidityPercentage: 55.30456,
-                pressure: 101102.789,
-                pm1: 9.87654,
-                pm2_5: 11.23456,
-                pm4: 15.65432,
-                pm10: 25.98765,
-                co2: 201,
-                voc: 10,
-                nox: 2,
-                luminosity: 13026.6789,
+                temperature: asCelsius(29.50123),
+                relativeHumidityPercentage: asRelativeHumidity(55.30456),
+                pressure: asPascal(101102.789),
+                pm1: asPM1(9.87654),
+                pm2_5: asPM2_5(11.23456),
+                pm4: asPM4(15.65432),
+                pm10: asPM10(25.98765),
+                co2: asCO2Ppm(201),
+                voc: asVOCIndex(10),
+                nox: asNOXIndex(2),
+                luminosity: asLux(13026.6789),
                 measurementSequence: 205,
                 macAddress: "4C:88:4F",
                 calibrationInProgress: false,
@@ -96,6 +109,8 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: 30.54321,
                 humidex: 32.10987,
                 absoluteHumidity: 14.87654,
+                ruuviAQI: null,
+                ruuviAQIDescription: null,
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 2);
@@ -120,6 +135,8 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: 30.54321,
                 humidex: 32.10987,
                 absoluteHumidity: 14.88,
+                ruuviAQI: null,
+                ruuviAQIDescription: null,
             });
         });
 
@@ -144,6 +161,8 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: null,
                 humidex: null,
                 absoluteHumidity: null,
+                ruuviAQI: null,
+                ruuviAQIDescription: null,
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 2);
@@ -168,23 +187,25 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: null,
                 humidex: null,
                 absoluteHumidity: null,
+                ruuviAQI: null,
+                ruuviAQIDescription: null,
             });
         });
 
         it("should format air quality sensor values with different decimal precision", () => {
             const sensorData: EnhancedRuuviTagAirQualitySensorData = {
                 type: "air-quality",
-                temperature: 29.50123,
-                relativeHumidityPercentage: 55.30456,
-                pressure: 101102.789,
-                pm1: 9.87654,
-                pm2_5: 11.23456,
-                pm4: 15.65432,
-                pm10: 25.98765,
-                co2: 201,
-                voc: 10,
-                nox: 2,
-                luminosity: 13026.6789,
+                temperature: asCelsius(29.50123),
+                relativeHumidityPercentage: asRelativeHumidity(55.30456),
+                pressure: asPascal(101102.789),
+                pm1: asPM1(9.87654),
+                pm2_5: asPM2_5(11.23456),
+                pm4: asPM4(15.65432),
+                pm10: asPM10(25.98765),
+                co2: asCO2Ppm(201),
+                voc: asVOCIndex(10),
+                nox: asNOXIndex(2),
+                luminosity: asLux(13026.6789),
                 measurementSequence: 205,
                 macAddress: "4C:88:4F",
                 calibrationInProgress: false,
@@ -192,6 +213,8 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: 30.54321,
                 humidex: 32.10987,
                 absoluteHumidity: 14.87654,
+                ruuviAQI: null,
+                ruuviAQIDescription: null,
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 0);
@@ -216,6 +239,8 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: 30.54321,
                 humidex: 32.10987,
                 absoluteHumidity: 15,
+                ruuviAQI: null,
+                ruuviAQIDescription: null,
             });
         });
     });

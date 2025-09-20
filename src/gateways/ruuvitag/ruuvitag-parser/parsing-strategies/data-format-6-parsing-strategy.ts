@@ -1,4 +1,4 @@
-import { asLux, asPM2_5, Lux, PM2_5 } from "../../../units";
+import { asLux, asPM2_5, Lux } from "../../../units";
 import { RuuviTagAirQualityParsingStrategy } from "../index";
 import {
     parseTemperature,
@@ -157,7 +157,7 @@ export const DataFormat6ParsingStrategy: RuuviTagAirQualityParsingStrategy = (ra
         relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData, DataFormatV6Offset.Humidity),
         pressure: parsePressure(rawRuuviTagData, DataFormatV6Offset.Pressure),
         pm1: null,
-        pm2_5: pm2_5 ? asPM2_5(pm2_5) : null,
+        pm2_5: pm2_5 !== null ? asPM2_5(pm2_5) : null,
         pm4: null,
         pm10: null,
         co2: parseCO2(rawRuuviTagData, DataFormatV6Offset.CO2),

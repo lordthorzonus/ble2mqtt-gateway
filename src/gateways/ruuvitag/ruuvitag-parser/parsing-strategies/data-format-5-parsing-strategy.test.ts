@@ -1,3 +1,4 @@
+import { asCelsius, asPascal, asRelativeHumidity } from "../../../units";
 import { RuuviTagEnvironmentalSensorData } from "../index";
 import { DataFormat5ParsingStrategy } from "./data-format-5-parsing-strategy";
 
@@ -8,9 +9,9 @@ describe("Data Format 5 Parsing Strategy", () => {
             "99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F",
             {
                 type: "environmental",
-                temperature: 24.3,
-                pressure: 100044,
-                relativeHumidityPercentage: 53.49,
+                temperature: asCelsius(24.3),
+                pressure: asPascal(100044),
+                relativeHumidityPercentage: asRelativeHumidity(53.49),
                 accelerationX: 0.004,
                 accelerationY: -0.004,
                 accelerationZ: 1.036,
@@ -25,9 +26,9 @@ describe("Data Format 5 Parsing Strategy", () => {
             "9904057FFFFFFEFFFE7FFF7FFF7FFFFFDEFEFFFECBB8334C884F",
             {
                 type: "environmental",
-                temperature: 163.835,
-                pressure: 115534,
-                relativeHumidityPercentage: 163.835,
+                temperature: asCelsius(163.835),
+                pressure: asPascal(115534),
+                relativeHumidityPercentage: asRelativeHumidity(163.835),
                 accelerationX: 32.767,
                 accelerationY: 32.767,
                 accelerationZ: 32.767,
@@ -42,9 +43,9 @@ describe("Data Format 5 Parsing Strategy", () => {
             "9904058001000000008001800180010000000000CBB8334C884F",
             {
                 type: "environmental",
-                temperature: -163.835,
-                pressure: 50000,
-                relativeHumidityPercentage: 0.0,
+                temperature: asCelsius(-163.835),
+                pressure: asPascal(50000),
+                relativeHumidityPercentage: asRelativeHumidity(0.0),
                 accelerationX: -32.767,
                 accelerationY: -32.767,
                 accelerationZ: -32.767,

@@ -27,6 +27,8 @@ export const formatAirQualitySensorValues = (
         co2: sensorValues.co2,
         voc: sensorValues.voc,
         nox: sensorValues.nox,
+        ruuviAQI: sensorValues.ruuviAQI,
+        ruuviAQIDescription: sensorValues.ruuviAQIDescription,
         luminosity: formatNumericSensorValue(sensorValues.luminosity, decimalPrecision),
     };
 };

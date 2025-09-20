@@ -13,7 +13,19 @@ import { DateTime, Settings } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
 import { Effect } from "effect";
 import { testEffectWithContext } from "../../test/test-context";
-import { asCelsius, asPascal, asRelativeHumidity } from "../units";
+import {
+    asCelsius,
+    asCO2Ppm,
+    asLux,
+    asNOXIndex,
+    asPascal,
+    asPM1,
+    asPM10,
+    asPM2_5,
+    asPM4,
+    asRelativeHumidity,
+    asVOCIndex,
+} from "../units";
 
 Settings.defaultZone = "UTC";
 const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
@@ -184,22 +196,24 @@ describe("RuuviTag Measurement Transformer", () => {
 
                         const airQualitySensorData: EnhancedRuuviTagAirQualitySensorData = {
                             type: "air-quality",
-                            temperature: -163.835,
-                            pressure: 50000,
-                            relativeHumidityPercentage: 0.0,
+                            temperature: asCelsius(-163.835),
+                            pressure: asPascal(50000),
+                            relativeHumidityPercentage: asRelativeHumidity(0.0),
                             measurementSequence: 0,
                             macAddress: "4C:88:4F",
-                            pm1: 0.0,
-                            pm2_5: 0.0,
-                            pm4: 0.0,
-                            pm10: 0.0,
-                            co2: 0,
-                            voc: 0,
-                            nox: 0,
-                            luminosity: 0.0,
+                            pm1: asPM1(0.0),
+                            pm2_5: asPM2_5(0.0),
+                            pm4: asPM4(0.0),
+                            pm10: asPM10(0.0),
+                            co2: asCO2Ppm(0),
+                            voc: asVOCIndex(0),
+                            nox: asNOXIndex(0),
+                            luminosity: asLux(0.0),
                             calibrationInProgress: false,
                             absoluteHumidity: 0.1,
-                            dewPoint: -163.8,
+                            dewPoint: asCelsius(-163.8),
+                            ruuviAQI: null,
+                            ruuviAQIDescription: null,
                             heatIndex: null,
                             humidex: null,
                         };
@@ -219,11 +233,11 @@ describe("RuuviTag Measurement Transformer", () => {
                             time: mockedTime,
                             payload: {
                                 ...airQualitySensorData,
-                                temperature: -163.84,
-                                pressure: 50000,
-                                relativeHumidityPercentage: 0,
-                                pm2_5: 0,
-                                luminosity: 0,
+                                temperature: asCelsius(-163.84),
+                                pressure: asPascal(50000),
+                                relativeHumidityPercentage: asRelativeHumidity(0),
+                                pm2_5: asPM2_5(0),
+                                luminosity: asLux(0),
                                 absoluteHumidity: 0.1,
                                 dewPoint: -163.8,
                             },

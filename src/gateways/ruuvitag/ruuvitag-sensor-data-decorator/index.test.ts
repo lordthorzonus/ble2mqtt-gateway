@@ -12,6 +12,19 @@ import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calcu
 import { calculateDewPoint } from "./calculators/dew-point-calculator";
 import { calculateHeatIndex } from "./calculators/heat-index-calculator";
 import { calculateHumidex } from "./calculators/humidex-calculator";
+import {
+    asCelsius,
+    asCO2Ppm,
+    asLux,
+    asNOXIndex,
+    asPascal,
+    asPM1,
+    asPM10,
+    asPM2_5,
+    asPM4,
+    asRelativeHumidity,
+    asVOCIndex,
+} from "../../units";
 
 const calculateAbsoluteHumidityMock = calculateAbsoluteHumidity as jest.Mock;
 const calculateDewPointMock = calculateDewPoint as jest.Mock;
@@ -31,9 +44,9 @@ describe("RuuviTag sensor data decorator", () => {
                 accelerationY: 2,
                 accelerationZ: 3,
                 batteryVoltage: 100,
-                pressure: 5000,
-                relativeHumidityPercentage: 80,
-                temperature: 20,
+                pressure: asPascal(5000),
+                relativeHumidityPercentage: asRelativeHumidity(80),
+                temperature: asCelsius(20),
             };
             const dewPoint = 1;
             const absoluteHumidity = 2;
@@ -75,17 +88,17 @@ describe("RuuviTag sensor data decorator", () => {
                 type: "air-quality",
                 macAddress: "4C:88:4F",
                 measurementSequence: 205,
-                temperature: 29.5,
-                relativeHumidityPercentage: 55.3,
-                pressure: 101102,
-                pm1: 9.8,
-                pm2_5: 11.2,
-                pm4: 15.6,
-                pm10: 25.9,
-                co2: 201,
-                voc: 10,
-                nox: 2,
-                luminosity: 13026.67,
+                temperature: asCelsius(29.5),
+                relativeHumidityPercentage: asRelativeHumidity(55.3),
+                pressure: asPascal(101102),
+                pm1: asPM1(9.8),
+                pm2_5: asPM2_5(11.2),
+                pm4: asPM4(15.6),
+                pm10: asPM10(25.9),
+                co2: asCO2Ppm(201),
+                voc: asVOCIndex(10),
+                nox: asNOXIndex(2),
+                luminosity: asLux(13026.67),
                 calibrationInProgress: false,
             };
             const dewPoint = 15.2;
@@ -104,6 +117,8 @@ describe("RuuviTag sensor data decorator", () => {
                 dewPoint,
                 humidex,
                 heatIndex,
+                ruuviAQI: 100,
+                ruuviAQIDescription: "excellent",
             });
 
             expect(calculateAbsoluteHumidityMock).toHaveBeenCalledWith(

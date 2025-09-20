@@ -1,5 +1,6 @@
 import { RuuviTagEnvironmentalSensorData } from "../index";
 import { DataFormat3ParsingStrategy } from "./data-format-3-parsing-strategy";
+import { asCelsius, asPascal, asRelativeHumidity } from "../../../units";
 
 describe("Data Format 3 Parsing Strategy", () => {
     const testCases: [string, RuuviTagEnvironmentalSensorData][] = [
@@ -7,9 +8,9 @@ describe("Data Format 3 Parsing Strategy", () => {
             "990403291A1ECE1EFC18F94202CA0B53",
             {
                 type: "environmental",
-                temperature: 26.3,
-                pressure: 102766,
-                relativeHumidityPercentage: 20.5,
+                temperature: asCelsius(26.3),
+                pressure: asPascal(102766),
+                relativeHumidityPercentage: asRelativeHumidity(20.5),
                 accelerationX: -1.0,
                 accelerationY: -1.726,
                 accelerationZ: 0.714,
@@ -24,9 +25,9 @@ describe("Data Format 3 Parsing Strategy", () => {
             "990403FF7F63FFFF7FFF7FFF7FFFFFFF",
             {
                 type: "environmental",
-                temperature: 127.99,
-                pressure: 115535,
-                relativeHumidityPercentage: 127.5,
+                temperature: asCelsius(127.99),
+                pressure: asPascal(115535),
+                relativeHumidityPercentage: asRelativeHumidity(127.5),
                 accelerationX: 32.767,
                 accelerationY: 32.767,
                 accelerationZ: 32.767,
@@ -41,9 +42,9 @@ describe("Data Format 3 Parsing Strategy", () => {
             "99040300FF6300008001800180010000",
             {
                 type: "environmental",
-                temperature: -127.99,
-                pressure: 50000,
-                relativeHumidityPercentage: 0.0,
+                temperature: asCelsius(-127.99),
+                pressure: asPascal(50000),
+                relativeHumidityPercentage: asRelativeHumidity(0.0),
                 accelerationX: -32.767,
                 accelerationY: -32.767,
                 accelerationZ: -32.767,
