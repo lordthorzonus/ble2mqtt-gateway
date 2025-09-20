@@ -1,7 +1,10 @@
 import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { parse } from "./ruuvitag-parser";
-import decorateRuuviTagSensorDataWithCalculatedValues, {
-    EnhancedRuuviTagSensorData,
+import {
+    decorateRuuviTagSensorDataWithCalculatedValues,
+    decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
+    EnhancedRuuviTagEnvironmentalSensorData,
+    EnhancedRuuviTagAirQualitySensorData,
 } from "./ruuvitag-sensor-data-decorator";
 import { v4 as uuid } from "uuid";
 import { PeripheralWithManufacturerData } from "./ruuvitag-gateway";
@@ -21,6 +24,7 @@ const mockedParse = parse as jest.Mock;
 jest.mock("./ruuvitag-sensor-data-decorator");
 
 const mockedRuuviTagDecorator = decorateRuuviTagSensorDataWithCalculatedValues as jest.Mock;
+const mockedRuuviTagAirQualityDecorator = decorateRuuviTagAirQualitySensorDataWithCalculatedValues as jest.Mock;
 
 jest.mock("uuid");
 
@@ -67,7 +71,8 @@ describe("RuuviTag Measurement Transformer", () => {
 
         const mockId = "id-1";
 
-        const sensorData: EnhancedRuuviTagSensorData = {
+        const sensorData: EnhancedRuuviTagEnvironmentalSensorData = {
+            type: "environmental",
             absoluteHumidity: null,
             dewPoint: null,
             heatIndex: null,
@@ -112,7 +117,7 @@ describe("RuuviTag Measurement Transformer", () => {
             Effect.runPromise(
                 testEffectWithContext(
                     Effect.gen(function* () {
-                        const dummyParsedData = "parsedRuuviTagData";
+                        const dummyParsedData = { type: "environmental" as const, temperature: 24.3 };
                         mockedParse.mockReturnValue(Effect.succeed(dummyParsedData));
                         mockedRuuviTagDecorator.mockReturnValue(sensorData);
                         mockedUuid.mockReturnValue(mockId);
@@ -134,10 +139,12 @@ describe("RuuviTag Measurement Transformer", () => {
             Effect.runPromise(
                 testEffectWithContext(
                     Effect.gen(function* () {
+                        const dummyParsedData = { type: "environmental" as const, temperature: 24.3 };
                         const sensorDataWithoutMacAddress = {
                             ...expectedMessage.payload,
                             macAddress: null,
                         };
+                        mockedParse.mockReturnValue(Effect.succeed(dummyParsedData));
                         mockedRuuviTagDecorator.mockReturnValue(sensorDataWithoutMacAddress);
                         mockedUuid.mockReturnValue(mockId);
 
@@ -153,6 +160,83 @@ describe("RuuviTag Measurement Transformer", () => {
                             },
                             payload: { ...sensorDataWithoutMacAddress },
                         });
+                    })
+                )
+            ));
+
+        it("should transform air quality sensor data from peripheral advertisement", () =>
+            Effect.runPromise(
+                testEffectWithContext(
+                    Effect.gen(function* () {
+                        const airQualityPeripheral = {
+                            advertisement: {
+                                manufacturerData: Buffer.from("99040680010000000000000000000000FF00004C884F", "hex"),
+                                localName: "RuuviTag Air",
+                                serviceData: [],
+                            },
+                            address: "4C:88:4F",
+                            rssi: -45,
+                            id: "air-quality-id",
+                            uuid: "air-quality-uuid",
+                        };
+
+                        const airQualitySensorData: EnhancedRuuviTagAirQualitySensorData = {
+                            type: "air-quality",
+                            temperature: -163.835,
+                            pressure: 50000,
+                            relativeHumidityPercentage: 0.0,
+                            measurementSequence: 0,
+                            macAddress: "4C:88:4F",
+                            pm25: 0.0,
+                            co2: 0,
+                            voc: 0,
+                            nox: 0,
+                            luminosity: 0.0,
+                            calibrationInProgress: false,
+                            absoluteHumidity: 0.1,
+                            dewPoint: -163.8,
+                            heatIndex: null,
+                            humidex: null,
+                        };
+
+                        const expectedAirQualityMessage: DeviceSensorMessage = {
+                            id: mockId,
+                            type: MessageType.SensorData,
+                            deviceType: DeviceType.Ruuvitag,
+                            device: {
+                                type: DeviceType.Ruuvitag,
+                                friendlyName: device.device.friendlyName,
+                                id: device.device.id,
+                                macAddress: airQualitySensorData.macAddress ?? "no-mac-address",
+                                rssi: airQualityPeripheral.rssi,
+                                timeout: 10000,
+                            },
+                            time: mockedTime,
+                            payload: {
+                                ...airQualitySensorData,
+                                temperature: -163.84,
+                                pressure: 50000,
+                                relativeHumidityPercentage: 0,
+                                pm25: 0,
+                                luminosity: 0,
+                                absoluteHumidity: 0.1,
+                                dewPoint: -163.8,
+                            },
+                        };
+
+                        const dummyParsedAirQualityData = { type: "air-quality" as const, temperature: -163.835 };
+                        mockedParse.mockReturnValue(Effect.succeed(dummyParsedAirQualityData));
+                        mockedRuuviTagAirQualityDecorator.mockReturnValue(airQualitySensorData);
+                        mockedUuid.mockReturnValue(mockId);
+
+                        const result = yield* yield* transformPeripheralAdvertisementToSensorDataDeviceMessage(
+                            airQualityPeripheral as PeripheralWithManufacturerData,
+                            device
+                        );
+
+                        expect(result).toStrictEqual(expectedAirQualityMessage);
+                        expect(mockedParse).toHaveBeenCalledWith(airQualityPeripheral.advertisement.manufacturerData);
+                        expect(mockedUuid).toHaveBeenCalledTimes(1);
                     })
                 )
             ));

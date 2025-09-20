@@ -1,12 +1,13 @@
-import { RuuviTagSensorData } from "../index";
+import { RuuviTagEnvironmentalSensorData } from "../index";
 import { DataFormat5ParsingStrategy } from "./data-format-5-parsing-strategy";
 
 describe("Data Format 5 Parsing Strategy", () => {
     const macAddress = "CB:B8:33:4C:88:4F";
-    const testCases: [string, RuuviTagSensorData][] = [
+    const testCases: [string, RuuviTagEnvironmentalSensorData][] = [
         [
             "99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F",
             {
+                type: "environmental",
                 temperature: 24.3,
                 pressure: 100044,
                 relativeHumidityPercentage: 53.49,
@@ -23,6 +24,7 @@ describe("Data Format 5 Parsing Strategy", () => {
         [
             "9904057FFFFFFEFFFE7FFF7FFF7FFFFFDEFEFFFECBB8334C884F",
             {
+                type: "environmental",
                 temperature: 163.835,
                 pressure: 115534,
                 relativeHumidityPercentage: 163.835,
@@ -39,6 +41,7 @@ describe("Data Format 5 Parsing Strategy", () => {
         [
             "9904058001000000008001800180010000000000CBB8334C884F",
             {
+                type: "environmental",
                 temperature: -163.835,
                 pressure: 50000,
                 relativeHumidityPercentage: 0.0,
@@ -55,6 +58,7 @@ describe("Data Format 5 Parsing Strategy", () => {
         [
             "9904058000FFFFFFFF800080008000FFFFFFFFFFFFFFFFFFFFFF",
             {
+                type: "environmental",
                 temperature: null,
                 pressure: null,
                 relativeHumidityPercentage: null,

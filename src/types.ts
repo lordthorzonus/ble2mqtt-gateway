@@ -1,4 +1,4 @@
-import { EnhancedRuuviTagSensorData } from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
+import { EnhancedRuuviTagAirQualitySensorData, EnhancedRuuviTagEnvironmentalSensorData, EnhancedRuuviTagSensorData } from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { DateTime } from "luxon";
 import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer";
 
@@ -119,7 +119,7 @@ export type HomeAssistantSensorConfigurationForDevice<T> =
     | Record<string, HomeAssistantSensorConfiguration & { valueTemplate: string }>;
 
 export type HomeAssistantSensorConfigurationForDeviceType<T> = T extends DeviceType.Ruuvitag
-    ? HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagSensorData>
+    ? HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagEnvironmentalSensorData>
     : T extends DeviceType.MiFlora
       ? HomeAssistantSensorConfigurationForDevice<MiFloraSensorData>
       : never;

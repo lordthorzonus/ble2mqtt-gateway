@@ -1,11 +1,12 @@
 import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
 import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
+import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy";
 import { Data, Effect, Match } from "effect";
 
 type Nullable<T> = T | null;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type RuuviTagSensorData = {
+export interface RuuviTagEnvironmentalSensorData {
+    type: "environmental";
     relativeHumidityPercentage: Nullable<number>;
     temperature: Nullable<number>;
     pressure: Nullable<number>;
@@ -17,14 +18,33 @@ export type RuuviTagSensorData = {
     movementCounter: Nullable<number>;
     measurementSequence: Nullable<number>;
     macAddress: Nullable<string>;
-};
+}
 
-export type RuuviTagParsingStrategy = (rawRuuviTagData: Buffer) => RuuviTagSensorData;
+export interface RuuviTagAirQualitySensorData {
+    type: "air-quality";
+    temperature: Nullable<number>;
+    relativeHumidityPercentage: Nullable<number>;
+    pressure: Nullable<number>;
+    pm25: Nullable<number>;
+    co2: Nullable<number>;
+    voc: Nullable<number>;
+    nox: Nullable<number>;
+    luminosity: Nullable<number>;
+    measurementSequence: Nullable<number>;
+    macAddress: Nullable<string>;
+    calibrationInProgress: Nullable<boolean>;
+}
+
+export type RuuviTagSensorData = RuuviTagEnvironmentalSensorData | RuuviTagAirQualitySensorData;
+
+export type RuuviTagParsingStrategy = (rawRuuviTagData: Buffer) => RuuviTagEnvironmentalSensorData;
+export type RuuviTagAirQualityParsingStrategy = (rawRuuviTagData: Buffer) => RuuviTagAirQualitySensorData;
 
 enum RuuvitagSensorProtocolDataFormat {
     DataFormat3 = 0x03,
     DataFormat2And4 = 0x04,
     DataFormat5 = 0x05,
+    DataFormat6 = 0x06,
 }
 
 enum RuuviTagDataOffsets {
@@ -60,6 +80,7 @@ export type RuuviParsingError = NotValidRuuviManufacturerIdError | UnsupportedDa
 const resolveParsingStrategy = Match.type<number>().pipe(
     Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed(DataFormat3ParsingStrategy)),
     Match.when(RuuvitagSensorProtocolDataFormat.DataFormat5, () => Effect.succeed(DataFormat5ParsingStrategy)),
+    Match.when(RuuvitagSensorProtocolDataFormat.DataFormat6, () => Effect.succeed(DataFormat6ParsingStrategy)),
     Match.orElse((dataFormat) => new UnsupportedDataFormatError({ dataFormat }))
 );
 

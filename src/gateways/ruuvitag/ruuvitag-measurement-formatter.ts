@@ -1,11 +1,39 @@
-import { EnhancedRuuviTagSensorData } from "./ruuvitag-sensor-data-decorator";
+import {
+    EnhancedRuuviTagAirQualitySensorData,
+    EnhancedRuuviTagEnvironmentalSensorData,
+} from "./ruuvitag-sensor-data-decorator";
 import { formatNumericSensorValue } from "../numeric-sensor-value-formatter";
 
-export const formatSensorValues = (
-    sensorValues: EnhancedRuuviTagSensorData,
+export const formatAirQualitySensorValues = (
+    sensorValues: EnhancedRuuviTagAirQualitySensorData,
     decimalPrecision: number
-): EnhancedRuuviTagSensorData => {
+): EnhancedRuuviTagAirQualitySensorData => {
     return {
+        type: "air-quality",
+        humidex: sensorValues.humidex,
+        heatIndex: sensorValues.heatIndex,
+        dewPoint: formatNumericSensorValue(sensorValues.dewPoint, decimalPrecision),
+        absoluteHumidity: formatNumericSensorValue(sensorValues.absoluteHumidity, decimalPrecision),
+        calibrationInProgress: sensorValues.calibrationInProgress,
+        macAddress: sensorValues.macAddress,
+        measurementSequence: sensorValues.measurementSequence,
+        temperature: formatNumericSensorValue(sensorValues.temperature, decimalPrecision),
+        relativeHumidityPercentage: formatNumericSensorValue(sensorValues.relativeHumidityPercentage, decimalPrecision),
+        pressure: formatNumericSensorValue(sensorValues.pressure, decimalPrecision),
+        pm25: formatNumericSensorValue(sensorValues.pm25, decimalPrecision),
+        co2: sensorValues.co2,
+        voc: sensorValues.voc,
+        nox: sensorValues.nox,
+        luminosity: formatNumericSensorValue(sensorValues.luminosity, decimalPrecision),
+    };
+};
+
+export const formatEnvironmentalSensorValues = (
+    sensorValues: EnhancedRuuviTagEnvironmentalSensorData,
+    decimalPrecision: number
+): EnhancedRuuviTagEnvironmentalSensorData => {
+    return {
+        type: "environmental",
         temperature: formatNumericSensorValue(sensorValues.temperature, decimalPrecision),
         relativeHumidityPercentage: formatNumericSensorValue(sensorValues.relativeHumidityPercentage, decimalPrecision),
         pressure: formatNumericSensorValue(sensorValues.pressure, decimalPrecision),

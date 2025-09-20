@@ -207,6 +207,7 @@ const parseMacAddress = (rawData: Buffer): string | null => {
  */
 export const DataFormat5ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) => {
     return {
+        type: "environmental",
         temperature: parseTemperature(rawRuuviTagData),
         relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData),
         pressure: parsePressure(rawRuuviTagData),

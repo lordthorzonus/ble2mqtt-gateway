@@ -83,6 +83,7 @@ const parsePressure = (rawData: Buffer): number => {
  */
 export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) => {
     return {
+        type: "environmental",
         accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationX),
         accelerationY: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationY),
         accelerationZ: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationZ),
