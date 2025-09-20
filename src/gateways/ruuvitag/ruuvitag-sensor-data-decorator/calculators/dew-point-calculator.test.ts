@@ -1,3 +1,4 @@
+import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units";
 import { calculateDewPoint } from "./dew-point-calculator";
 
 describe("Dew point calculator", () => {
@@ -7,14 +8,14 @@ describe("Dew point calculator", () => {
      * @link http://www.decatur.de/javascript/dew/index.html
      * @link http://www.dpcalc.org/
      */
-    const testCases: [number | null, number | null, number | null][] = [
-        [20, 65, 13.2],
-        [11.6, 88, 9.7],
-        [13, 50, 2.8],
-        [16, 69, 10.3],
-        [20, 50, 9.3],
-        [null, 50, null],
-        [20, null, null],
+    const testCases: [Celsius | null, RelativeHumidity | null, Celsius | null][] = [
+        [asCelsius(20), asRelativeHumidity(65), asCelsius(13.2)],
+        [asCelsius(11.6), asRelativeHumidity(88), asCelsius(9.7)],
+        [asCelsius(13), asRelativeHumidity(50), asCelsius(2.8)],
+        [asCelsius(16), asRelativeHumidity(69), asCelsius(10.3)],
+        [asCelsius(20), asRelativeHumidity(50), asCelsius(9.3)],
+        [null, asRelativeHumidity(50), null],
+        [asCelsius(20), null, null],
         [null, null, null],
     ];
 

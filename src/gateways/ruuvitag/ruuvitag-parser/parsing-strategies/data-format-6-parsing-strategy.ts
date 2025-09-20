@@ -1,3 +1,4 @@
+import { asLux, asPM2_5, Lux, PM2_5 } from "../../../units";
 import { RuuviTagAirQualityParsingStrategy } from "../index";
 import {
     parseTemperature,
@@ -51,7 +52,7 @@ enum DataFormatV6Offset {
  * @param offset - Byte offset to read from
  * @returns The value in Lux.
  */
-const parseLuminosity = (rawData: Buffer, offset: number): number | null => {
+const parseLuminosity = (rawData: Buffer, offset: number): Lux | null => {
     const code = rawData.readUInt8(offset);
     const maxCode = 254;
 
@@ -60,14 +61,14 @@ const parseLuminosity = (rawData: Buffer, offset: number): number | null => {
     }
 
     if (code === 0) {
-        return 0;
+        return asLux(0);
     }
 
     const maxValue = 65535;
     const delta = Math.log(maxValue + 1) / maxCode;
     const value = Math.exp(code * delta) - 1;
 
-    return Math.round(value * 100) / 100;
+    return asLux(Math.round(value * 100) / 100);
 };
 
 /**
@@ -148,13 +149,15 @@ const parseMacAddress = (rawData: Buffer, offset: number): string | null => {
  * @see https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-6
  */
 export const DataFormat6ParsingStrategy: RuuviTagAirQualityParsingStrategy = (rawRuuviTagData) => {
+    const pm2_5 = parseParticulateMatter(rawRuuviTagData, DataFormatV6Offset.PM25);
+
     return {
         type: "air-quality",
         temperature: parseTemperature(rawRuuviTagData, DataFormatV6Offset.Temperature),
         relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData, DataFormatV6Offset.Humidity),
         pressure: parsePressure(rawRuuviTagData, DataFormatV6Offset.Pressure),
         pm1: null,
-        pm2_5: parseParticulateMatter(rawRuuviTagData, DataFormatV6Offset.PM25),
+        pm2_5: pm2_5 ? asPM2_5(pm2_5) : null,
         pm4: null,
         pm10: null,
         co2: parseCO2(rawRuuviTagData, DataFormatV6Offset.CO2),

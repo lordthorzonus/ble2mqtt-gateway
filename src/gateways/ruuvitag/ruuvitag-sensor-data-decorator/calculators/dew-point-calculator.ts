@@ -1,3 +1,5 @@
+import { Celsius, RelativeHumidity, asCelsius } from "../../../units";
+
 /**
  * Calculates the dew point using the Magnus formula.
  *
@@ -7,9 +9,9 @@
  * @return Returns the Dew point in Celsius (C).
  */
 export const calculateDewPoint = (
-    temperatureInCelsius: number | null,
-    relativeHumidityInPercents: number | null
-): number | null => {
+    temperatureInCelsius: Celsius | null,
+    relativeHumidityInPercents: RelativeHumidity | null
+): Celsius | null => {
     const constant1 = 243.12;
     const constant2 = 17.62;
 
@@ -25,5 +27,5 @@ export const calculateDewPoint = (
             Math.log(relativeHumidityInPercents / 100) -
             (constant2 * temperatureInCelsius) / (constant1 + temperatureInCelsius));
 
-    return parseFloat(dewPoint.toFixed(1));
+    return asCelsius(parseFloat(dewPoint.toFixed(1)));
 };

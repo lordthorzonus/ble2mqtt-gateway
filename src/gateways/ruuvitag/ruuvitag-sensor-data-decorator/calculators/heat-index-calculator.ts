@@ -1,3 +1,5 @@
+import { Celsius, RelativeHumidity } from "../../../units";
+
 const HeatIndexConstantsCelsius = {
     c1: -8.78469475556,
     c2: 1.61139411,
@@ -19,8 +21,8 @@ const HeatIndexConstantsCelsius = {
  * @return Returns the HI in celsius.
  */
 export const calculateHeatIndex = (
-    temperatureInCelsius: number | null,
-    relativeHumidityInPercents: number | null
+    temperatureInCelsius: Celsius | null,
+    relativeHumidityInPercents: RelativeHumidity | null
 ): number | null => {
     if (temperatureInCelsius === null || relativeHumidityInPercents === null) {
         return null;

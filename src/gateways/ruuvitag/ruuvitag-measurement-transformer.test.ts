@@ -13,6 +13,7 @@ import { DateTime, Settings } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
 import { Effect } from "effect";
 import { testEffectWithContext } from "../../test/test-context";
+import { asCelsius, asPascal, asRelativeHumidity } from "../units";
 
 Settings.defaultZone = "UTC";
 const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
@@ -78,9 +79,9 @@ describe("RuuviTag Measurement Transformer", () => {
             dewPoint: null,
             heatIndex: null,
             humidex: null,
-            temperature: 24.31234,
-            pressure: 100044,
-            relativeHumidityPercentage: 53.49,
+            temperature: asCelsius(24.31234),
+            pressure: asPascal(100044),
+            relativeHumidityPercentage: asRelativeHumidity(53.49),
             accelerationX: 0.004,
             accelerationY: -0,
             accelerationZ: 1.036,
@@ -110,7 +111,7 @@ describe("RuuviTag Measurement Transformer", () => {
                 accelerationX: 0,
                 accelerationY: 0,
                 accelerationZ: 1.04,
-                temperature: 24.31,
+                temperature: asCelsius(24.31),
             },
         };
 

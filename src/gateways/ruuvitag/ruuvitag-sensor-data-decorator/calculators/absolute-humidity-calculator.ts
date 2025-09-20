@@ -1,3 +1,5 @@
+import { Celsius, RelativeHumidity } from "../../../units";
+
 /**
  * Calculates the vapour pressure of the water where water vapour
  * is in thermodynamic equilibrium with its condensed state using Magnus-Tetens formula.
@@ -16,8 +18,8 @@ const calculateVapourPressureOfWater = (temperatureInCelsius: number): number =>
  * @return Returns the value in (grams/m^3)
  */
 export const calculateAbsoluteHumidity = (
-    temperatureInCelsius: number | null,
-    relativeHumidityInPercents: number | null
+    temperatureInCelsius: Celsius | null,
+    relativeHumidityInPercents: RelativeHumidity | null
 ): number | null => {
     const molarMassOfWater = 18.01534;
     const universalGasConstant = 8.31447215;

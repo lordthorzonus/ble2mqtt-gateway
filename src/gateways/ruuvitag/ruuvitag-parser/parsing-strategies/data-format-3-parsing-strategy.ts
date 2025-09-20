@@ -1,3 +1,4 @@
+import { asCelsius, asPascal, asRelativeHumidity, Celsius, Pascal, RelativeHumidity } from "../../../units";
 import { RuuviTagParsingStrategy } from "../index";
 
 enum DataFormatV3Offset {
@@ -28,7 +29,7 @@ const parseAcceleration = (rawData: Buffer, dataOffset: DataFormatV3Offset): num
  *
  * @return Returns the value in Celsius (C).
  */
-const parseTemperature = (rawData: Buffer): number => {
+const parseTemperature = (rawData: Buffer): Celsius => {
     const temperatureByte = rawData.readUInt8(DataFormatV3Offset.TemperatureBase);
 
     // First bit is the sign bit, which tells if the temperature is negative.
@@ -38,7 +39,7 @@ const parseTemperature = (rawData: Buffer): number => {
 
     const temperature = temperatureBase + temperatureFraction;
 
-    return isTemperatureNegative ? temperature * -1 : temperature;
+    return asCelsius(isTemperatureNegative ? temperature * -1 : temperature);
 };
 
 /**
@@ -47,8 +48,8 @@ const parseTemperature = (rawData: Buffer): number => {
  *
  * @return Returns the value in percents (%)
  */
-const parseRelativeHumidity = (rawData: Buffer): number => {
-    return rawData.readUInt8(DataFormatV3Offset.Humidity) * 0.5;
+const parseRelativeHumidity = (rawData: Buffer): RelativeHumidity => {
+    return asRelativeHumidity(rawData.readUInt8(DataFormatV3Offset.Humidity) * 0.5);
 };
 
 /**
@@ -72,9 +73,9 @@ const parseBatteryVoltage = (rawData: Buffer): number => {
  *
  * @return Returns the pressure in Pascals (Pa).
  */
-const parsePressure = (rawData: Buffer): number => {
+const parsePressure = (rawData: Buffer): Pascal => {
     const minimumSupportedPascalMeasurement = 50000;
-    return rawData.readUInt16BE(DataFormatV3Offset.Pressure) + minimumSupportedPascalMeasurement;
+    return asPascal(rawData.readUInt16BE(DataFormatV3Offset.Pressure) + minimumSupportedPascalMeasurement);
 };
 
 /**

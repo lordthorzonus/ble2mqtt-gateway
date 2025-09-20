@@ -1,3 +1,4 @@
+import { asLux, asPM1, asPM10, asPM2_5, asPM4, Lux } from "../../../units";
 import { RuuviTagAirQualityParsingStrategy } from "../index";
 import {
     parseTemperature,
@@ -43,7 +44,7 @@ enum DataFormatE1Offset {
  * @param offset - Byte offset to read from
  * @returns Luminosity in Lux or null if invalid
  */
-const parseLuminosity = (rawData: Buffer, offset: number): number | null => {
+const parseLuminosity = (rawData: Buffer, offset: number): Lux | null => {
     const luminosity = rawData.readUIntBE(offset, 3);
     const resolution = 0.01;
 
@@ -51,7 +52,7 @@ const parseLuminosity = (rawData: Buffer, offset: number): number | null => {
         return null;
     }
 
-    return luminosity * resolution;
+    return asLux(luminosity * resolution);
 };
 
 /**
@@ -106,15 +107,20 @@ const parseMeasurementSequence = (rawData: Buffer, offset: number): number | nul
  * @see https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-e1
  */
 export const DataFormatE1ParsingStrategy: RuuviTagAirQualityParsingStrategy = (rawRuuviTagData) => {
+    const pm1 = parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM10);
+    const pm2_5 = parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM25);
+    const pm4 = parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM40);
+    const pm10 = parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM100);
+
     return {
         type: "air-quality",
         temperature: parseTemperature(rawRuuviTagData, DataFormatE1Offset.Temperature),
         relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData, DataFormatE1Offset.Humidity),
         pressure: parsePressure(rawRuuviTagData, DataFormatE1Offset.Pressure),
-        pm1: parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM10),
-        pm2_5: parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM25),
-        pm4: parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM40),
-        pm10: parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM100),
+        pm1: pm1 ? asPM1(pm1) : null,
+        pm2_5: pm2_5 ? asPM2_5(pm2_5) : null,
+        pm4: pm4 ? asPM4(pm4) : null,
+        pm10: pm10 ? asPM10(pm10) : null,
         co2: parseCO2(rawRuuviTagData, DataFormatE1Offset.CO2),
         voc: parseVOC(rawRuuviTagData, DataFormatE1Offset.VOC, DataFormatE1Offset.Flags),
         nox: parseNOX(rawRuuviTagData, DataFormatE1Offset.NOX, DataFormatE1Offset.Flags),

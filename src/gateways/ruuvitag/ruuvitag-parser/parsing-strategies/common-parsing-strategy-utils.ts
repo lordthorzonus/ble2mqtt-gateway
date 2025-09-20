@@ -1,3 +1,22 @@
+import {
+    asCelsius,
+    asCO2Ppm,
+    asNOXIndex,
+    asPascal,
+    asRelativeHumidity,
+    asVOCIndex,
+    Celsius,
+    CO2Ppm,
+    NOXIndex,
+    Pascal,
+    PM1,
+    PM10,
+    PM2_5,
+    PM4,
+    RelativeHumidity,
+    VOCIndex,
+} from "../../../units";
+
 export const isInvalidMeasurementForSigned16BitInteger = (value: number): boolean => {
     return value === 0x8000 || value === -0x8000;
 };
@@ -18,7 +37,7 @@ export const isInvalidMeasurementForUnsigned24BitInteger = (value: number): bool
  * @param offset - Byte offset to read from
  * @returns The value in Celsius (°C).
  */
-export const parseTemperature = (rawData: Buffer, offset: number): number | null => {
+export const parseTemperature = (rawData: Buffer, offset: number): Celsius | null => {
     const temperature = rawData.readInt16BE(offset);
     const degreeIncrements = 0.005;
 
@@ -26,7 +45,7 @@ export const parseTemperature = (rawData: Buffer, offset: number): number | null
         return null;
     }
 
-    return temperature * degreeIncrements;
+    return asCelsius(temperature * degreeIncrements);
 };
 
 /**
@@ -38,7 +57,7 @@ export const parseTemperature = (rawData: Buffer, offset: number): number | null
  * @param offset - Byte offset to read from
  * @returns The value in percents (%).
  */
-export const parseRelativeHumidity = (rawData: Buffer, offset: number): number | null => {
+export const parseRelativeHumidity = (rawData: Buffer, offset: number): RelativeHumidity | null => {
     const humidity = rawData.readUInt16BE(offset);
     const percentageIncrements = 0.0025;
 
@@ -46,7 +65,7 @@ export const parseRelativeHumidity = (rawData: Buffer, offset: number): number |
         return null;
     }
 
-    return humidity * percentageIncrements;
+    return asRelativeHumidity(humidity * percentageIncrements);
 };
 
 /**
@@ -57,7 +76,7 @@ export const parseRelativeHumidity = (rawData: Buffer, offset: number): number |
  * @param offset - Byte offset to read from
  * @returns The pressure in Pascals (Pa).
  */
-export const parsePressure = (rawData: Buffer, offset: number): number | null => {
+export const parsePressure = (rawData: Buffer, offset: number): Pascal | null => {
     const pressure = rawData.readUInt16BE(offset);
     const minimumSupportedPascalMeasurement = 50000;
 
@@ -65,7 +84,7 @@ export const parsePressure = (rawData: Buffer, offset: number): number | null =>
         return null;
     }
 
-    return pressure + minimumSupportedPascalMeasurement;
+    return asPascal(pressure + minimumSupportedPascalMeasurement);
 };
 
 /**
@@ -96,14 +115,14 @@ export const parseParticulateMatter = (rawData: Buffer, offset: number): number 
  * @param offset - Byte offset to read from
  * @returns The value in parts per million (ppm).
  */
-export const parseCO2 = (rawData: Buffer, offset: number): number | null => {
+export const parseCO2 = (rawData: Buffer, offset: number): CO2Ppm | null => {
     const co2 = rawData.readUInt16BE(offset);
 
     if (isInvalidMeasurementForUnsigned16BitInteger(co2)) {
         return null;
     }
 
-    return co2;
+    return asCO2Ppm(co2);
 };
 
 /**
@@ -118,7 +137,7 @@ export const parseCO2 = (rawData: Buffer, offset: number): number | null => {
  * @param flagsOffset - Byte offset for the flags containing the upper bit
  * @returns The VOC index (unitless).
  */
-export const parseVOC = (rawData: Buffer, vocOffset: number, flagsOffset: number): number | null => {
+export const parseVOC = (rawData: Buffer, vocOffset: number, flagsOffset: number): VOCIndex | null => {
     const vocLower8Bits = rawData.readUInt8(vocOffset);
     const flags = rawData.readUInt8(flagsOffset);
     const vocUpperBit = (flags & 0b01000000) >> 6;
@@ -129,7 +148,7 @@ export const parseVOC = (rawData: Buffer, vocOffset: number, flagsOffset: number
         return null;
     }
 
-    return voc;
+    return asVOCIndex(voc);
 };
 
 /**
@@ -144,7 +163,7 @@ export const parseVOC = (rawData: Buffer, vocOffset: number, flagsOffset: number
  * @param flagsOffset - Byte offset for the flags containing the upper bit
  * @returns The NOX index (unitless).
  */
-export const parseNOX = (rawData: Buffer, noxOffset: number, flagsOffset: number): number | null => {
+export const parseNOX = (rawData: Buffer, noxOffset: number, flagsOffset: number): NOXIndex | null => {
     const noxLower8Bits = rawData.readUInt8(noxOffset);
     const flags = rawData.readUInt8(flagsOffset);
     const noxUpperBit = (flags & 0b10000000) >> 7;
@@ -155,7 +174,7 @@ export const parseNOX = (rawData: Buffer, noxOffset: number, flagsOffset: number
         return null;
     }
 
-    return nox;
+    return asNOXIndex(nox);
 };
 
 /**

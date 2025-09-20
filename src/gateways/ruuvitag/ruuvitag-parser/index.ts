@@ -1,4 +1,5 @@
 import { RuuviModel } from "../../../types";
+import { Celsius, CO2Ppm, Lux, NOXIndex, Pascal, PM1, PM10, PM2_5, PM4, RelativeHumidity, VOCIndex } from "../../units";
 import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
 import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
 import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy";
@@ -9,9 +10,9 @@ type Nullable<T> = T | null;
 
 export interface RuuviTagEnvironmentalSensorData {
     type: "environmental";
-    relativeHumidityPercentage: Nullable<number>;
-    temperature: Nullable<number>;
-    pressure: Nullable<number>;
+    relativeHumidityPercentage: Nullable<RelativeHumidity>;
+    temperature: Nullable<Celsius>;
+    pressure: Nullable<Pascal>;
     accelerationX: Nullable<number>;
     accelerationY: Nullable<number>;
     accelerationZ: Nullable<number>;
@@ -24,17 +25,17 @@ export interface RuuviTagEnvironmentalSensorData {
 
 export interface RuuviTagAirQualitySensorData {
     type: "air-quality";
-    temperature: Nullable<number>;
-    relativeHumidityPercentage: Nullable<number>;
-    pressure: Nullable<number>;
-    pm1: Nullable<number>;
-    pm2_5: Nullable<number>;
-    pm4: Nullable<number>;
-    pm10: Nullable<number>;
-    co2: Nullable<number>;
-    voc: Nullable<number>;
-    nox: Nullable<number>;
-    luminosity: Nullable<number>;
+    temperature: Nullable<Celsius>;
+    relativeHumidityPercentage: Nullable<RelativeHumidity>;
+    pressure: Nullable<Pascal>;
+    pm1: Nullable<PM1>;
+    pm2_5: Nullable<PM2_5>;
+    pm4: Nullable<PM4>;
+    pm10: Nullable<PM10>;
+    co2: Nullable<CO2Ppm>;
+    voc: Nullable<VOCIndex>;
+    nox: Nullable<NOXIndex>;
+    luminosity: Nullable<Lux>;
     measurementSequence: Nullable<number>;
     macAddress: Nullable<string>;
     calibrationInProgress: Nullable<boolean>;
