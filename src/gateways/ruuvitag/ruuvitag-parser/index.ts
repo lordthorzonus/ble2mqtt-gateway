@@ -1,5 +1,5 @@
-import DataFormat3ParsingStrategy from "./parsing-strategies/data-format-3-parsing-strategy";
-import DataFormat5ParsingStrategy from "./parsing-strategies/data-format-5-parsing-strategy";
+import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
+import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
 import { Data, Effect, Match } from "effect";
 
 type Nullable<T> = T | null;
@@ -19,9 +19,7 @@ export type RuuviTagSensorData = {
     macAddress: Nullable<string>;
 };
 
-export interface RuuviTagParsingStrategy {
-    parse: (rawRuuviTagData: Buffer) => RuuviTagSensorData;
-}
+export type RuuviTagParsingStrategy = (rawRuuviTagData: Buffer) => RuuviTagSensorData;
 
 enum RuuvitagSensorProtocolDataFormat {
     DataFormat3 = 0x03,
@@ -76,5 +74,5 @@ export const parse = (rawRuuviTagData: Buffer): Effect.Effect<RuuviTagSensorData
         const dataFormat = rawRuuviTagData.readUInt8(RuuviTagDataOffsets.DataFormatOffset);
         const parsingStrategy = yield* resolveParsingStrategy(dataFormat);
 
-        return parsingStrategy.parse(rawRuuviTagData);
+        return parsingStrategy(rawRuuviTagData);
     });

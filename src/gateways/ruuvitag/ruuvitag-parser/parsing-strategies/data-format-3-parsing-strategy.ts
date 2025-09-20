@@ -81,22 +81,18 @@ const parsePressure = (rawData: Buffer): number => {
  * Parses the raw manufacturer specific data field according to the Data Format 3 Specification (RAWv1)
  * @see https://github.com/ruuvi/ruuvi-sensor-protocols/blob/master/dataformat_03.md
  */
-const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = {
-    parse(rawRuuviTagData) {
-        return {
-            accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationX),
-            accelerationY: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationY),
-            accelerationZ: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationZ),
-            batteryVoltage: parseBatteryVoltage(rawRuuviTagData),
-            relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData),
-            pressure: parsePressure(rawRuuviTagData),
-            temperature: parseTemperature(rawRuuviTagData),
-            measurementSequence: null,
-            movementCounter: null,
-            txPower: null,
-            macAddress: null,
-        };
-    },
+export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) => {
+    return {
+        accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationX),
+        accelerationY: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationY),
+        accelerationZ: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationZ),
+        batteryVoltage: parseBatteryVoltage(rawRuuviTagData),
+        relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData),
+        pressure: parsePressure(rawRuuviTagData),
+        temperature: parseTemperature(rawRuuviTagData),
+        measurementSequence: null,
+        movementCounter: null,
+        txPower: null,
+        macAddress: null,
+    };
 };
-
-export default DataFormat3ParsingStrategy;

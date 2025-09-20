@@ -5,8 +5,8 @@ jest.mock("./parsing-strategies/data-format-3-parsing-strategy");
 jest.mock("./parsing-strategies/data-format-5-parsing-strategy");
 
 import { parse, RuuviTagParsingStrategy, UnsupportedDataFormatError, NotValidRuuviManufacturerIdError } from "./index";
-import DataFormat3ParsingStrategy from "./parsing-strategies/data-format-3-parsing-strategy";
-import DataFormat5ParsingStrategy from "./parsing-strategies/data-format-5-parsing-strategy";
+import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
+import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
 
 describe("RuuviTagParser", () => {
     const ruuviTagDataParsingStrategyMap: [string, RuuviTagParsingStrategy][] = [
@@ -20,7 +20,7 @@ describe("RuuviTagParser", () => {
             return Effect.runPromise(
                 Effect.gen(function* () {
                     const ruuviTagData = Buffer.from(rawStringData, "hex");
-                    const mockedParse = expectedParsingStrategy.parse as Mock;
+                    const mockedParse = expectedParsingStrategy as Mock;
 
                     mockedParse.mockReturnValue("a");
                     const result = yield* parse(ruuviTagData);

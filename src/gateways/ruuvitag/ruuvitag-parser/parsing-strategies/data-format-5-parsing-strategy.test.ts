@@ -1,5 +1,5 @@
 import { RuuviTagSensorData } from "../index";
-import DataFormat5ParsingStrategy from "./data-format-5-parsing-strategy";
+import { DataFormat5ParsingStrategy } from "./data-format-5-parsing-strategy";
 
 describe("Data Format 5 Parsing Strategy", () => {
     const macAddress = "CB:B8:33:4C:88:4F";
@@ -74,7 +74,7 @@ describe("Data Format 5 Parsing Strategy", () => {
         "should parse the raw data %s to a valid RuuviTagSensorData",
         (rawStringData, expectedRuuviTagSensorData) => {
             const rawData = Buffer.from(rawStringData, "hex");
-            expect(DataFormat5ParsingStrategy.parse(rawData)).toEqual(expectedRuuviTagSensorData);
+            expect(DataFormat5ParsingStrategy(rawData)).toEqual(expectedRuuviTagSensorData);
         }
     );
 });

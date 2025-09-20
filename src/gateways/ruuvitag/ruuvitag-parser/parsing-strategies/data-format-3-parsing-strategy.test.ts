@@ -1,5 +1,5 @@
 import { RuuviTagSensorData } from "../index";
-import DataFormat3ParsingStrategy from "./data-format-3-parsing-strategy";
+import { DataFormat3ParsingStrategy } from "./data-format-3-parsing-strategy";
 
 describe("Data Format 3 Parsing Strategy", () => {
     const testCases: [string, RuuviTagSensorData][] = [
@@ -57,7 +57,7 @@ describe("Data Format 3 Parsing Strategy", () => {
         "should parse the raw data %s to a valid RuuviTagSensorData",
         (rawStringData, expectedRuuviTagSensorData) => {
             const rawData = Buffer.from(rawStringData, "hex");
-            expect(DataFormat3ParsingStrategy.parse(rawData)).toEqual(expectedRuuviTagSensorData);
+            expect(DataFormat3ParsingStrategy(rawData)).toEqual(expectedRuuviTagSensorData);
         }
     );
 });

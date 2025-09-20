@@ -205,22 +205,18 @@ const parseMacAddress = (rawData: Buffer): string | null => {
  * Parses the raw manufacturer specific data field according to the Data Format 5 Specification (RAWv2)
  * @see https://github.com/ruuvi/ruuvi-sensor-protocols/blob/master/dataformat_05.md
  */
-const DataFormat5ParsingStrategy: RuuviTagParsingStrategy = {
-    parse(rawRuuviTagData) {
-        return {
-            temperature: parseTemperature(rawRuuviTagData),
-            relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData),
-            pressure: parsePressure(rawRuuviTagData),
-            accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV5Offset.AccelerationX),
-            accelerationY: parseAcceleration(rawRuuviTagData, DataFormatV5Offset.AccelerationY),
-            accelerationZ: parseAcceleration(rawRuuviTagData, DataFormatV5Offset.AccelerationZ),
-            batteryVoltage: parseBatteryVoltage(rawRuuviTagData),
-            txPower: parseTxPower(rawRuuviTagData),
-            movementCounter: parseMovementCounter(rawRuuviTagData),
-            measurementSequence: parseMeasurementSequence(rawRuuviTagData),
-            macAddress: parseMacAddress(rawRuuviTagData),
-        };
-    },
+export const DataFormat5ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) => {
+    return {
+        temperature: parseTemperature(rawRuuviTagData),
+        relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData),
+        pressure: parsePressure(rawRuuviTagData),
+        accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV5Offset.AccelerationX),
+        accelerationY: parseAcceleration(rawRuuviTagData, DataFormatV5Offset.AccelerationY),
+        accelerationZ: parseAcceleration(rawRuuviTagData, DataFormatV5Offset.AccelerationZ),
+        batteryVoltage: parseBatteryVoltage(rawRuuviTagData),
+        txPower: parseTxPower(rawRuuviTagData),
+        movementCounter: parseMovementCounter(rawRuuviTagData),
+        measurementSequence: parseMeasurementSequence(rawRuuviTagData),
+        macAddress: parseMacAddress(rawRuuviTagData),
+    };
 };
-
-export default DataFormat5ParsingStrategy;
