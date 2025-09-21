@@ -18,6 +18,10 @@ gateways:
             - name: Balcony Second
               id: 641cae0910b5
               timeout: 10000
+              model: environmental
+            - name: Living Room Air Quality
+              id: aa:bb:cc:dd:ee:ff
+              model: air-quality
     miflora:
         devices:
             - name: My super plant
