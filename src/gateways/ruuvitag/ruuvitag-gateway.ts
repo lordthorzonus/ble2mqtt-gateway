@@ -9,6 +9,8 @@ import { RuuviTagGatewayConfiguration } from "../../config";
 import { handleBleAdvertisement } from "../gateway-helpers";
 import { Data, Effect } from "effect";
 import { GatewayError, MapMessage } from "../ble-gateway";
+import { parseRuuviDataFormat, RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser";
+import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter";
 
 export interface PeripheralWithManufacturerData extends Peripheral {
     advertisement: Omit<Peripheral["advertisement"], "manufacturerData"> & {
@@ -51,17 +53,33 @@ export const makeRuuvitagDeviceRegistry = (
 };
 
 export const makeRuuvitagGateway =
-    (ruuviTagSettings: NonNullable<RuuviTagGatewayConfiguration>): MapMessage =>
+    (
+        ruuviTagSettings: NonNullable<RuuviTagGatewayConfiguration>,
+        ruuvitagDataFormatDeviceFilter: RuuvitagDataFormatDeviceFilter = new RuuvitagDataFormatDeviceFilter()
+    ): MapMessage =>
     (peripheral) =>
-        Effect.flatMap(validatePeripheral(peripheral), (p) =>
-            handleBleAdvertisement(
-                p,
+        Effect.gen(function* () {
+            const validPeripheral = yield* validatePeripheral(peripheral);
+            const dataFormat = yield* parseRuuviDataFormat(validPeripheral.advertisement.manufacturerData);
+
+            const deviceId = validPeripheral.uuid;
+
+            if (dataFormat === RuuvitagSensorProtocolDataFormat.DataFormatE1) {
+                ruuvitagDataFormatDeviceFilter.markE1FormatSeen(deviceId);
+            }
+
+            if (ruuvitagDataFormatDeviceFilter.shouldDiscardPeripheral(deviceId, dataFormat)) {
+                return yield* Effect.succeed([]);
+            }
+
+            return yield* handleBleAdvertisement(
+                validPeripheral,
                 DeviceType.Ruuvitag,
                 ruuviTagSettings.allow_unknown,
                 resolveDeviceModel,
                 transformPeripheralAdvertisementToSensorDataDeviceMessage
-            )
-        ).pipe(
+            );
+        }).pipe(
             Effect.catchTags({
                 PeripheralWithoutManufacturerDataError: (error) =>
                     new GatewayError({

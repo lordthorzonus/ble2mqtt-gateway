@@ -157,3 +157,62 @@ exports[`RuuviTag Gateway ruuvitagGateway() should produce a availability and a 
   },
 ]
 `;
+
+exports[`RuuviTag Gateway ruuvitagGateway() should support air quality ruuvitags 1`] = `
+[
+  {
+    "device": {
+      "friendlyName": "my_air_quality_ruuvitag",
+      "id": "a1:b2",
+      "macAddress": "a1:b2",
+      "model": "air-quality",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": {
+      "state": "online",
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "availability",
+  },
+  {
+    "device": {
+      "friendlyName": "my_air_quality_ruuvitag",
+      "id": "a1:b2",
+      "macAddress": "4C:88:4F",
+      "model": "air-quality",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": {
+      "absoluteHumidity": 16.33,
+      "calibrationInProgress": false,
+      "co2": 201,
+      "dewPoint": 19.6,
+      "heatIndex": 31,
+      "humidex": 37,
+      "luminosity": 13026.67,
+      "macAddress": "4C:88:4F",
+      "measurementSequence": 205,
+      "nox": 2,
+      "pm1": null,
+      "pm10": null,
+      "pm2_5": 11.2,
+      "pm4": null,
+      "pressure": 101102,
+      "relativeHumidityPercentage": 55.3,
+      "ruuviAQI": 100,
+      "ruuviAQIDescription": "excellent",
+      "temperature": 29.5,
+      "type": "air-quality",
+      "voc": 10,
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "sensor-data",
+  },
+]
+`;

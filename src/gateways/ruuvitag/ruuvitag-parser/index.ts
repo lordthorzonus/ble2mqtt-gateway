@@ -46,7 +46,7 @@ export type RuuviTagSensorData = RuuviTagEnvironmentalSensorData | RuuviTagAirQu
 export type RuuviTagParsingStrategy = (rawRuuviTagData: Buffer) => RuuviTagEnvironmentalSensorData;
 export type RuuviTagAirQualityParsingStrategy = (rawRuuviTagData: Buffer) => RuuviTagAirQualitySensorData;
 
-enum RuuvitagSensorProtocolDataFormat {
+export enum RuuvitagSensorProtocolDataFormat {
     DataFormat3 = 0x03,
     DataFormat2And4 = 0x04,
     DataFormat5 = 0x05,
@@ -101,6 +101,9 @@ const resolveDeviceModel = Match.type<number>().pipe(
     Match.orElse((dataFormat) => new UnsupportedDataFormatError({ dataFormat }))
 );
 
+const assertValidDataFormat = (dataFormat: number): dataFormat is RuuvitagSensorProtocolDataFormat =>
+    Object.values(RuuvitagSensorProtocolDataFormat).includes(dataFormat);
+
 export const parse = (rawRuuviTagData: Buffer): Effect.Effect<RuuviTagSensorData, RuuviParsingError> =>
     Effect.gen(function* () {
         const manufacturerId = rawRuuviTagData.readUInt16LE(RuuviTagDataOffsets.ManufacturedIdOffset);
@@ -126,3 +129,19 @@ export const parseRuuviDeviceModel = (rawRuuviTagData: Buffer): Effect.Effect<Ru
         const dataFormat = rawRuuviTagData.readUInt8(RuuviTagDataOffsets.DataFormatOffset);
         return yield* resolveDeviceModel(dataFormat);
     });
+
+export const parseRuuviDataFormat = (
+    rawRuuviTagData: Buffer
+): Effect.Effect<RuuvitagSensorProtocolDataFormat, NotValidRuuviManufacturerIdError | UnsupportedDataFormatError> => {
+    const manufacturerId = rawRuuviTagData.readUInt16LE(RuuviTagDataOffsets.ManufacturedIdOffset);
+
+    if (!validateRuuviTag(rawRuuviTagData)) {
+        return new NotValidRuuviManufacturerIdError({ manufacturerId });
+    }
+    const dataFormat = rawRuuviTagData.readUInt8(RuuviTagDataOffsets.DataFormatOffset);
+    if (!assertValidDataFormat(dataFormat)) {
+        return new UnsupportedDataFormatError({ dataFormat });
+    }
+
+    return Effect.succeed(dataFormat);
+};
