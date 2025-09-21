@@ -191,7 +191,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
         humidex: humidexSensorConfiguration,
         ruuviAQI: {
             component: HomeAssistantMQTTComponent.Sensor,
-            deviceClass: HomeAssistantDeviceClass.None,
+            deviceClass: HomeAssistantDeviceClass.AQI,
             name: "Ruuvi AQI",
             unitOfMeasurement: "",
             uniqueId: "ruuvi_aqi",
@@ -209,7 +209,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
         },
         atmoTubeAQI: {
             component: HomeAssistantMQTTComponent.Sensor,
-            deviceClass: HomeAssistantDeviceClass.None,
+            deviceClass: HomeAssistantDeviceClass.AQI,
             name: "AtmoTube AQI",
             unitOfMeasurement: "",
             uniqueId: "atmotube_aqi",

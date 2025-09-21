@@ -84,6 +84,7 @@ export enum HomeAssistantDeviceClass {
     PM25 = "pm25",
     PM10 = "pm10",
     CarbonDioxide = "carbon_dioxide",
+    AQI = "aqi",
 }
 
 export enum HomeAssistantMQTTComponent {
