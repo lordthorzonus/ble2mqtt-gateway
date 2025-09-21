@@ -15,6 +15,11 @@ const ruuviTagDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = 
     model: "RuuviTag",
 };
 
+const ruuviAirDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = {
+    manufacturer: "Ruuvi Innovations Oy",
+    model: "Ruuvi Air",
+};
+
 const absoluteHumiditySensorConfiguration: HomeAssistantSensorConfiguration = {
     component: HomeAssistantMQTTComponent.Sensor,
     deviceClass: HomeAssistantDeviceClass.None,
@@ -103,16 +108,16 @@ const measurementSequenceSensorConfiguration: HomeAssistantSensorConfiguration =
 
 export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagAirQualitySensorData> =
     {
-        absoluteHumidity: absoluteHumiditySensorConfiguration,
-        temperature: temperatureSensorConfiguration,
-        pressure: pressureSensorConfiguration,
+        absoluteHumidity: { ...absoluteHumiditySensorConfiguration, device: ruuviAirDeviceConfiguration },
+        temperature: { ...temperatureSensorConfiguration, device: ruuviAirDeviceConfiguration },
+        pressure: { ...pressureSensorConfiguration, device: ruuviAirDeviceConfiguration },
         pm1: {
             component: HomeAssistantMQTTComponent.Sensor,
             deviceClass: HomeAssistantDeviceClass.PM1,
             name: "PM1.0",
             unitOfMeasurement: "µg/m³",
             uniqueId: "pm1",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         pm2_5: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -120,7 +125,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "PM2.5",
             unitOfMeasurement: "µg/m³",
             uniqueId: "pm2_5",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         pm4: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -128,7 +133,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "PM4.0",
             unitOfMeasurement: "µg/m³",
             uniqueId: "pm4",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         pm10: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -136,7 +141,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "PM10.0",
             unitOfMeasurement: "µg/m³",
             uniqueId: "pm10",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         co2: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -144,7 +149,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "CO2",
             unitOfMeasurement: "ppm",
             uniqueId: "co2",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         voc: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -152,7 +157,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "VOC",
             unitOfMeasurement: "",
             uniqueId: "voc",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         nox: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -160,7 +165,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "NOX",
             unitOfMeasurement: "",
             uniqueId: "nox",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         luminosity: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -168,7 +173,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "Luminosity",
             unitOfMeasurement: "lux",
             uniqueId: "luminosity",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         calibrationInProgress: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -177,7 +182,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "Calibration in progress",
             unitOfMeasurement: "",
             uniqueId: "calibration_in_progress",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
         measurementSequence: measurementSequenceSensorConfiguration,
         macAddress: macAddressSensorConfiguration,
@@ -190,7 +195,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "Ruuvi AQI",
             unitOfMeasurement: "",
             uniqueId: "ruuvi_aqi",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
         },
         ruuviAQIDescription: {
@@ -199,7 +204,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "Ruuvi AQI Description",
             unitOfMeasurement: "",
             uniqueId: "ruuvi_aqi_description",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
         },
         atmoTubeAQI: {
@@ -208,7 +213,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "AtmoTube AQI",
             unitOfMeasurement: "",
             uniqueId: "atmotube_aqi",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
         },
         atmoTubeAQIDescription: {
@@ -217,7 +222,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "AtmoTube AQI Description",
             unitOfMeasurement: "",
             uniqueId: "atmotube_aqi_description",
-            device: ruuviTagDeviceConfiguration,
+            device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
         },
     };
