@@ -1,4 +1,12 @@
 import { AQI, asAQI, CO2Ppm, NOXIndex, PM1, PM10, PM2_5, VOCIndex } from "../../../units";
+import { Match } from "effect";
+
+export type AtmoTubeAQIDescription = "good" | "moderate" | "polluted" | "very-polluted" | "severely-polluted";
+
+export interface AtmoTubeAQICalculationResult {
+    index: AQI;
+    description: AtmoTubeAQIDescription;
+}
 
 interface Breakpoint {
     aqiLow: number;
@@ -125,7 +133,33 @@ interface SensorData {
 }
 
 const pollutants: readonly (keyof SensorData)[] = ["pm2_5", "co2", "voc", "nox", "pm10", "pm1"] as const;
-export const calculateAtmoTubeIAQI = (sensorData: SensorData): AQI | null => {
+
+const toDescription = Match.type<AQI>().pipe(
+    Match.withReturnType<AtmoTubeAQIDescription>(),
+    Match.when(
+        (index) => index >= 81 && index <= 100,
+        () => "good"
+    ),
+    Match.when(
+        (index) => index >= 61 && index <= 80,
+        () => "moderate"
+    ),
+    Match.when(
+        (index) => index >= 41 && index <= 60,
+        () => "polluted"
+    ),
+    Match.when(
+        (index) => index >= 21 && index <= 40,
+        () => "very-polluted"
+    ),
+    Match.orElse(() => "severely-polluted")
+);
+
+/**
+ * Calculate the AtmoTube Indoor Air Quality Index (IAQI) from sensor data.
+ * Uses the worst (lowest) individual AQI value as the overall index.
+ */
+export const calculateAtmoTubeIAQI = (sensorData: SensorData): AtmoTubeAQICalculationResult | null => {
     const worstAQI = pollutants.reduce(
         (worstAQI, pollutant) => {
             const concentration = sensorData[pollutant];
@@ -143,5 +177,10 @@ export const calculateAtmoTubeIAQI = (sensorData: SensorData): AQI | null => {
         { index: 100, hasValidData: false }
     );
 
-    return worstAQI.hasValidData ? asAQI(worstAQI.index) : null;
+    if (!worstAQI.hasValidData) {
+        return null;
+    }
+
+    const index = asAQI(worstAQI.index);
+    return { index, description: toDescription(index) };
 };

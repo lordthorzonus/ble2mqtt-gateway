@@ -119,6 +119,8 @@ describe("RuuviTag sensor data decorator", () => {
                 heatIndex,
                 ruuviAQI: 100,
                 ruuviAQIDescription: "excellent",
+                atmoTubeAQI: 0,
+                atmoTubeAQIDescription: "severely-polluted",
             });
 
             expect(calculateAbsoluteHumidityMock).toHaveBeenCalledWith(

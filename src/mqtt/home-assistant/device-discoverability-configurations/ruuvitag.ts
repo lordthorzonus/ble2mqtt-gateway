@@ -184,6 +184,42 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
         dewPoint: dewPointSensorConfiguration,
         heatIndex: heatIndexSensorConfiguration,
         humidex: humidexSensorConfiguration,
+        ruuviAQI: {
+            component: HomeAssistantMQTTComponent.Sensor,
+            deviceClass: HomeAssistantDeviceClass.None,
+            name: "Ruuvi AQI",
+            unitOfMeasurement: "",
+            uniqueId: "ruuvi_aqi",
+            device: ruuviTagDeviceConfiguration,
+            icon: "mdi:air-filter",
+        },
+        ruuviAQIDescription: {
+            component: HomeAssistantMQTTComponent.Sensor,
+            deviceClass: HomeAssistantDeviceClass.None,
+            name: "Ruuvi AQI Description",
+            unitOfMeasurement: "",
+            uniqueId: "ruuvi_aqi_description",
+            device: ruuviTagDeviceConfiguration,
+            icon: "mdi:air-filter",
+        },
+        atmoTubeAQI: {
+            component: HomeAssistantMQTTComponent.Sensor,
+            deviceClass: HomeAssistantDeviceClass.None,
+            name: "AtmoTube AQI",
+            unitOfMeasurement: "",
+            uniqueId: "atmotube_aqi",
+            device: ruuviTagDeviceConfiguration,
+            icon: "mdi:air-filter",
+        },
+        atmoTubeAQIDescription: {
+            component: HomeAssistantMQTTComponent.Sensor,
+            deviceClass: HomeAssistantDeviceClass.None,
+            name: "AtmoTube AQI Description",
+            unitOfMeasurement: "",
+            uniqueId: "atmotube_aqi_description",
+            device: ruuviTagDeviceConfiguration,
+            icon: "mdi:air-filter",
+        },
     };
 
 export const ruuviTagEnvironmentalSensorConfiguration: HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagEnvironmentalSensorData> =

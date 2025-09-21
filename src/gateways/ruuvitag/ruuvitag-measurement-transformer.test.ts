@@ -214,6 +214,8 @@ describe("RuuviTag Measurement Transformer", () => {
                             dewPoint: asCelsius(-163.8),
                             ruuviAQI: null,
                             ruuviAQIDescription: null,
+                            atmoTubeAQI: null,
+                            atmoTubeAQIDescription: null,
                             heatIndex: null,
                             humidex: null,
                         };

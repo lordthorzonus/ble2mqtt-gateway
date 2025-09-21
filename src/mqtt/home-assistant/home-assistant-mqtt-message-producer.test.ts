@@ -1,7 +1,10 @@
 import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType, DeviceType } from "../../types";
 import { DateTime } from "luxon";
 import { makeHomeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
-import { EnhancedRuuviTagEnvironmentalSensorData } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
+import {
+    EnhancedRuuviTagEnvironmentalSensorData,
+    EnhancedRuuviTagAirQualitySensorData,
+} from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer";
 import { Chunk, Effect, Stream } from "effect";
 import { testEffectWithContext } from "../../test/test-context";
@@ -80,6 +83,47 @@ describe("HomeAssistant MQTT Message producer", () => {
         });
     });
 
+    it("should generate device state mqtt message for air quality ruuvitag", async () => {
+        const deviceMessage: DeviceSensorMessage = {
+            id: "air-quality-msg",
+            payload: {
+                type: "air-quality",
+                temperature: 22.5,
+                pm2_5: 12.3,
+            } as unknown as EnhancedRuuviTagAirQualitySensorData,
+            type: MessageType.SensorData,
+            time: DateTime.now(),
+            device: {
+                macAddress: "cc:dd",
+                id: "cc:dd",
+                friendlyName: "Air Quality Sensor",
+                rssi: 15,
+                type: DeviceType.Ruuvitag,
+                model: "air-quality",
+                timeout: 10000,
+            },
+        };
+
+        const testProgram = Effect.gen(function* () {
+            const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+            return yield* Stream.runCollect(homeAssistantMqttMessageProducer(deviceMessage));
+        });
+
+        const message = await Effect.runPromise(testEffectWithContext(testProgram));
+
+        expect(Chunk.toArray(message)[0]).toEqual({
+            payload: JSON.stringify({
+                type: "air-quality",
+                temperature: 22.5,
+                pm2_5: 12.3,
+                time: deviceMessage.time,
+                id: deviceMessage.id,
+            }),
+            retain: false,
+            topic: "test/ruuvitag/cc:dd/state",
+        });
+    });
+
     const availabilityTestCases: [string, DeviceAvailabilityMessage][] = [
         [
             "RuuviTag Discovered",
@@ -150,6 +194,42 @@ describe("HomeAssistant MQTT Message producer", () => {
                     type: DeviceType.MiFlora,
                     model: "miflora",
                     timeout: 30000,
+                },
+            },
+        ],
+        [
+            "RuuviTag Air Quality Discovered",
+            {
+                id: "air-quality-id",
+                time: DateTime.now(),
+                payload: { state: "online" },
+                type: MessageType.Availability,
+                device: {
+                    macAddress: "cc:dd",
+                    id: "cc:dd",
+                    friendlyName: "Air Quality Sensor",
+                    rssi: 15,
+                    type: DeviceType.Ruuvitag,
+                    model: "air-quality",
+                    timeout: 10000,
+                },
+            },
+        ],
+        [
+            "RuuviTag Air Quality Offline",
+            {
+                id: "air-quality-id",
+                time: DateTime.now(),
+                payload: { state: "offline" },
+                type: MessageType.Availability,
+                device: {
+                    macAddress: "cc:dd",
+                    id: "cc:dd",
+                    friendlyName: "air sensor",
+                    rssi: 15,
+                    type: DeviceType.Ruuvitag,
+                    model: "air-quality",
+                    timeout: 10000,
                 },
             },
         ],

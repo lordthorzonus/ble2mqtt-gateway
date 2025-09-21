@@ -29,8 +29,8 @@ function runComparison(sensorData: {
 
     return {
         ruuviIndex: ruuviResult?.index ?? null,
-        atmotubeIndex: atmotubeResult,
-        difference: ruuviResult && atmotubeResult ? Math.abs(ruuviResult.index - atmotubeResult) : null,
+        atmotubeIndex: atmotubeResult?.index ?? null,
+        difference: ruuviResult && atmotubeResult ? Math.abs(ruuviResult.index - atmotubeResult.index) : null,
     };
 }
 
@@ -250,7 +250,7 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 0,
-              "difference": null,
+              "difference": 0,
               "ruuviIndex": 0,
             }
         `);

@@ -190,6 +190,8 @@ exports[`RuuviTag Gateway ruuvitagGateway() should support air quality ruuvitags
     "id": "mock-uuid",
     "payload": {
       "absoluteHumidity": 16.33,
+      "atmoTubeAQI": 0,
+      "atmoTubeAQIDescription": "severely-polluted",
       "calibrationInProgress": false,
       "co2": 201,
       "dewPoint": 19.6,

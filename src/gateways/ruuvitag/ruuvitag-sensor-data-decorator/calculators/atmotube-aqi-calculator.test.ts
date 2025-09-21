@@ -1,4 +1,4 @@
-import { calculateAtmoTubeIAQI } from "./atmotube-aqi-calculator";
+import { calculateAtmoTubeIAQI, AtmoTubeAQIDescription } from "./atmotube-aqi-calculator";
 import { asCO2Ppm, asNOXIndex, asPM1, asPM10, asPM2_5, asVOCIndex } from "../../../units";
 
 describe("AtmoTube IAQI Calculator", () => {
@@ -477,7 +477,7 @@ describe("AtmoTube IAQI Calculator", () => {
             },
         ])("should calculate correct AQI for $description", ({ sensorData, expectedAQI }) => {
             const result = calculateAtmoTubeIAQI(sensorData);
-            expect(result).toBe(expectedAQI);
+            expect(result?.index).toBe(expectedAQI);
         });
     });
 
@@ -521,7 +521,7 @@ describe("AtmoTube IAQI Calculator", () => {
             },
         ])("should handle $description", ({ sensorData, expectedAQI }) => {
             const result = calculateAtmoTubeIAQI(sensorData);
-            expect(result).toBe(expectedAQI);
+            expect(result?.index).toBe(expectedAQI);
         });
     });
 
@@ -551,7 +551,7 @@ describe("AtmoTube IAQI Calculator", () => {
             };
 
             const result = calculateAtmoTubeIAQI(sensorData);
-            expect(result).toBe(91);
+            expect(result?.index).toBe(91);
         });
 
         it("should handle zero concentration and return perfect AQI (100)", () => {
@@ -565,7 +565,7 @@ describe("AtmoTube IAQI Calculator", () => {
             };
 
             const result = calculateAtmoTubeIAQI(sensorData);
-            expect(result).toBe(100);
+            expect(result?.index).toBe(100);
         });
 
         it("should handle negative concentration and return perfect AQI (100)", () => {
@@ -579,7 +579,7 @@ describe("AtmoTube IAQI Calculator", () => {
             };
 
             const result = calculateAtmoTubeIAQI(sensorData);
-            expect(result).toBe(100);
+            expect(result?.index).toBe(100);
         });
 
         it("should handle concentrations at exact breakpoint boundaries", () => {
@@ -601,8 +601,66 @@ describe("AtmoTube IAQI Calculator", () => {
                 };
 
                 const result = calculateAtmoTubeIAQI(sensorData);
-                expect(result).toBe(expectedAQI);
+                expect(result?.index).toBe(expectedAQI);
             });
+        });
+    });
+
+    describe("AQI Description mapping", () => {
+        it.each([
+            {
+                description: "good AQI (100)",
+                sensorData: { pm2_5: asPM2_5(0), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "good" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "good AQI (82)",
+                sensorData: { pm2_5: asPM2_5(19), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "good" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "moderate AQI (80)",
+                sensorData: { pm2_5: asPM2_5(21), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "moderate" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "moderate AQI (61)",
+                sensorData: { pm2_5: asPM2_5(49), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "moderate" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "polluted AQI (60)",
+                sensorData: { pm2_5: asPM2_5(51), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "polluted" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "polluted AQI (41)",
+                sensorData: { pm2_5: asPM2_5(89), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "polluted" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "very polluted AQI (40)",
+                sensorData: { pm2_5: asPM2_5(91), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "very-polluted" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "very polluted AQI (21)",
+                sensorData: { pm2_5: asPM2_5(139), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "very-polluted" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "severely polluted AQI (20)",
+                sensorData: { pm2_5: asPM2_5(141), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "severely-polluted" as AtmoTubeAQIDescription,
+            },
+            {
+                description: "severely polluted AQI (0)",
+                sensorData: { pm2_5: asPM2_5(200), co2: null, voc: null, nox: null, pm10: null, pm1: null },
+                expectedDescription: "severely-polluted" as AtmoTubeAQIDescription,
+            },
+        ])("should return correct description for $description", ({ sensorData, expectedDescription }) => {
+            const result = calculateAtmoTubeIAQI(sensorData);
+            expect(result?.description).toBe(expectedDescription);
         });
     });
 });

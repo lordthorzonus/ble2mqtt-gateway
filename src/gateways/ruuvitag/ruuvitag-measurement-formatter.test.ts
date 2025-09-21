@@ -111,6 +111,8 @@ describe("RuuviTag measurement formatter", () => {
                 absoluteHumidity: 14.87654,
                 ruuviAQI: null,
                 ruuviAQIDescription: null,
+                atmoTubeAQI: null,
+                atmoTubeAQIDescription: null,
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 2);
@@ -137,6 +139,8 @@ describe("RuuviTag measurement formatter", () => {
                 absoluteHumidity: 14.88,
                 ruuviAQI: null,
                 ruuviAQIDescription: null,
+                atmoTubeAQI: null,
+                atmoTubeAQIDescription: null,
             });
         });
 
@@ -163,6 +167,8 @@ describe("RuuviTag measurement formatter", () => {
                 absoluteHumidity: null,
                 ruuviAQI: null,
                 ruuviAQIDescription: null,
+                atmoTubeAQI: null,
+                atmoTubeAQIDescription: null,
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 2);
@@ -189,6 +195,8 @@ describe("RuuviTag measurement formatter", () => {
                 absoluteHumidity: null,
                 ruuviAQI: null,
                 ruuviAQIDescription: null,
+                atmoTubeAQI: null,
+                atmoTubeAQIDescription: null,
             });
         });
 
@@ -215,6 +223,8 @@ describe("RuuviTag measurement formatter", () => {
                 absoluteHumidity: 14.87654,
                 ruuviAQI: null,
                 ruuviAQIDescription: null,
+                atmoTubeAQI: null,
+                atmoTubeAQIDescription: null,
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 0);
@@ -241,6 +251,8 @@ describe("RuuviTag measurement formatter", () => {
                 absoluteHumidity: 15,
                 ruuviAQI: null,
                 ruuviAQIDescription: null,
+                atmoTubeAQI: null,
+                atmoTubeAQIDescription: null,
             });
         });
     });
