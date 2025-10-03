@@ -1,5 +1,5 @@
 import {
-    EnhancedRuuviTagAirQualitySensorData,
+    EnhancedRuuviAirSensorData,
     EnhancedRuuviTagEnvironmentalSensorData,
 } from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { DateTime } from "luxon";
@@ -40,7 +40,7 @@ export interface SensorMessageForType<TDeviceType extends DeviceType, TModel ext
 
 export type RuuvitagSensorMessage =
     | SensorMessageForType<DeviceType.Ruuvitag, "environmental", EnhancedRuuviTagEnvironmentalSensorData>
-    | SensorMessageForType<DeviceType.Ruuvitag, "air-quality", EnhancedRuuviTagAirQualitySensorData>;
+    | SensorMessageForType<DeviceType.Ruuvitag, "air-quality", EnhancedRuuviAirSensorData>;
 export type MifloraSensorMessage = SensorMessageForType<DeviceType.MiFlora, "miflora", MiFloraSensorData>;
 
 export type DeviceSensorMessage = MifloraSensorMessage | RuuvitagSensorMessage;

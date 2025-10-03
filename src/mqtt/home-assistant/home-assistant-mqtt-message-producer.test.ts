@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 import { makeHomeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
 import {
     EnhancedRuuviTagEnvironmentalSensorData,
-    EnhancedRuuviTagAirQualitySensorData,
+    EnhancedRuuviAirSensorData,
 } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer";
 import { Chunk, Effect, Stream } from "effect";
@@ -90,7 +90,7 @@ describe("HomeAssistant MQTT Message producer", () => {
                 type: "air-quality",
                 temperature: 22.5,
                 pm2_5: 12.3,
-            } as unknown as EnhancedRuuviTagAirQualitySensorData,
+            } as unknown as EnhancedRuuviAirSensorData,
             type: MessageType.SensorData,
             time: DateTime.now(),
             device: {

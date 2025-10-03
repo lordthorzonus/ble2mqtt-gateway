@@ -1,4 +1,4 @@
-import { RuuviTagAirQualitySensorData } from "../index";
+import { RuuviAirSensorData } from "../index";
 import { DataFormatE1ParsingStrategy } from "./data-format-e1-parsing-strategy";
 import {
     asCelsius,
@@ -15,7 +15,7 @@ import {
 } from "../../../units";
 
 describe("Data Format E1 Parsing Strategy", () => {
-    const testCases: [string, RuuviTagAirQualitySensorData][] = [
+    const testCases: [string, RuuviAirSensorData][] = [
         [
             "9904E1170C5668C79E0065007004BD11CA00C9140413E0AC3FFFFFFECDEE11FFFFFFFFFFFFCBB8334C884F",
             {

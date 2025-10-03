@@ -3,7 +3,7 @@ jest.mock("./calculators/dew-point-calculator");
 jest.mock("./calculators/heat-index-calculator");
 jest.mock("./calculators/humidex-calculator");
 
-import { RuuviTagSensorData, RuuviTagAirQualitySensorData } from "../ruuvitag-parser";
+import { RuuviTagSensorData, RuuviAirSensorData } from "../ruuvitag-parser";
 import {
     decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues,
     decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
@@ -84,7 +84,7 @@ describe("RuuviTag sensor data decorator", () => {
 
     describe("Air quality sensor data", () => {
         it("should enhance the given ruuvitag air quality sensor data with calculations", () => {
-            const ruuviTagAirQualitySensorData: RuuviTagAirQualitySensorData = {
+            const ruuviTagAirQualitySensorData: RuuviAirSensorData = {
                 type: "air-quality",
                 macAddress: "4C:88:4F",
                 measurementSequence: 205,

@@ -6,7 +6,7 @@ import {
     HomeAssistantSensorConfigurationForDevice,
 } from "../../../types";
 import {
-    EnhancedRuuviTagAirQualitySensorData,
+    EnhancedRuuviAirSensorData,
     EnhancedRuuviTagEnvironmentalSensorData,
 } from "../../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 
@@ -106,7 +106,7 @@ const measurementSequenceSensorConfiguration: HomeAssistantSensorConfiguration =
     device: ruuviTagDeviceConfiguration,
 };
 
-export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagAirQualitySensorData> =
+export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigurationForDevice<EnhancedRuuviAirSensorData> =
     {
         absoluteHumidity: { ...absoluteHumiditySensorConfiguration, device: ruuviAirDeviceConfiguration },
         temperature: { ...temperatureSensorConfiguration, device: ruuviAirDeviceConfiguration },

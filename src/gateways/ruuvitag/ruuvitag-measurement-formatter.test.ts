@@ -1,7 +1,4 @@
-import {
-    EnhancedRuuviTagEnvironmentalSensorData,
-    EnhancedRuuviTagAirQualitySensorData,
-} from "./ruuvitag-sensor-data-decorator";
+import { EnhancedRuuviTagEnvironmentalSensorData, EnhancedRuuviAirSensorData } from "./ruuvitag-sensor-data-decorator";
 import { formatEnvironmentalSensorValues, formatAirQualitySensorValues } from "./ruuvitag-measurement-formatter";
 import {
     asCelsius,
@@ -89,7 +86,7 @@ describe("RuuviTag measurement formatter", () => {
 
     describe("Air quality sensor data formatting", () => {
         it("should format air quality sensor values with specified decimal precision", () => {
-            const sensorData: EnhancedRuuviTagAirQualitySensorData = {
+            const sensorData: EnhancedRuuviAirSensorData = {
                 type: "air-quality",
                 temperature: asCelsius(29.50123),
                 relativeHumidityPercentage: asRelativeHumidity(55.30456),
@@ -145,7 +142,7 @@ describe("RuuviTag measurement formatter", () => {
         });
 
         it("should handle null values in air quality sensor data", () => {
-            const sensorData: EnhancedRuuviTagAirQualitySensorData = {
+            const sensorData: EnhancedRuuviAirSensorData = {
                 type: "air-quality",
                 temperature: null,
                 relativeHumidityPercentage: null,
@@ -201,7 +198,7 @@ describe("RuuviTag measurement formatter", () => {
         });
 
         it("should format air quality sensor values with different decimal precision", () => {
-            const sensorData: EnhancedRuuviTagAirQualitySensorData = {
+            const sensorData: EnhancedRuuviAirSensorData = {
                 type: "air-quality",
                 temperature: asCelsius(29.50123),
                 relativeHumidityPercentage: asRelativeHumidity(55.30456),

@@ -1,13 +1,10 @@
-import {
-    EnhancedRuuviTagAirQualitySensorData,
-    EnhancedRuuviTagEnvironmentalSensorData,
-} from "./ruuvitag-sensor-data-decorator";
+import { EnhancedRuuviAirSensorData, EnhancedRuuviTagEnvironmentalSensorData } from "./ruuvitag-sensor-data-decorator";
 import { formatNumericSensorValue } from "../numeric-sensor-value-formatter";
 
 export const formatAirQualitySensorValues = (
-    sensorValues: EnhancedRuuviTagAirQualitySensorData,
+    sensorValues: EnhancedRuuviAirSensorData,
     decimalPrecision: number
-): EnhancedRuuviTagAirQualitySensorData => {
+): EnhancedRuuviAirSensorData => {
     return {
         type: "air-quality",
         humidex: sensorValues.humidex,

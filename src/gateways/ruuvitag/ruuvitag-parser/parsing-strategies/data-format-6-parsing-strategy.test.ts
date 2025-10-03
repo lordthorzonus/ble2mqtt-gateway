@@ -1,4 +1,4 @@
-import { RuuviTagAirQualitySensorData } from "../index";
+import { RuuviAirSensorData } from "../index";
 import { DataFormat6ParsingStrategy } from "./data-format-6-parsing-strategy";
 import {
     asCelsius,
@@ -12,7 +12,7 @@ import {
 } from "../../../units";
 
 describe("Data Format 6 Parsing Strategy", () => {
-    const testCases: [string, RuuviTagAirQualitySensorData][] = [
+    const testCases: [string, RuuviAirSensorData][] = [
         [
             "990406170C5668C79E007000C90A02D900CD004C884F",
             {

@@ -23,7 +23,7 @@ export interface RuuviTagEnvironmentalSensorData {
     macAddress: Nullable<string>;
 }
 
-export interface RuuviTagAirQualitySensorData {
+export interface RuuviAirSensorData {
     type: "air-quality";
     temperature: Nullable<Celsius>;
     relativeHumidityPercentage: Nullable<RelativeHumidity>;
@@ -41,10 +41,10 @@ export interface RuuviTagAirQualitySensorData {
     calibrationInProgress: Nullable<boolean>;
 }
 
-export type RuuviTagSensorData = RuuviTagEnvironmentalSensorData | RuuviTagAirQualitySensorData;
+export type RuuviTagSensorData = RuuviTagEnvironmentalSensorData | RuuviAirSensorData;
 
 export type RuuviTagParsingStrategy = (rawRuuviTagData: Buffer) => RuuviTagEnvironmentalSensorData;
-export type RuuviTagAirQualityParsingStrategy = (rawRuuviTagData: Buffer) => RuuviTagAirQualitySensorData;
+export type RuuviAirParsingStrategy = (rawRuuviTagData: Buffer) => RuuviAirSensorData;
 
 export enum RuuvitagSensorProtocolDataFormat {
     DataFormat3 = 0x03,

@@ -1,5 +1,5 @@
 import { asLux, asPM2_5, Lux } from "../../../units";
-import { RuuviTagAirQualityParsingStrategy } from "../index";
+import { RuuviAirParsingStrategy } from "../index";
 import {
     parseTemperature,
     parseRelativeHumidity,
@@ -148,7 +148,7 @@ const parseMacAddress = (rawData: Buffer, offset: number): string | null => {
  *
  * @see https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-6
  */
-export const DataFormat6ParsingStrategy: RuuviTagAirQualityParsingStrategy = (rawRuuviTagData) => {
+export const DataFormat6ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTagData) => {
     const pm2_5 = parseParticulateMatter(rawRuuviTagData, DataFormatV6Offset.PM25);
 
     return {

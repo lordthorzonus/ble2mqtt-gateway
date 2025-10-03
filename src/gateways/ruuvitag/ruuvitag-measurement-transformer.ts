@@ -3,7 +3,7 @@ import {
     parse,
     RuuviParsingError,
     RuuviTagEnvironmentalSensorData,
-    RuuviTagAirQualitySensorData,
+    RuuviAirSensorData,
     RuuviTagSensorData,
     parseRuuviDeviceModel,
 } from "./ruuvitag-parser";
@@ -33,10 +33,7 @@ const processEnvironmentalData = (
         formatEnvironmentalSensorValues(decoratedValues, decimalPrecision)
     );
 
-const processAirQualityData = (
-    data: RuuviTagAirQualitySensorData,
-    decimalPrecision: number
-): EnhancedRuuviTagSensorData =>
+const processAirQualityData = (data: RuuviAirSensorData, decimalPrecision: number): EnhancedRuuviTagSensorData =>
     pipe(data, decorateRuuviTagAirQualitySensorDataWithCalculatedValues, (decoratedValues) =>
         formatAirQualitySensorValues(decoratedValues, decimalPrecision)
     );

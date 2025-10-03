@@ -4,7 +4,7 @@ import {
     decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues,
     decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
     EnhancedRuuviTagEnvironmentalSensorData,
-    EnhancedRuuviTagAirQualitySensorData,
+    EnhancedRuuviAirSensorData,
 } from "./ruuvitag-sensor-data-decorator";
 import { v4 as uuid } from "uuid";
 import { PeripheralWithManufacturerData } from "./ruuvitag-gateway";
@@ -194,7 +194,7 @@ describe("RuuviTag Measurement Transformer", () => {
                             uuid: "air-quality-uuid",
                         };
 
-                        const airQualitySensorData: EnhancedRuuviTagAirQualitySensorData = {
+                        const airQualitySensorData: EnhancedRuuviAirSensorData = {
                             type: "air-quality",
                             temperature: asCelsius(-163.835),
                             pressure: asPascal(50000),

@@ -1,4 +1,4 @@
-import { RuuviTagAirQualitySensorData, RuuviTagEnvironmentalSensorData } from "../ruuvitag-parser";
+import { RuuviAirSensorData, RuuviTagEnvironmentalSensorData } from "../ruuvitag-parser";
 import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calculator";
 import { RuuviAQIDescription, calculateRuuviAQI } from "./calculators/ruuvi-aqi-calculator";
 import { AtmoTubeAQIDescription, calculateAtmoTubeIAQI } from "./calculators/atmotube-aqi-calculator";
@@ -17,19 +17,19 @@ interface SharedEnhancedRuuviTagSensorData {
 export type EnhancedRuuviTagEnvironmentalSensorData = SharedEnhancedRuuviTagSensorData &
     RuuviTagEnvironmentalSensorData;
 
-export type EnhancedRuuviTagAirQualitySensorData = SharedEnhancedRuuviTagSensorData &
-    RuuviTagAirQualitySensorData & {
+export type EnhancedRuuviAirSensorData = SharedEnhancedRuuviTagSensorData &
+    RuuviAirSensorData & {
         ruuviAQI: AQI | null;
         ruuviAQIDescription: RuuviAQIDescription | null;
         atmoTubeAQI: AQI | null;
         atmoTubeAQIDescription: AtmoTubeAQIDescription | null;
     };
 
-export type EnhancedRuuviTagSensorData = EnhancedRuuviTagEnvironmentalSensorData | EnhancedRuuviTagAirQualitySensorData;
+export type EnhancedRuuviTagSensorData = EnhancedRuuviTagEnvironmentalSensorData | EnhancedRuuviAirSensorData;
 
 export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
-    ruuviTagAirQualitySensorData: RuuviTagAirQualitySensorData
-): EnhancedRuuviTagAirQualitySensorData => {
+    ruuviTagAirQualitySensorData: RuuviAirSensorData
+): EnhancedRuuviAirSensorData => {
     const dewPoint = calculateDewPoint(
         ruuviTagAirQualitySensorData.temperature,
         ruuviTagAirQualitySensorData.relativeHumidityPercentage
