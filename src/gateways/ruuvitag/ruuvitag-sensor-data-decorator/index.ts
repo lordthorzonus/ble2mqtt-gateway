@@ -1,6 +1,6 @@
 import { RuuviAirSensorData, RuuviTagEnvironmentalSensorData } from "../ruuvitag-parser";
 import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calculator";
-import { RuuviAQIDescription, calculateRuuviAQI } from "./calculators/ruuvi-aqi-calculator";
+import { RuuviIAQSDescription, calculateRuuviIAQS } from "./calculators/ruuvi-iaqs-calculator";
 import { AtmoTubeAQIDescription, calculateAtmoTubeIAQI } from "./calculators/atmotube-aqi-calculator";
 import { calculateDewPoint } from "./calculators/dew-point-calculator";
 import { calculateHeatIndex } from "./calculators/heat-index-calculator";
@@ -19,8 +19,8 @@ export type EnhancedRuuviTagEnvironmentalSensorData = SharedEnhancedRuuviTagSens
 
 export type EnhancedRuuviAirSensorData = SharedEnhancedRuuviTagSensorData &
     RuuviAirSensorData & {
-        ruuviAQI: AQI | null;
-        ruuviAQIDescription: RuuviAQIDescription | null;
+        ruuviIAQS: AQI | null;
+        ruuviIAQSDescription: RuuviIAQSDescription | null;
         atmoTubeAQI: AQI | null;
         atmoTubeAQIDescription: AtmoTubeAQIDescription | null;
     };
@@ -34,11 +34,9 @@ export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
         ruuviTagAirQualitySensorData.temperature,
         ruuviTagAirQualitySensorData.relativeHumidityPercentage
     );
-    const ruuviAQICalculationResult = calculateRuuviAQI({
+    const ruuviIAQSCalculationResult = calculateRuuviIAQS({
         pm25: ruuviTagAirQualitySensorData.pm2_5,
         co2: ruuviTagAirQualitySensorData.co2,
-        voc: ruuviTagAirQualitySensorData.voc,
-        nox: ruuviTagAirQualitySensorData.nox,
     });
     const atmoTubeAQICalculationResult = calculateAtmoTubeIAQI({
         pm2_5: ruuviTagAirQualitySensorData.pm2_5,
@@ -61,8 +59,8 @@ export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
             ruuviTagAirQualitySensorData.temperature,
             ruuviTagAirQualitySensorData.relativeHumidityPercentage
         ),
-        ruuviAQI: ruuviAQICalculationResult?.index ?? null,
-        ruuviAQIDescription: ruuviAQICalculationResult?.description ?? null,
+        ruuviIAQS: ruuviIAQSCalculationResult?.index ?? null,
+        ruuviIAQSDescription: ruuviIAQSCalculationResult?.description ?? null,
         atmoTubeAQI: atmoTubeAQICalculationResult?.index ?? null,
         atmoTubeAQIDescription: atmoTubeAQICalculationResult?.description ?? null,
     };

@@ -189,21 +189,21 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
         dewPoint: dewPointSensorConfiguration,
         heatIndex: heatIndexSensorConfiguration,
         humidex: humidexSensorConfiguration,
-        ruuviAQI: {
+        ruuviIAQS: {
             component: HomeAssistantMQTTComponent.Sensor,
             deviceClass: HomeAssistantDeviceClass.AQI,
-            name: "Ruuvi AQI",
+            name: "Ruuvi Indoor Air Quality Score (IAQS)",
             unitOfMeasurement: "",
-            uniqueId: "ruuvi_aqi",
+            uniqueId: "ruuvi_iaqs",
             device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
         },
-        ruuviAQIDescription: {
+        ruuviIAQSDescription: {
             component: HomeAssistantMQTTComponent.Sensor,
             deviceClass: HomeAssistantDeviceClass.None,
-            name: "Ruuvi AQI Description",
+            name: "Ruuvi IAQS Description",
             unitOfMeasurement: "",
-            uniqueId: "ruuvi_aqi_description",
+            uniqueId: "ruuvi_iaqs_description",
             device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
         },

@@ -1,4 +1,4 @@
-import { calculateRuuviAQI } from "./ruuvi-aqi-calculator";
+import { calculateRuuviIAQS } from "./ruuvi-iaqs-calculator";
 import { calculateAtmoTubeIAQI } from "./atmotube-aqi-calculator";
 import { asCO2Ppm, asNOXIndex, asPM2_5, asVOCIndex } from "../../../units";
 
@@ -11,8 +11,6 @@ function runComparison(sensorData: {
     const ruuviInput = {
         pm25: sensorData.pm2_5 !== null ? asPM2_5(sensorData.pm2_5) : null,
         co2: sensorData.co2 !== null ? asCO2Ppm(sensorData.co2) : null,
-        voc: sensorData.voc !== null ? asVOCIndex(sensorData.voc) : null,
-        nox: sensorData.nox !== null ? asNOXIndex(sensorData.nox) : null,
     };
 
     const atmotubeInput = {
@@ -24,7 +22,7 @@ function runComparison(sensorData: {
         pm1: null,
     };
 
-    const ruuviResult = calculateRuuviAQI(ruuviInput);
+    const ruuviResult = calculateRuuviIAQS(ruuviInput);
     const atmotubeResult = calculateAtmoTubeIAQI(atmotubeInput);
 
     return {
@@ -46,8 +44,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 80,
-              "difference": 20,
-              "ruuviIndex": 100,
+              "difference": 11.515258075173477,
+              "ruuviIndex": 91.51525807517348,
             }
         `);
     });
@@ -63,8 +61,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 70,
-              "difference": 18,
-              "ruuviIndex": 88,
+              "difference": 0.899831134915047,
+              "ruuviIndex": 70.89983113491505,
             }
         `);
     });
@@ -80,8 +78,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 43,
-              "difference": 3,
-              "ruuviIndex": 40,
+              "difference": 8.132937583214456,
+              "ruuviIndex": 51.132937583214456,
             }
         `);
     });
@@ -97,8 +95,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 20,
-              "difference": 20,
-              "ruuviIndex": 0,
+              "difference": 1.4773180609932268,
+              "ruuviIndex": 21.477318060993227,
             }
         `);
     });
@@ -131,8 +129,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 60,
-              "difference": 2,
-              "ruuviIndex": 62,
+              "difference": 43.33333333333334,
+              "ruuviIndex": 16.666666666666657,
             }
         `);
     });
@@ -148,8 +146,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 40,
-              "difference": 10,
-              "ruuviIndex": 50,
+              "difference": 46.66666666666667,
+              "ruuviIndex": 86.66666666666667,
             }
         `);
     });
@@ -165,8 +163,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 30,
-              "difference": 0,
-              "ruuviIndex": 30,
+              "difference": 15.093645618942048,
+              "ruuviIndex": 14.906354381057952,
             }
         `);
     });
@@ -182,8 +180,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 70,
-              "difference": 12,
-              "ruuviIndex": 82,
+              "difference": 8.982906751057335,
+              "ruuviIndex": 61.017093248942665,
             }
         `);
     });
@@ -199,8 +197,8 @@ describe("AQI Calculator Comparison", () => {
         expect(result).toMatchInlineSnapshot(`
             {
               "atmotubeIndex": 40,
-              "difference": 40,
-              "ruuviIndex": 0,
+              "difference": null,
+              "ruuviIndex": null,
             }
         `);
     });

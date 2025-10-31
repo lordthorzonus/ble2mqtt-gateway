@@ -117,8 +117,8 @@ describe("RuuviTag sensor data decorator", () => {
                 dewPoint,
                 humidex,
                 heatIndex,
-                ruuviAQI: 100,
-                ruuviAQIDescription: "excellent",
+                ruuviIAQS: 81.33333333333333,
+                ruuviIAQSDescription: "good",
                 atmoTubeAQI: 0,
                 atmoTubeAQIDescription: "severely-polluted",
             });
