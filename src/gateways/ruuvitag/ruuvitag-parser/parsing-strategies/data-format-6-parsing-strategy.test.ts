@@ -14,7 +14,7 @@ import {
 describe("Data Format 6 Parsing Strategy", () => {
     const testCases: [string, RuuviAirSensorData][] = [
         [
-            "990406170C5668C79E007000C90A02D900CD004C884F",
+            "990406170C5668C79E007000C90501D900CD004C884F",
             {
                 type: "air-quality",
                 temperature: asCelsius(29.5),
@@ -34,7 +34,7 @@ describe("Data Format 6 Parsing Strategy", () => {
             },
         ],
         [
-            "9904067FFF9C40FFFE27109C40F4F4FEC0FFFF4C884F",
+            "9904067FFF9C40FFFE27109C40FAFAFE00FF074C884F",
             {
                 type: "air-quality",
                 temperature: asCelsius(163.835),

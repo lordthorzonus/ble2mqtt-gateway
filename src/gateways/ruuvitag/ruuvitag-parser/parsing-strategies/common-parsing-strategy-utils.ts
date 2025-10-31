@@ -126,18 +126,19 @@ export const parseCO2 = (rawData: Buffer, offset: number): CO2Ppm | null => {
  * VOC is a unitless index which learns the installation environment and tracks changes over time.
  * The index average is 100, i.e. values under 100 mean the air quality is improving and
  * values over 100 mean the air quality is getting worse.
- * Uses 9 bits, with the least significant bit stored in the Flags byte (bit 6).
+ * Uses 9 bits, with the least significant bit (bit 0) stored in the Flags byte (bit 6).
+ * Bits 1-8 are stored in the VOC data byte.
  *
  * @param rawData - The raw buffer data
- * @param vocOffset - Byte offset for the lower 8 bits
- * @param flagsOffset - Byte offset for the flags containing the upper bit
+ * @param vocOffset - Byte offset for bits 1-8
+ * @param flagsOffset - Byte offset for the flags containing bit 0 (LSB)
  * @returns The VOC index (unitless).
  */
 export const parseVOC = (rawData: Buffer, vocOffset: number, flagsOffset: number): VOCIndex | null => {
-    const vocLower8Bits = rawData.readUInt8(vocOffset);
+    const vocBits1to8 = rawData.readUInt8(vocOffset);
     const flags = rawData.readUInt8(flagsOffset);
-    const vocUpperBit = (flags & 0b01000000) >> 6;
-    const voc = (vocUpperBit << 8) | vocLower8Bits;
+    const vocBit0 = (flags & 0b01000000) >> 6;
+    const voc = (vocBits1to8 << 1) | vocBit0;
     const max9BitValue = 0x1ff;
 
     if (voc === max9BitValue) {
@@ -152,18 +153,19 @@ export const parseVOC = (rawData: Buffer, vocOffset: number, flagsOffset: number
  * NOX is a unitless index which learns the installation environment and tracks changes over time.
  * The index has a base value of 1, values higher than 1 meaning there's more nitrogen oxides
  * in the air than usual.
- * Uses 9 bits, with the least significant bit stored in the Flags byte (bit 7).
+ * Uses 9 bits, with the least significant bit (bit 0) stored in the Flags byte (bit 7).
+ * Bits 1-8 are stored in the NOX data byte.
  *
  * @param rawData - The raw buffer data
- * @param noxOffset - Byte offset for the lower 8 bits
- * @param flagsOffset - Byte offset for the flags containing the upper bit
+ * @param noxOffset - Byte offset for bits 1-8
+ * @param flagsOffset - Byte offset for the flags containing bit 0 (LSB)
  * @returns The NOX index (unitless).
  */
 export const parseNOX = (rawData: Buffer, noxOffset: number, flagsOffset: number): NOXIndex | null => {
-    const noxLower8Bits = rawData.readUInt8(noxOffset);
+    const noxBits1to8 = rawData.readUInt8(noxOffset);
     const flags = rawData.readUInt8(flagsOffset);
-    const noxUpperBit = (flags & 0b10000000) >> 7;
-    const nox = (noxUpperBit << 8) | noxLower8Bits;
+    const noxBit0 = (flags & 0b10000000) >> 7;
+    const nox = (noxBits1to8 << 1) | noxBit0;
     const max9BitValue = 0x1ff;
 
     if (nox === max9BitValue) {

@@ -17,7 +17,7 @@ import {
 describe("Data Format E1 Parsing Strategy", () => {
     const testCases: [string, RuuviAirSensorData][] = [
         [
-            "9904E1170C5668C79E0065007004BD11CA00C9140413E0AC3FFFFFFECDEE11FFFFFFFFFFFFCBB8334C884F",
+            "9904E1170C5668C79E0065007004BD11CA00C90A0213E0ACFFFFFFDECDEE10FFFFFFFFFFCBB8334C884F",
             {
                 type: "air-quality",
                 temperature: asCelsius(29.5),
@@ -31,13 +31,13 @@ describe("Data Format E1 Parsing Strategy", () => {
                 voc: asVOCIndex(20),
                 nox: asNOXIndex(4),
                 luminosity: asLux(13027.0),
-                measurementSequence: 16698862,
-                macAddress: "FF:CB:B8:33:4C:88",
-                calibrationInProgress: true,
+                measurementSequence: 14601710,
+                macAddress: "CB:B8:33:4C:88:4F",
+                calibrationInProgress: false,
             },
         ],
         [
-            "9904E17FFF9C40FFFE27102710271027109C40F4F4DC28F0FFFFFFFFFFFEC1FFFFFFFFFFFFFFFFCBB8334C884F",
+            "9904E17FFF9C40FFFE27102710271027109C40FAFADC28F0FFFFFFFFFFFE3FFFFFFFFFFFCBB8334C884F",
             {
                 type: "air-quality",
                 temperature: asCelsius(163.835),
@@ -52,7 +52,7 @@ describe("Data Format E1 Parsing Strategy", () => {
                 nox: asNOXIndex(500),
                 luminosity: asLux(144284),
                 measurementSequence: 16777214,
-                macAddress: "FF:FF:FF:CB:B8:33",
+                macAddress: "CB:B8:33:4C:88:4F",
                 calibrationInProgress: true,
             },
         ],
