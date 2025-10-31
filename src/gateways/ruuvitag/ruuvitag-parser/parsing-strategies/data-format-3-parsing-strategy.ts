@@ -1,3 +1,4 @@
+import { asCelsius, asPascal, asRelativeHumidity, Celsius, Pascal, RelativeHumidity } from "../../../units";
 import { RuuviTagParsingStrategy } from "../index";
 
 enum DataFormatV3Offset {
@@ -28,7 +29,7 @@ const parseAcceleration = (rawData: Buffer, dataOffset: DataFormatV3Offset): num
  *
  * @return Returns the value in Celsius (C).
  */
-const parseTemperature = (rawData: Buffer): number => {
+const parseTemperature = (rawData: Buffer): Celsius => {
     const temperatureByte = rawData.readUInt8(DataFormatV3Offset.TemperatureBase);
 
     // First bit is the sign bit, which tells if the temperature is negative.
@@ -38,7 +39,7 @@ const parseTemperature = (rawData: Buffer): number => {
 
     const temperature = temperatureBase + temperatureFraction;
 
-    return isTemperatureNegative ? temperature * -1 : temperature;
+    return asCelsius(isTemperatureNegative ? temperature * -1 : temperature);
 };
 
 /**
@@ -47,8 +48,8 @@ const parseTemperature = (rawData: Buffer): number => {
  *
  * @return Returns the value in percents (%)
  */
-const parseRelativeHumidity = (rawData: Buffer): number => {
-    return rawData.readUInt8(DataFormatV3Offset.Humidity) * 0.5;
+const parseRelativeHumidity = (rawData: Buffer): RelativeHumidity => {
+    return asRelativeHumidity(rawData.readUInt8(DataFormatV3Offset.Humidity) * 0.5);
 };
 
 /**
@@ -72,31 +73,28 @@ const parseBatteryVoltage = (rawData: Buffer): number => {
  *
  * @return Returns the pressure in Pascals (Pa).
  */
-const parsePressure = (rawData: Buffer): number => {
+const parsePressure = (rawData: Buffer): Pascal => {
     const minimumSupportedPascalMeasurement = 50000;
-    return rawData.readUInt16BE(DataFormatV3Offset.Pressure) + minimumSupportedPascalMeasurement;
+    return asPascal(rawData.readUInt16BE(DataFormatV3Offset.Pressure) + minimumSupportedPascalMeasurement);
 };
 
 /**
  * Parses the raw manufacturer specific data field according to the Data Format 3 Specification (RAWv1)
  * @see https://github.com/ruuvi/ruuvi-sensor-protocols/blob/master/dataformat_03.md
  */
-const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = {
-    parse(rawRuuviTagData) {
-        return {
-            accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationX),
-            accelerationY: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationY),
-            accelerationZ: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationZ),
-            batteryVoltage: parseBatteryVoltage(rawRuuviTagData),
-            relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData),
-            pressure: parsePressure(rawRuuviTagData),
-            temperature: parseTemperature(rawRuuviTagData),
-            measurementSequence: null,
-            movementCounter: null,
-            txPower: null,
-            macAddress: null,
-        };
-    },
+export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) => {
+    return {
+        type: "environmental",
+        accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationX),
+        accelerationY: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationY),
+        accelerationZ: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationZ),
+        batteryVoltage: parseBatteryVoltage(rawRuuviTagData),
+        relativeHumidityPercentage: parseRelativeHumidity(rawRuuviTagData),
+        pressure: parsePressure(rawRuuviTagData),
+        temperature: parseTemperature(rawRuuviTagData),
+        measurementSequence: null,
+        movementCounter: null,
+        txPower: null,
+        macAddress: null,
+    };
 };
-
-export default DataFormat3ParsingStrategy;

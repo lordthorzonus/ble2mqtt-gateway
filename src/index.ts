@@ -28,6 +28,13 @@ const program = Effect.gen(function* () {
         Stream.tap((message) => publish(message)),
         Stream.runDrain,
         Effect.catchTags({
+            SensorConfigurationMissingError: (error) =>
+                Effect.sync(() =>
+                    logger.error(
+                        "Encountered a device message that does not have corresponding Home Assistant configuration",
+                        { message: error.message }
+                    )
+                ),
             MqttClientError: (error) =>
                 Effect.sync(() => logger.error("Error publishing MQTT message", { message: error.mqttMessage })),
             GatewayError: (error) => Effect.sync(() => logger.error("Error from gateway", { error })),

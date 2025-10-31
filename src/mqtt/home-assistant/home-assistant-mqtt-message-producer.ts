@@ -8,17 +8,29 @@ import {
     MessageType,
     MqttMessage,
 } from "../../types";
-import { ruuviTagSensorConfiguration } from "./device-discoverability-configurations/ruuvitag";
+import {
+    ruuviTagAirQualitySensorConfiguration,
+    ruuviTagEnvironmentalSensorConfiguration,
+} from "./device-discoverability-configurations/ruuvitag";
 import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../mqtt-topic-factory";
 import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora";
 import { capitalize, snakeCase } from "lodash";
-import { Effect, Match, Stream } from "effect";
+import { Data, Effect, Match, Stream } from "effect";
 import { Config, ConfigurationError, GlobalConfiguration } from "../../config";
 
-const getHASensorConfiguration = Match.type<DeviceType>().pipe(
-    Match.when(Match.is(DeviceType.Ruuvitag), () => ruuviTagSensorConfiguration),
-    Match.when(Match.is(DeviceType.MiFlora), () => miFloraSensorConfiguration),
-    Match.exhaustive
+export class SensorConfigurationMissingError extends Data.TaggedError("SensorConfigurationMissingError")<{
+    message: DeviceAvailabilityMessage;
+}> {}
+
+const getHASensorConfiguration = Match.type<DeviceAvailabilityMessage>().pipe(
+    Match.when({ device: { type: DeviceType.Ruuvitag, model: "environmental" } }, () =>
+        Effect.succeed(ruuviTagEnvironmentalSensorConfiguration)
+    ),
+    Match.when({ device: { type: DeviceType.Ruuvitag, model: "air-quality" } }, () =>
+        Effect.succeed(ruuviTagAirQualitySensorConfiguration)
+    ),
+    Match.when({ device: { type: DeviceType.MiFlora } }, () => Effect.succeed(miFloraSensorConfiguration)),
+    Match.orElse((message) => Effect.fail(new SensorConfigurationMissingError({ message })))
 );
 
 const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSensorConfiguration) =>
@@ -150,28 +162,27 @@ const getHaDiscoveryPayload = (
     }
 };
 
-function* haDiscoverAdapter(
+const haDiscoverAdapter = (
     deviceMessage: DeviceAvailabilityMessage,
     config: GlobalConfiguration
-): Generator<MqttMessage> {
-    const configuration = getHASensorConfiguration(deviceMessage.device.type);
+): Effect.Effect<MqttMessage[], SensorConfigurationMissingError> =>
+    Effect.gen(function* () {
+        const configuration = yield* getHASensorConfiguration(deviceMessage);
 
-    for (const [propertyName, configEntry] of Object.entries(configuration)) {
-        const haDiscoveryPayload = getHaDiscoveryPayload(propertyName, configEntry, deviceMessage, config);
-        const payload = haDiscoveryPayload.payload;
+        return Object.entries(configuration).map(([propertyName, configEntry]) => {
+            const haDiscoveryPayload = getHaDiscoveryPayload(propertyName, configEntry, deviceMessage, config);
+            const payload = haDiscoveryPayload.payload;
 
-        const message: MqttMessage = {
-            topic: `${config.homeassistant.discovery_topic}/${haDiscoveryPayload.component}/${deviceMessage.device.id}/${getObjectID(
-                deviceMessage,
-                configEntry
-            )}/config`,
-            retain: true,
-            payload: payload !== null ? JSON.stringify(payload) : "",
-        };
-
-        yield message;
-    }
-}
+            return {
+                topic: `${config.homeassistant.discovery_topic}/${haDiscoveryPayload.component}/${deviceMessage.device.id}/${getObjectID(
+                    deviceMessage,
+                    configEntry
+                )}/config`,
+                retain: true,
+                payload: payload !== null ? JSON.stringify(payload) : "",
+            };
+        });
+    });
 
 const generateAvailabilityMessage = (deviceMessage: DeviceMessage, config: GlobalConfiguration): MqttMessage => ({
     retain: true,
@@ -186,8 +197,8 @@ const generateStateMessage = (deviceMessage: DeviceMessage, config: GlobalConfig
 });
 
 export const makeHomeAssistantMqttMessageProducer = (): Effect.Effect<
-    (deviceMessage: DeviceMessage) => Stream.Stream<MqttMessage>,
-    ConfigurationError,
+    (deviceMessage: DeviceMessage) => Stream.Stream<MqttMessage, SensorConfigurationMissingError>,
+    ConfigurationError | SensorConfigurationMissingError,
     Config
 > =>
     Effect.gen(function* () {
@@ -196,7 +207,7 @@ export const makeHomeAssistantMqttMessageProducer = (): Effect.Effect<
         return Match.type<DeviceMessage>().pipe(
             Match.when({ type: MessageType.Availability }, (message) =>
                 Stream.concat(
-                    Stream.fromIterable(haDiscoverAdapter(message, config)),
+                    Stream.fromIterableEffect(haDiscoverAdapter(message, config)),
                     Stream.make(generateAvailabilityMessage(message, config))
                 )
             ),

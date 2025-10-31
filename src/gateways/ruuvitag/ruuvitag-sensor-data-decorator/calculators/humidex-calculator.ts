@@ -1,3 +1,5 @@
+import { Celsius } from "../../../units";
+
 /**
  * Calculates the humidex (humidity index).
  *
@@ -6,8 +8,8 @@
  * @return Returns the humidex number integer.
  */
 export const calculateHumidex = (
-    temperatureInCelsius: number | null,
-    dewPointInCelsius: number | null
+    temperatureInCelsius: Celsius | null,
+    dewPointInCelsius: Celsius | null
 ): number | null => {
     if (temperatureInCelsius === null || dewPointInCelsius === null) {
         return null;

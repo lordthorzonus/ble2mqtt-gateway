@@ -6,12 +6,22 @@ import { DateTime } from "luxon";
 import { MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
 import { formatNumericSensorValue } from "../numeric-sensor-value-formatter";
 import { pipe } from "effect";
+import {
+    asCelsius,
+    asLux,
+    asSoilConductivity,
+    asSoilMoisture,
+    Celsius,
+    Lux,
+    SoilConductivity,
+    SoilMoisture,
+} from "../units";
 
 export interface MiFloraSensorData {
-    temperature: number | null;
-    moisture: number | null;
-    illuminance: number | null;
-    soilConductivity: number | null;
+    temperature: Celsius | null;
+    moisture: SoilMoisture | null;
+    illuminance: Lux | null;
+    soilConductivity: SoilConductivity | null;
     lowBatteryWarning: boolean;
 }
 
@@ -19,10 +29,12 @@ const getSensorData = (buffer: MiFloraSensorMeasurementBuffer, decimalPrecision:
     pipe(
         buffer,
         (buffer: MiFloraSensorMeasurementBuffer) => ({
-            temperature: buffer.temperatureEvent?.data ?? null,
-            moisture: buffer.moistureEvent?.data ?? null,
-            illuminance: buffer.illuminanceEvent?.data ?? null,
-            soilConductivity: buffer.soilConductivityEvent?.data ?? null,
+            temperature: buffer.temperatureEvent?.data ? asCelsius(buffer.temperatureEvent.data) : null,
+            moisture: buffer.moistureEvent?.data ? asSoilMoisture(buffer.moistureEvent.data) : null,
+            illuminance: buffer.illuminanceEvent?.data ? asLux(buffer.illuminanceEvent.data) : null,
+            soilConductivity: buffer.soilConductivityEvent?.data
+                ? asSoilConductivity(buffer.soilConductivityEvent.data)
+                : null,
             lowBatteryWarning: buffer.lowBatteryEvent?.data === 1,
         }),
         (sensorData: MiFloraSensorData): MiFloraSensorData => ({
@@ -43,7 +55,6 @@ export const transformMiFloraMeasurementsToDeviceMessage = (
 
     return {
         id: uuid(),
-        deviceType: DeviceType.MiFlora,
         device: {
             macAddress: peripheral.address,
             rssi: peripheral.rssi,
@@ -51,6 +62,7 @@ export const transformMiFloraMeasurementsToDeviceMessage = (
             type: DeviceType.MiFlora,
             friendlyName: deviceRegistryEntry.device.friendlyName,
             timeout: deviceRegistryEntry.timeout,
+            model: "miflora",
         },
         time: DateTime.now(),
         type: MessageType.SensorData,

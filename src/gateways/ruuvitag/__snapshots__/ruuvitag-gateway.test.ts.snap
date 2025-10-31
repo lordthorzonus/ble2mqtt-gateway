@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`RuuviTag Gateway getUnavailableDevices() should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
 [
@@ -8,6 +8,7 @@ exports[`RuuviTag Gateway getUnavailableDevices() should produce unavailability 
     "device": {
       "friendlyName": "my_ruuvitag",
       "id": "a1:b2",
+      "model": "environmental",
       "type": "ruuvitag",
     },
     "lastPublishedAvailability": "online",
@@ -24,6 +25,7 @@ exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags norm
       "friendlyName": "unknown",
       "id": "unknown",
       "macAddress": "a1:b2",
+      "model": "environmental",
       "rssi": 23,
       "timeout": 30000,
       "type": "ruuvitag",
@@ -40,11 +42,11 @@ exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags norm
       "friendlyName": "unknown",
       "id": "unknown",
       "macAddress": "CB:B8:33:4C:88:4F",
+      "model": "environmental",
       "rssi": 23,
       "timeout": 30000,
       "type": "ruuvitag",
     },
-    "deviceType": "ruuvitag",
     "id": "mock-uuid",
     "payload": {
       "absoluteHumidity": 11.84,
@@ -62,6 +64,7 @@ exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags norm
       "relativeHumidityPercentage": 53.49,
       "temperature": 24.3,
       "txPower": 4,
+      "type": "environmental",
     },
     "time": "2019-10-10T00:00:00.000Z",
     "type": "sensor-data",
@@ -71,11 +74,11 @@ exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags norm
       "friendlyName": "unknown",
       "id": "unknown",
       "macAddress": "CB:B8:33:4C:88:4F",
+      "model": "environmental",
       "rssi": 23,
       "timeout": 30000,
       "type": "ruuvitag",
     },
-    "deviceType": "ruuvitag",
     "id": "mock-uuid",
     "payload": {
       "absoluteHumidity": 11.84,
@@ -93,6 +96,7 @@ exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags norm
       "relativeHumidityPercentage": 53.49,
       "temperature": 24.3,
       "txPower": 4,
+      "type": "environmental",
     },
     "time": "2019-10-10T00:00:00.000Z",
     "type": "sensor-data",
@@ -107,6 +111,7 @@ exports[`RuuviTag Gateway ruuvitagGateway() should produce a availability and a 
       "friendlyName": "my_ruuvitag",
       "id": "a1:b2",
       "macAddress": "a1:b2",
+      "model": "environmental",
       "rssi": 23,
       "timeout": 30000,
       "type": "ruuvitag",
@@ -123,11 +128,11 @@ exports[`RuuviTag Gateway ruuvitagGateway() should produce a availability and a 
       "friendlyName": "my_ruuvitag",
       "id": "a1:b2",
       "macAddress": "CB:B8:33:4C:88:4F",
+      "model": "environmental",
       "rssi": 23,
       "timeout": 30000,
       "type": "ruuvitag",
     },
-    "deviceType": "ruuvitag",
     "id": "mock-uuid",
     "payload": {
       "absoluteHumidity": 11.84,
@@ -145,6 +150,68 @@ exports[`RuuviTag Gateway ruuvitagGateway() should produce a availability and a 
       "relativeHumidityPercentage": 53.49,
       "temperature": 24.3,
       "txPower": 4,
+      "type": "environmental",
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "sensor-data",
+  },
+]
+`;
+
+exports[`RuuviTag Gateway ruuvitagGateway() should support air quality ruuvitags 1`] = `
+[
+  {
+    "device": {
+      "friendlyName": "my_air_quality_ruuvitag",
+      "id": "a1:b2",
+      "macAddress": "a1:b2",
+      "model": "air-quality",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": {
+      "state": "online",
+    },
+    "time": "2019-10-10T00:00:00.000Z",
+    "type": "availability",
+  },
+  {
+    "device": {
+      "friendlyName": "my_air_quality_ruuvitag",
+      "id": "a1:b2",
+      "macAddress": "4C:88:4F",
+      "model": "air-quality",
+      "rssi": 23,
+      "timeout": 30000,
+      "type": "ruuvitag",
+    },
+    "id": "mock-uuid",
+    "payload": {
+      "absoluteHumidity": 16.33,
+      "atmoTubeAQI": 0,
+      "atmoTubeAQIDescription": "severely-polluted",
+      "calibrationInProgress": false,
+      "co2": 201,
+      "dewPoint": 19.6,
+      "heatIndex": 31,
+      "humidex": 37,
+      "luminosity": 13026.67,
+      "macAddress": "4C:88:4F",
+      "measurementSequence": 205,
+      "nox": 4,
+      "pm1": null,
+      "pm10": null,
+      "pm2_5": 11.2,
+      "pm4": null,
+      "pressure": 101102,
+      "relativeHumidityPercentage": 55.3,
+      "ruuviIAQS": 81.33333333333333,
+      "ruuviIAQSDescription": "good",
+      "temperature": 29.5,
+      "type": "air-quality",
+      "voc": 20,
     },
     "time": "2019-10-10T00:00:00.000Z",
     "type": "sensor-data",

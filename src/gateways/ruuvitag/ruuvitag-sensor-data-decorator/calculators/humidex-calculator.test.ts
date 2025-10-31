@@ -1,3 +1,4 @@
+import { asCelsius, Celsius } from "../../../units";
 import { calculateHumidex } from "./humidex-calculator";
 
 describe("Humidex calculator", () => {
@@ -6,13 +7,13 @@ describe("Humidex calculator", () => {
      *
      * @link https://en.wikipedia.org/wiki/Humidex
      */
-    const testCases: [number | null, number | null, number | null][] = [
-        [30, 15, 34],
-        [30, 25, 42],
-        [43, 28, 59],
-        [36, 10, 37],
-        [null, 50, null],
-        [20, null, null],
+    const testCases: [Celsius | null, Celsius | null, number | null][] = [
+        [asCelsius(30), asCelsius(15), 34],
+        [asCelsius(30), asCelsius(25), 42],
+        [asCelsius(43), asCelsius(28), 59],
+        [asCelsius(36), asCelsius(10), 37],
+        [null, asCelsius(50), null],
+        [asCelsius(20), null, null],
         [null, null, null],
     ];
 

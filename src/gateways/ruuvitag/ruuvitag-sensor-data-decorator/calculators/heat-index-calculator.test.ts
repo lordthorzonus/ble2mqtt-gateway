@@ -1,3 +1,4 @@
+import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units";
 import { calculateHeatIndex } from "./heat-index-calculator";
 
 describe("Heat Index (HI) calculator", () => {
@@ -5,14 +6,14 @@ describe("Heat Index (HI) calculator", () => {
      * Test cases approximately based on table in wikipedia:
      * @link https://en.wikipedia.org/wiki/Heat_index
      */
-    const heatIndexTestCases: [number | null, number | null, number | null][] = [
-        [27, 40, 27],
-        [32, 40, 32],
-        [43, 40, 57],
-        [27, 75, 29],
-        [33, 75, 46],
-        [null, 50, null],
-        [20, null, null],
+    const heatIndexTestCases: [Celsius | null, RelativeHumidity | null, number | null][] = [
+        [asCelsius(27), asRelativeHumidity(40), 27],
+        [asCelsius(32), asRelativeHumidity(40), 32],
+        [asCelsius(43), asRelativeHumidity(40), 57],
+        [asCelsius(27), asRelativeHumidity(75), 29],
+        [asCelsius(33), asRelativeHumidity(75), 46],
+        [null, asRelativeHumidity(50), null],
+        [asCelsius(20), null, null],
         [null, null, null],
     ];
 

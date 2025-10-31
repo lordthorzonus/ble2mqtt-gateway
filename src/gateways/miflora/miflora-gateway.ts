@@ -36,6 +36,7 @@ export const makeMiFloraDeviceRegistry = (
             id: sensor.id,
             type: DeviceType.MiFlora,
             friendlyName: sensor.name,
+            model: "miflora",
         },
         timeout: sensor.timeout,
     }));
@@ -73,6 +74,7 @@ export const makeMiFloraGateway = (miFloraSettings: MiFloraGatewayConfiguration)
             peripheral,
             DeviceType.MiFlora,
             false,
+            () => Effect.succeed("miflora"),
             handleMifloraBleAdvertisement(sensorEventBuffer)
         ).pipe(
             Effect.catchTags({

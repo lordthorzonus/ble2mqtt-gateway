@@ -1,13 +1,22 @@
 import { v4 as uuid } from "uuid";
-import { parse, RuuviParsingError } from "./ruuvitag-parser";
-import decorateRuuviTagSensorDataWithCalculatedValues, {
+import {
+    parse,
+    RuuviParsingError,
+    RuuviTagEnvironmentalSensorData,
+    RuuviAirSensorData,
+    RuuviTagSensorData,
+    parseRuuviDeviceModel,
+} from "./ruuvitag-parser";
+import {
     EnhancedRuuviTagSensorData,
+    decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues,
+    decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
 } from "./ruuvitag-sensor-data-decorator";
-import { MessageType, DeviceType, RuuvitagSensorMessage } from "../../types";
+import { MessageType, DeviceType, RuuvitagSensorMessage, RuuviModel } from "../../types";
 import { DateTime } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
-import { formatSensorValues } from "./ruuvitag-measurement-formatter";
-import { Effect, Option, pipe } from "effect";
+import { formatEnvironmentalSensorValues, formatAirQualitySensorValues } from "./ruuvitag-measurement-formatter";
+import { Effect, Match, Option, pipe } from "effect";
 import { PeripheralWithManufacturerData } from "./ruuvitag-gateway";
 
 export interface RuuviTag {
@@ -15,31 +24,58 @@ export interface RuuviTag {
     id: string;
     rssi: number;
 }
-const getSensorData = (
+
+const processEnvironmentalData = (
+    data: RuuviTagEnvironmentalSensorData,
+    decimalPrecision: number
+): EnhancedRuuviTagSensorData =>
+    pipe(data, decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues, (decoratedValues) =>
+        formatEnvironmentalSensorValues(decoratedValues, decimalPrecision)
+    );
+
+const processAirQualityData = (data: RuuviAirSensorData, decimalPrecision: number): EnhancedRuuviTagSensorData =>
+    pipe(data, decorateRuuviTagAirQualitySensorDataWithCalculatedValues, (decoratedValues) =>
+        formatAirQualitySensorValues(decoratedValues, decimalPrecision)
+    );
+
+const transformRuuviTagData = (
+    ruuviTagData: RuuviTagSensorData,
+    decimalPrecision: number
+): EnhancedRuuviTagSensorData =>
+    Match.value(ruuviTagData).pipe(
+        Match.withReturnType<EnhancedRuuviTagSensorData>(),
+        Match.when({ type: "environmental" }, (data) => processEnvironmentalData(data, decimalPrecision)),
+        Match.when({ type: "air-quality" }, (data) => processAirQualityData(data, decimalPrecision)),
+        Match.exhaustive
+    );
+
+const parseSensorData = (
     data: Buffer,
     decimalPrecision: number
 ): Effect.Effect<EnhancedRuuviTagSensorData, RuuviParsingError> =>
     pipe(
         data,
         parse,
-        Effect.map(decorateRuuviTagSensorDataWithCalculatedValues),
-        Effect.map((decoratedSensorValues) => formatSensorValues(decoratedSensorValues, decimalPrecision))
+        Effect.map((ruuviTagData) => transformRuuviTagData(ruuviTagData, decimalPrecision))
     );
+
+export const resolveDeviceModel = (
+    peripheral: PeripheralWithManufacturerData
+): Effect.Effect<RuuviModel, RuuviParsingError> => parseRuuviDeviceModel(peripheral.advertisement.manufacturerData);
 
 export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
     peripheral: PeripheralWithManufacturerData,
     deviceRegistryEntry: DeviceRegistryEntry
 ): Effect.Effect<Option.Option<RuuvitagSensorMessage>, RuuviParsingError> =>
     Effect.gen(function* () {
-        const sensorData = yield* getSensorData(
+        const sensorData = yield* parseSensorData(
             peripheral.advertisement.manufacturerData,
             deviceRegistryEntry.decimalPrecision
         );
         const macAddress = sensorData.macAddress ?? peripheral.address;
 
-        return Option.some({
+        const commonMessage = {
             id: uuid(),
-            deviceType: DeviceType.Ruuvitag,
             device: {
                 macAddress,
                 rssi: peripheral.rssi,
@@ -50,6 +86,29 @@ export const transformPeripheralAdvertisementToSensorDataDeviceMessage = (
             },
             time: DateTime.now(),
             type: MessageType.SensorData,
-            payload: sensorData,
-        });
+        } as const;
+
+        return Match.value(sensorData).pipe(
+            Match.when({ type: "environmental" }, (data) =>
+                Option.some({
+                    ...commonMessage,
+                    device: {
+                        ...commonMessage.device,
+                        model: data.type,
+                    },
+                    payload: data,
+                } as const)
+            ),
+            Match.when({ type: "air-quality" }, (data) =>
+                Option.some({
+                    ...commonMessage,
+                    device: {
+                        ...commonMessage.device,
+                        model: data.type,
+                    },
+                    payload: data,
+                } as const)
+            ),
+            Match.exhaustive
+        );
     });
