@@ -34,6 +34,8 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: 27.89012,
                 humidex: 30.45678,
                 absoluteHumidity: 12.34567,
+                breezeIndoorClimateIndex: 3,
+                breezeIndoorClimateIndexDescription: "moderate",
             };
 
             const formatted = formatEnvironmentalSensorValues(sensorData, 2);
@@ -55,6 +57,8 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: 27.89012,
                 humidex: 30.45678,
                 absoluteHumidity: 12.35,
+                breezeIndoorClimateIndex: 3,
+                breezeIndoorClimateIndexDescription: "moderate",
             });
         });
 
@@ -76,6 +80,8 @@ describe("RuuviTag measurement formatter", () => {
                 heatIndex: null,
                 humidex: null,
                 absoluteHumidity: null,
+                breezeIndoorClimateIndex: null,
+                breezeIndoorClimateIndexDescription: null,
             };
 
             const formatted = formatEnvironmentalSensorValues(sensorData, 2);
@@ -110,6 +116,8 @@ describe("RuuviTag measurement formatter", () => {
                 ruuviIAQSDescription: null,
                 atmoTubeAQI: null,
                 atmoTubeAQIDescription: null,
+                breezeIndoorClimateIndex: 6,
+                breezeIndoorClimateIndexDescription: "severe",
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 2);
@@ -138,6 +146,8 @@ describe("RuuviTag measurement formatter", () => {
                 ruuviIAQSDescription: null,
                 atmoTubeAQI: null,
                 atmoTubeAQIDescription: null,
+                breezeIndoorClimateIndex: 6,
+                breezeIndoorClimateIndexDescription: "severe",
             });
         });
 
@@ -166,6 +176,8 @@ describe("RuuviTag measurement formatter", () => {
                 ruuviIAQSDescription: null,
                 atmoTubeAQI: null,
                 atmoTubeAQIDescription: null,
+                breezeIndoorClimateIndex: null,
+                breezeIndoorClimateIndexDescription: null,
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 2);
@@ -194,6 +206,8 @@ describe("RuuviTag measurement formatter", () => {
                 ruuviIAQSDescription: null,
                 atmoTubeAQI: null,
                 atmoTubeAQIDescription: null,
+                breezeIndoorClimateIndex: null,
+                breezeIndoorClimateIndexDescription: null,
             });
         });
 
@@ -222,6 +236,8 @@ describe("RuuviTag measurement formatter", () => {
                 ruuviIAQSDescription: null,
                 atmoTubeAQI: null,
                 atmoTubeAQIDescription: null,
+                breezeIndoorClimateIndex: 6,
+                breezeIndoorClimateIndexDescription: "severe",
             };
 
             const formatted = formatAirQualitySensorValues(sensorData, 0);
@@ -250,6 +266,8 @@ describe("RuuviTag measurement formatter", () => {
                 ruuviIAQSDescription: null,
                 atmoTubeAQI: null,
                 atmoTubeAQIDescription: null,
+                breezeIndoorClimateIndex: 6,
+                breezeIndoorClimateIndexDescription: "severe",
             });
         });
     });

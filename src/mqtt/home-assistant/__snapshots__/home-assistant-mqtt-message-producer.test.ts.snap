@@ -178,6 +178,16 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_atmotube_aqi_description/config",
   },
   {
+    "payload": "{"name":"Breeze Indoor Climate Index","object_id":"air_quality_sensor_breeze_indoor_climate_index","unique_id":"air_quality_sensor_breeze_indoor_climate_index","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:home-thermometer-outline","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.breezeIndoorClimateIndex | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_breeze_indoor_climate_index/config",
+  },
+  {
+    "payload": "{"name":"Breeze Indoor Climate Index Description","object_id":"air_quality_sensor_breeze_indoor_climate_index_description","unique_id":"air_quality_sensor_breeze_indoor_climate_index_description","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:home-thermometer-outline","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.breezeIndoorClimateIndexDescription | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":""}",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_breeze_indoor_climate_index_description/config",
+  },
+  {
     "payload": "{"state":"online"}",
     "retain": true,
     "topic": "test/ruuvitag/cc:dd/availability",
@@ -293,6 +303,16 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_sensor_atmotube_aqi_description/config",
   },
   {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_sensor_breeze_indoor_climate_index/config",
+  },
+  {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_sensor_breeze_indoor_climate_index_description/config",
+  },
+  {
     "payload": "{"state":"offline"}",
     "retain": true,
     "topic": "test/ruuvitag/cc:dd/availability",
@@ -388,6 +408,16 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/binary_sensor/aa:bb/my_fridge_battery_low/config",
   },
   {
+    "payload": "{"name":"Breeze Indoor Climate Index","object_id":"my_fridge_breeze_indoor_climate_index","unique_id":"my_fridge_breeze_indoor_climate_index","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:home-thermometer-outline","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.breezeIndoorClimateIndex | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
+    "retain": true,
+    "topic": "homeassistant/sensor/aa:bb/my_fridge_breeze_indoor_climate_index/config",
+  },
+  {
+    "payload": "{"name":"Breeze Indoor Climate Index Description","object_id":"my_fridge_breeze_indoor_climate_index_description","unique_id":"my_fridge_breeze_indoor_climate_index_description","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:home-thermometer-outline","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.breezeIndoorClimateIndexDescription | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":""}",
+    "retain": true,
+    "topic": "homeassistant/sensor/aa:bb/my_fridge_breeze_indoor_climate_index_description/config",
+  },
+  {
     "payload": "{"state":"online"}",
     "retain": true,
     "topic": "test/ruuvitag/aa:bb/availability",
@@ -481,6 +511,16 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "payload": "",
     "retain": true,
     "topic": "homeassistant/binary_sensor/aa:bb/fridge_battery_low/config",
+  },
+  {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/aa:bb/fridge_breeze_indoor_climate_index/config",
+  },
+  {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/aa:bb/fridge_breeze_indoor_climate_index_description/config",
   },
   {
     "payload": "{"state":"offline"}",

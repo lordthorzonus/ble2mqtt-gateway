@@ -29,6 +29,8 @@ export const formatAirQualitySensorValues = (
         atmoTubeAQI: sensorValues.atmoTubeAQI,
         atmoTubeAQIDescription: sensorValues.atmoTubeAQIDescription,
         luminosity: formatNumericSensorValue(sensorValues.luminosity, decimalPrecision),
+        breezeIndoorClimateIndex: sensorValues.breezeIndoorClimateIndex,
+        breezeIndoorClimateIndexDescription: sensorValues.breezeIndoorClimateIndexDescription,
     };
 };
 
@@ -53,5 +55,7 @@ export const formatEnvironmentalSensorValues = (
         txPower: sensorValues.txPower,
         movementCounter: sensorValues.movementCounter,
         measurementSequence: sensorValues.measurementSequence,
+        breezeIndoorClimateIndex: sensorValues.breezeIndoorClimateIndex,
+        breezeIndoorClimateIndexDescription: sensorValues.breezeIndoorClimateIndexDescription,
     };
 };

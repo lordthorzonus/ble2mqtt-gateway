@@ -87,6 +87,28 @@ const heatIndexSensorConfiguration: HomeAssistantSensorConfiguration = {
     device: ruuviTagDeviceConfiguration,
 };
 
+const breezeIndoorClimateIndexSensorConfiguration: HomeAssistantSensorConfiguration = {
+    component: HomeAssistantMQTTComponent.Sensor,
+    deviceClass: HomeAssistantDeviceClass.None,
+    name: "Breeze Indoor Climate Index",
+    unitOfMeasurement: "",
+    uniqueId: "breeze_indoor_climate_index",
+    stateClass: "measurement",
+    device: ruuviTagDeviceConfiguration,
+    icon: "mdi:home-thermometer-outline",
+};
+
+const breezeIndoorClimateIndexDescriptionSensorConfiguration: HomeAssistantSensorConfiguration = {
+    component: HomeAssistantMQTTComponent.Sensor,
+    deviceClass: HomeAssistantDeviceClass.None,
+    name: "Breeze Indoor Climate Index Description",
+    unitOfMeasurement: "",
+    uniqueId: "breeze_indoor_climate_index_description",
+    device: ruuviTagDeviceConfiguration,
+    icon: "mdi:home-thermometer-outline",
+    suggestedDecimalPrecision: null,
+};
+
 const macAddressSensorConfiguration: HomeAssistantSensorConfiguration = {
     component: HomeAssistantMQTTComponent.Sensor,
     deviceClass: HomeAssistantDeviceClass.None,
@@ -234,6 +256,14 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             icon: "mdi:air-filter",
             suggestedDecimalPrecision: null,
         },
+        breezeIndoorClimateIndex: {
+            ...breezeIndoorClimateIndexSensorConfiguration,
+            device: ruuviAirDeviceConfiguration,
+        },
+        breezeIndoorClimateIndexDescription: {
+            ...breezeIndoorClimateIndexDescriptionSensorConfiguration,
+            device: ruuviAirDeviceConfiguration,
+        },
     };
 
 export const ruuviTagEnvironmentalSensorConfiguration: HomeAssistantSensorConfigurationForDevice<EnhancedRuuviTagEnvironmentalSensorData> =
@@ -346,4 +376,6 @@ export const ruuviTagEnvironmentalSensorConfiguration: HomeAssistantSensorConfig
 {% endif %}
         `,
         },
+        breezeIndoorClimateIndex: breezeIndoorClimateIndexSensorConfiguration,
+        breezeIndoorClimateIndexDescription: breezeIndoorClimateIndexDescriptionSensorConfiguration,
     };
