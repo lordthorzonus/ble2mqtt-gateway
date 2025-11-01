@@ -1,5 +1,5 @@
 import { DeviceRegistry } from "../device-registry";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../../infra/ble-scanner";
 import { DeviceType } from "../../types";
 import {
     resolveDeviceModel,

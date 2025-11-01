@@ -27,8 +27,8 @@ export const asCO2Ppm = Brand.nominal<CO2Ppm>();
 export type VOCIndex = number & Brand.Brand<"VOCIndex">;
 export const asVOCIndex = Brand.nominal<VOCIndex>();
 
-export type NOXIndex = number & Brand.Brand<"NOXIndex">;
-export const asNOXIndex = Brand.nominal<NOXIndex>();
+export type NOxIndex = number & Brand.Brand<"NOxIndex">;
+export const asNOxIndex = Brand.nominal<NOxIndex>();
 
 export type Lux = number & Brand.Brand<"Lux">;
 export const asLux = Brand.nominal<Lux>();

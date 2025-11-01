@@ -1,4 +1,4 @@
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../../../infra/ble-scanner";
 import {
     MiFloraMeasurement,
     parseIlluminanceEvent,

@@ -1,7 +1,7 @@
 import { DeviceRegistry, DeviceSettings } from "./device-registry";
 import { DeviceType } from "../types";
 import { Settings } from "luxon";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../infra/ble-scanner";
 
 const defaultRuuviTagId = "da21045d81a8";
 const defaultTimeout = 30000;

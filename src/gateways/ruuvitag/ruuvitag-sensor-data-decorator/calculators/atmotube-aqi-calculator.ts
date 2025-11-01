@@ -1,4 +1,4 @@
-import { AQI, asAQI, CO2Ppm, NOXIndex, PM1, PM10, PM2_5, VOCIndex } from "../../../units";
+import { AQI, asAQI, CO2Ppm, NOxIndex, PM1, PM10, PM2_5, VOCIndex } from "../../../units";
 import { Match } from "effect";
 
 export type AtmoTubeAQIDescription = "good" | "moderate" | "polluted" | "very-polluted" | "severely-polluted";
@@ -127,7 +127,7 @@ interface SensorData {
     pm2_5: PM2_5 | null;
     co2: CO2Ppm | null;
     voc: VOCIndex | null;
-    nox: NOXIndex | null;
+    nox: NOxIndex | null;
     pm10: PM10 | null;
     pm1: PM1 | null;
 }

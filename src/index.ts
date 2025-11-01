@@ -4,7 +4,7 @@ import { makeBleGateway } from "./gateways/ble-gateway";
 import { publish, MqttClient } from "./infra/mqtt-client";
 import { Logger } from "./infra/logger";
 import { Effect, Stream, Layer } from "effect";
-import { scan, stopScanning } from "./infra/ble-scanner";
+import { scan } from "./infra/ble-scanner";
 import { NodeRuntime } from "@effect/platform-node";
 process.stdin.resume();
 
@@ -12,20 +12,25 @@ const GatewayLive = Layer.mergeAll(Config.Default, Logger.Default, MqttClient.De
 
 const program = Effect.gen(function* () {
     const logger = yield* Logger;
+    const config = yield* Config;
+
+    logger.info("Starting BLE2MQTT Gateway");
+
+    yield* Effect.addFinalizer(() =>
+        Effect.sync(() => {
+            logger.info("Shutting down BLE2MQTT Gateway");
+        })
+    );
 
     const bleGateway = yield* makeBleGateway();
     const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
 
-    yield* Effect.addFinalizer(() =>
-        Effect.sync(() => {
-            stopScanning();
-        })
-    );
-
     return yield* scan().pipe(
         bleGateway,
-        Stream.flatMap((message) => homeAssistantMqttMessageProducer(message)),
-        Stream.tap((message) => publish(message)),
+        Stream.flatMap((message) => homeAssistantMqttMessageProducer(message), {
+            concurrency: config.concurrency.mqtt_message_production,
+        }),
+        Stream.mapEffect((message) => publish(message), { concurrency: config.concurrency.mqtt_publishing }),
         Stream.runDrain,
         Effect.catchTags({
             SensorConfigurationMissingError: (error) =>
@@ -38,6 +43,7 @@ const program = Effect.gen(function* () {
             MqttClientError: (error) =>
                 Effect.sync(() => logger.error("Error publishing MQTT message", { message: error.mqttMessage })),
             GatewayError: (error) => Effect.sync(() => logger.error("Error from gateway", { error })),
+            BleScannerError: (error) => Effect.sync(() => logger.error("Error during BLE scanning", { error })),
         })
     );
 });

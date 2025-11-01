@@ -162,7 +162,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
         nox: {
             component: HomeAssistantMQTTComponent.Sensor,
             deviceClass: HomeAssistantDeviceClass.None,
-            name: "NOX",
+            name: "NOx",
             unitOfMeasurement: "",
             uniqueId: "nox",
             device: ruuviAirDeviceConfiguration,
@@ -183,6 +183,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             unitOfMeasurement: "",
             uniqueId: "calibration_in_progress",
             device: ruuviAirDeviceConfiguration,
+            suggestedDecimalPrecision: null,
         },
         measurementSequence: measurementSequenceSensorConfiguration,
         macAddress: macAddressSensorConfiguration,
@@ -206,6 +207,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             uniqueId: "ruuvi_iaqs_description",
             device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
+            suggestedDecimalPrecision: null,
         },
         atmoTubeAQI: {
             component: HomeAssistantMQTTComponent.Sensor,
@@ -224,6 +226,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             uniqueId: "atmotube_aqi_description",
             device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
+            suggestedDecimalPrecision: null,
         },
     };
 

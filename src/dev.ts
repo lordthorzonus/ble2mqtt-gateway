@@ -1,5 +1,5 @@
-import { makeBleGateway } from "./gateways/ble-gateway";
-import { scan, stopScanning } from "./infra/ble-scanner";
+import { getManufacturerId, makeBleGateway } from "./gateways/ble-gateway";
+import { scan } from "./infra/ble-scanner";
 import { Logger } from "./infra/logger";
 import { DeviceType } from "./types";
 import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
@@ -16,10 +16,16 @@ const bleMode = Effect.gen(function* () {
         logger.info("Filtering manufacturer id %s", filterManufacturerId);
     }
 
+    yield* Effect.addFinalizer(() =>
+        Effect.sync(() => {
+            logger.info("BLE mode finalizer called");
+        })
+    );
+
     return yield* scan().pipe(
         Stream.tap((peripheral) =>
             Effect.sync(() => {
-                const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+                const manufacturerId = getManufacturerId(peripheral);
 
                 if (filterManufacturerId && filterManufacturerId !== manufacturerId) {
                     return;
@@ -41,6 +47,12 @@ const gatewayMode = Effect.gen(function* () {
         logger.info("Filtering device type %s", filterDeviceType);
     }
 
+    yield* Effect.addFinalizer(() =>
+        Effect.sync(() => {
+            logger.info("Gateway mode finalizer called");
+        })
+    );
+
     const bleGateway = yield* makeBleGateway();
 
     return yield* scan().pipe(
@@ -57,6 +69,13 @@ const gatewayMode = Effect.gen(function* () {
 
 const mqttMode = Effect.gen(function* () {
     const logger = yield* Logger;
+
+    yield* Effect.addFinalizer(() =>
+        Effect.sync(() => {
+            logger.info("MQTT mode finalizer called");
+        })
+    );
+
     const bleGateway = yield* makeBleGateway();
     const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
 
@@ -85,8 +104,7 @@ const devProgram = Effect.gen(function* () {
 
     yield* Effect.addFinalizer(() =>
         Effect.sync(() => {
-            logger.info("Stopping BLE scanner");
-            stopScanning();
+            logger.info("Dev program finalizer called - shutting down");
         })
     );
 

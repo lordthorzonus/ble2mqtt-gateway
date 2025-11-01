@@ -7,7 +7,7 @@ import {
     parseParticulateMatter,
     parseCO2,
     parseVOC,
-    parseNOX,
+    parseNOx,
     parseCalibrationInProgress,
 } from "./common-parsing-strategy-utils";
 
@@ -18,7 +18,7 @@ enum DataFormatV6Offset {
     PM25 = 9,
     CO2 = 11,
     VOC = 13,
-    NOX = 14,
+    NOx = 14,
     Luminosity = 15,
     Reserved = 16,
     MeasurementSequence = 17,
@@ -129,7 +129,7 @@ const parseMacAddress = (rawData: Buffer, offset: number): string | null => {
  * data format E1 packets instead.
  *
  * Data format 6 focuses on air quality measurements and includes environmental sensors for context.
- * It provides PM2.5, CO2, VOC, NOX measurements along with basic environmental data.
+ * It provides PM2.5, CO2, VOC, NOx measurements along with basic environmental data.
  *
  * Data field layout (20 bytes total):
  * Offset 0: Data format (6)
@@ -139,11 +139,11 @@ const parseMacAddress = (rawData: Buffer, offset: number): string | null => {
  * Offset 7-8: PM 2.5 (0-1000.0 μg/m³ in 0.1 μg/m³ increments)
  * Offset 9-10: CO2 (0-40000 ppm in 1 ppm increments)
  * Offset 11: VOC index lower 8 bits (0-500, unitless)
- * Offset 12: NOX index lower 8 bits (0-500, unitless)
+ * Offset 12: NOx index lower 8 bits (0-500, unitless)
  * Offset 13: Luminosity (0-65535 lux, logarithmic encoding)
  * Offset 14: Reserved
  * Offset 15: Measurement sequence (0-255)
- * Offset 16: Flags (VOC/NOX upper bits + calibration status)
+ * Offset 16: Flags (VOC/NOx upper bits + calibration status)
  * Offset 17-19: MAC address (24 least significant bits)
  *
  * @see https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-6
@@ -162,7 +162,7 @@ export const DataFormat6ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTagD
         pm10: null,
         co2: parseCO2(rawRuuviTagData, DataFormatV6Offset.CO2),
         voc: parseVOC(rawRuuviTagData, DataFormatV6Offset.VOC, DataFormatV6Offset.Flags),
-        nox: parseNOX(rawRuuviTagData, DataFormatV6Offset.NOX, DataFormatV6Offset.Flags),
+        nox: parseNOx(rawRuuviTagData, DataFormatV6Offset.NOx, DataFormatV6Offset.Flags),
         luminosity: parseLuminosity(rawRuuviTagData, DataFormatV6Offset.Luminosity),
         measurementSequence: parseMeasurementSequence(rawRuuviTagData, DataFormatV6Offset.MeasurementSequence),
         macAddress: parseMacAddress(rawRuuviTagData, DataFormatV6Offset.MacAddress),

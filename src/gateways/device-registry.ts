@@ -1,5 +1,5 @@
 import { Device, DeviceType } from "../types";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../infra/ble-scanner";
 import { DateTime } from "luxon";
 
 export interface DeviceSettings {

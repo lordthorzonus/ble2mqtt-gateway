@@ -16,7 +16,7 @@ import {
     asCelsius,
     asCO2Ppm,
     asLux,
-    asNOXIndex,
+    asNOxIndex,
     asPascal,
     asPM1,
     asPM10,
@@ -97,7 +97,7 @@ describe("RuuviTag sensor data decorator", () => {
                 pm10: asPM10(25.9),
                 co2: asCO2Ppm(201),
                 voc: asVOCIndex(10),
-                nox: asNOXIndex(2),
+                nox: asNOxIndex(2),
                 luminosity: asLux(13026.67),
                 calibrationInProgress: false,
             };

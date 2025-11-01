@@ -7,6 +7,13 @@ mqtt:
     password: secret
     client_id: ble2mqtt
     protocol: mqtt
+# Concurrency settings for stream processing (optional)
+# Use "unbounded" for maximum throughput (recommended for most setups)
+# Or specify a positive number to limit concurrent operations (e.g., 20, 50, 100)
+concurrency:
+    ble_gateway_processing: unbounded # BLE peripheral processing
+    mqtt_message_production: unbounded # Home Assistant message transformation
+    mqtt_publishing: unbounded # MQTT publishing operations
 gateways:
     base_topic: ble2mqtt
     ruuvitag:

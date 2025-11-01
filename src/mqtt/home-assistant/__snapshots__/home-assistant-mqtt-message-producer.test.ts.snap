@@ -118,7 +118,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_voc/config",
   },
   {
-    "payload": "{"name":"NOX","object_id":"air_quality_sensor_nox","unique_id":"air_quality_sensor_nox","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.nox | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"NOx","object_id":"air_quality_sensor_nox","unique_id":"air_quality_sensor_nox","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.nox | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_nox/config",
   },
@@ -128,7 +128,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_luminosity/config",
   },
   {
-    "payload": "{"name":"Calibration in progress","entity_category":"diagnostic","object_id":"air_quality_sensor_calibration_in_progress","unique_id":"air_quality_sensor_calibration_in_progress","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.calibrationInProgress | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"Calibration in progress","entity_category":"diagnostic","object_id":"air_quality_sensor_calibration_in_progress","unique_id":"air_quality_sensor_calibration_in_progress","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.calibrationInProgress | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":""}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_calibration_in_progress/config",
   },
@@ -163,7 +163,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_ruuvi_iaqs/config",
   },
   {
-    "payload": "{"name":"Ruuvi IAQS Description","object_id":"air_quality_sensor_ruuvi_iaqs_description","unique_id":"air_quality_sensor_ruuvi_iaqs_description","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.ruuviIAQSDescription | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"Ruuvi IAQS Description","object_id":"air_quality_sensor_ruuvi_iaqs_description","unique_id":"air_quality_sensor_ruuvi_iaqs_description","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.ruuviIAQSDescription | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":""}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_ruuvi_iaqs_description/config",
   },
@@ -173,7 +173,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_atmotube_aqi/config",
   },
   {
-    "payload": "{"name":"AtmoTube AQI Description","object_id":"air_quality_sensor_atmotube_aqi_description","unique_id":"air_quality_sensor_atmotube_aqi_description","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.atmoTubeAQIDescription | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"AtmoTube AQI Description","object_id":"air_quality_sensor_atmotube_aqi_description","unique_id":"air_quality_sensor_atmotube_aqi_description","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.atmoTubeAQIDescription | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":""}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_atmotube_aqi_description/config",
   },

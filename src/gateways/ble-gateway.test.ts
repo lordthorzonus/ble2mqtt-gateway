@@ -1,4 +1,4 @@
-import type { Peripheral } from "@abandonware/noble";
+import type { Peripheral } from "../infra/ble-scanner";
 import { DeviceType, MessageType } from "../types";
 import { Config, GlobalConfiguration } from "../config";
 import { Effect, Layer, Stream } from "effect";
@@ -184,6 +184,11 @@ describe("BLE Gateway", () => {
                 gateway_name: "test",
                 unavailable_devices_check_interval_ms: 1000,
                 gateway_version: "1.0.0",
+                concurrency: {
+                    ble_gateway_processing: "unbounded",
+                    mqtt_message_production: "unbounded",
+                    mqtt_publishing: "unbounded",
+                },
                 mqtt: {
                     host: "test",
                     port: 1883,
@@ -252,6 +257,49 @@ describe("BLE Gateway", () => {
         expect(messages).toEqual([handledMessage, handledMessage]);
 
         expect(mockRuuvitagMapMessageFn).toHaveBeenCalledTimes(2);
+        expect(mockRuuvitagMapMessageFn).toHaveBeenCalledWith(ruuviPeripheral);
+    });
+
+    it("should handle peripherals with empty or short manufacturer data without crashing", async () => {
+        const peripheralWithEmptyData = {
+            advertisement: {
+                manufacturerData: Buffer.from([]),
+                serviceData: [],
+            },
+            address: "cc:cc",
+            rssi: 23,
+            uuid: "cc:cc",
+        } as unknown as Peripheral;
+
+        const peripheralWithSingleByte = {
+            advertisement: {
+                manufacturerData: Buffer.from([0x99]),
+                serviceData: [],
+            },
+            address: "dd:dd",
+            rssi: 23,
+            uuid: "dd:dd",
+        } as unknown as Peripheral;
+
+        const peripherals = [peripheralWithEmptyData, peripheralWithSingleByte, ruuviPeripheral];
+
+        mockRuuviUnavailableDevices.mockReturnValue([]);
+        mockMiFloraUnavailableDevices.mockReturnValue([]);
+
+        mockRuuvitagMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+
+        const program = Effect.gen(function* () {
+            const bleGateway = yield* makeBleGateway();
+            const eventStream = bleGateway(Stream.fromIterable(peripherals));
+            return yield* Stream.runCollect(Stream.take(eventStream, 1));
+        });
+
+        const messages = Array.from(await Effect.runPromise(Effect.provide(program, TestLayer)));
+
+        expect(messages).toHaveLength(1);
+        expect(messages).toEqual([handledMessage]);
+
+        expect(mockRuuvitagMapMessageFn).toHaveBeenCalledTimes(1);
         expect(mockRuuvitagMapMessageFn).toHaveBeenCalledWith(ruuviPeripheral);
     });
 
