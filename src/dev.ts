@@ -88,7 +88,7 @@ const mqttMode = Effect.gen(function* () {
     return yield* scan().pipe(
         bleGateway,
         Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType),
-        Stream.flatMap((message) => homeAssistantMqttMessageProducer(message)),
+        Stream.flatMap((message) => homeAssistantMqttMessageProducer(message), { concurrency: "unbounded" }),
         Stream.tap((message) => Effect.sync(() => logger.info("Received MQTT message %s", JSON.stringify(message)))),
         Stream.runDrain
     );
