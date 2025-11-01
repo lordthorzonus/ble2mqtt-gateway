@@ -64,6 +64,8 @@ describe("RuuviTag sensor data decorator", () => {
                 dewPoint,
                 humidex,
                 heatIndex,
+                breezeIndoorClimateIndex: 2,
+                breezeIndoorClimateIndexDescription: "fine",
             });
 
             expect(calculateAbsoluteHumidityMock).toHaveBeenCalledWith(
@@ -121,6 +123,8 @@ describe("RuuviTag sensor data decorator", () => {
                 ruuviIAQSDescription: "good",
                 atmoTubeAQI: 0,
                 atmoTubeAQIDescription: "severely-polluted",
+                breezeIndoorClimateIndex: 6,
+                breezeIndoorClimateIndexDescription: "severe",
             });
 
             expect(calculateAbsoluteHumidityMock).toHaveBeenCalledWith(

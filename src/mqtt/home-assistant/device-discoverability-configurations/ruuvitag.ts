@@ -74,6 +74,7 @@ const humidexSensorConfiguration: HomeAssistantSensorConfiguration = {
     name: "Humidex",
     unitOfMeasurement: "",
     uniqueId: "humidex",
+    stateClass: "measurement",
     device: ruuviTagDeviceConfiguration,
 };
 
@@ -84,6 +85,28 @@ const heatIndexSensorConfiguration: HomeAssistantSensorConfiguration = {
     unitOfMeasurement: "°C",
     uniqueId: "heat_index",
     device: ruuviTagDeviceConfiguration,
+};
+
+const breezeIndoorClimateIndexSensorConfiguration: HomeAssistantSensorConfiguration = {
+    component: HomeAssistantMQTTComponent.Sensor,
+    deviceClass: HomeAssistantDeviceClass.None,
+    name: "Breeze Indoor Climate Index",
+    unitOfMeasurement: "",
+    uniqueId: "breeze_indoor_climate_index",
+    stateClass: "measurement",
+    device: ruuviTagDeviceConfiguration,
+    icon: "mdi:home-thermometer-outline",
+};
+
+const breezeIndoorClimateIndexDescriptionSensorConfiguration: HomeAssistantSensorConfiguration = {
+    component: HomeAssistantMQTTComponent.Sensor,
+    deviceClass: HomeAssistantDeviceClass.None,
+    name: "Breeze Indoor Climate Index Description",
+    unitOfMeasurement: "",
+    uniqueId: "breeze_indoor_climate_index_description",
+    device: ruuviTagDeviceConfiguration,
+    icon: "mdi:home-thermometer-outline",
+    suggestedDecimalPrecision: null,
 };
 
 const macAddressSensorConfiguration: HomeAssistantSensorConfiguration = {
@@ -103,6 +126,7 @@ const measurementSequenceSensorConfiguration: HomeAssistantSensorConfiguration =
     name: "Measurement Sequence",
     unitOfMeasurement: "",
     uniqueId: "measurement_sequence",
+    stateClass: "total",
     device: ruuviTagDeviceConfiguration,
 };
 
@@ -157,6 +181,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "VOC",
             unitOfMeasurement: "",
             uniqueId: "voc",
+            stateClass: "measurement",
             device: ruuviAirDeviceConfiguration,
         },
         nox: {
@@ -165,6 +190,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "NOx",
             unitOfMeasurement: "",
             uniqueId: "nox",
+            stateClass: "measurement",
             device: ruuviAirDeviceConfiguration,
         },
         luminosity: {
@@ -196,6 +222,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "Ruuvi Indoor Air Quality Score (IAQS)",
             unitOfMeasurement: "",
             uniqueId: "ruuvi_iaqs",
+            stateClass: "measurement",
             device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
         },
@@ -215,6 +242,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             name: "AtmoTube AQI",
             unitOfMeasurement: "",
             uniqueId: "atmotube_aqi",
+            stateClass: "measurement",
             device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
         },
@@ -227,6 +255,14 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
             device: ruuviAirDeviceConfiguration,
             icon: "mdi:air-filter",
             suggestedDecimalPrecision: null,
+        },
+        breezeIndoorClimateIndex: {
+            ...breezeIndoorClimateIndexSensorConfiguration,
+            device: ruuviAirDeviceConfiguration,
+        },
+        breezeIndoorClimateIndexDescription: {
+            ...breezeIndoorClimateIndexDescriptionSensorConfiguration,
+            device: ruuviAirDeviceConfiguration,
         },
     };
 
@@ -291,6 +327,7 @@ export const ruuviTagEnvironmentalSensorConfiguration: HomeAssistantSensorConfig
             name: "Movement Counter",
             unitOfMeasurement: "",
             uniqueId: "movement_counter",
+            stateClass: "total",
             device: ruuviTagDeviceConfiguration,
         },
         /**
@@ -339,4 +376,6 @@ export const ruuviTagEnvironmentalSensorConfiguration: HomeAssistantSensorConfig
 {% endif %}
         `,
         },
+        breezeIndoorClimateIndex: breezeIndoorClimateIndexSensorConfiguration,
+        breezeIndoorClimateIndexDescription: breezeIndoorClimateIndexDescriptionSensorConfiguration,
     };

@@ -102,6 +102,8 @@ describe("RuuviTag Measurement Transformer", () => {
             movementCounter: 66,
             measurementSequence: 205,
             macAddress: "cb:b8:33:4c:88:4f",
+            breezeIndoorClimateIndex: null,
+            breezeIndoorClimateIndexDescription: null,
         };
 
         const expectedMessage: DeviceSensorMessage = {
@@ -218,6 +220,8 @@ describe("RuuviTag Measurement Transformer", () => {
                             atmoTubeAQIDescription: null,
                             heatIndex: null,
                             humidex: null,
+                            breezeIndoorClimateIndex: null,
+                            breezeIndoorClimateIndexDescription: null,
                         };
 
                         const expectedAirQualityMessage: DeviceSensorMessage = {

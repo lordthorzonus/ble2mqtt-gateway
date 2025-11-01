@@ -113,12 +113,12 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_co2/config",
   },
   {
-    "payload": "{"name":"VOC","object_id":"air_quality_sensor_voc","unique_id":"air_quality_sensor_voc","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.voc | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"VOC","object_id":"air_quality_sensor_voc","unique_id":"air_quality_sensor_voc","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.voc | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_voc/config",
   },
   {
-    "payload": "{"name":"NOx","object_id":"air_quality_sensor_nox","unique_id":"air_quality_sensor_nox","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.nox | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"NOx","object_id":"air_quality_sensor_nox","unique_id":"air_quality_sensor_nox","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.nox | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_nox/config",
   },
@@ -133,7 +133,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_calibration_in_progress/config",
   },
   {
-    "payload": "{"name":"Measurement Sequence","object_id":"air_quality_sensor_measurement_sequence","unique_id":"air_quality_sensor_measurement_sequence","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.measurementSequence | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"Measurement Sequence","object_id":"air_quality_sensor_measurement_sequence","unique_id":"air_quality_sensor_measurement_sequence","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.measurementSequence | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"total","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_measurement_sequence/config",
   },
@@ -153,12 +153,12 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_heat_index/config",
   },
   {
-    "payload": "{"name":"Humidex","object_id":"air_quality_sensor_humidex","unique_id":"air_quality_sensor_humidex","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.humidex | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"Humidex","object_id":"air_quality_sensor_humidex","unique_id":"air_quality_sensor_humidex","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.humidex | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_humidex/config",
   },
   {
-    "payload": "{"name":"Ruuvi Indoor Air Quality Score (IAQS)","device_class":"aqi","object_id":"air_quality_sensor_ruuvi_iaqs","unique_id":"air_quality_sensor_ruuvi_iaqs","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.ruuviIAQS | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"Ruuvi Indoor Air Quality Score (IAQS)","device_class":"aqi","object_id":"air_quality_sensor_ruuvi_iaqs","unique_id":"air_quality_sensor_ruuvi_iaqs","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.ruuviIAQS | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_ruuvi_iaqs/config",
   },
@@ -168,7 +168,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_ruuvi_iaqs_description/config",
   },
   {
-    "payload": "{"name":"AtmoTube AQI","device_class":"aqi","object_id":"air_quality_sensor_atmotube_aqi","unique_id":"air_quality_sensor_atmotube_aqi","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.atmoTubeAQI | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"AtmoTube AQI","device_class":"aqi","object_id":"air_quality_sensor_atmotube_aqi","unique_id":"air_quality_sensor_atmotube_aqi","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.atmoTubeAQI | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_atmotube_aqi/config",
   },
@@ -176,6 +176,16 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "payload": "{"name":"AtmoTube AQI Description","object_id":"air_quality_sensor_atmotube_aqi_description","unique_id":"air_quality_sensor_atmotube_aqi_description","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:air-filter","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.atmoTubeAQIDescription | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":""}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_atmotube_aqi_description/config",
+  },
+  {
+    "payload": "{"name":"Breeze Indoor Climate Index","object_id":"air_quality_sensor_breeze_indoor_climate_index","unique_id":"air_quality_sensor_breeze_indoor_climate_index","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:home-thermometer-outline","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.breezeIndoorClimateIndex | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_breeze_indoor_climate_index/config",
+  },
+  {
+    "payload": "{"name":"Breeze Indoor Climate Index Description","object_id":"air_quality_sensor_breeze_indoor_climate_index_description","unique_id":"air_quality_sensor_breeze_indoor_climate_index_description","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:home-thermometer-outline","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.breezeIndoorClimateIndexDescription | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":""}",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_breeze_indoor_climate_index_description/config",
   },
   {
     "payload": "{"state":"online"}",
@@ -293,6 +303,16 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_sensor_atmotube_aqi_description/config",
   },
   {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_sensor_breeze_indoor_climate_index/config",
+  },
+  {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_sensor_breeze_indoor_climate_index_description/config",
+  },
+  {
     "payload": "{"state":"offline"}",
     "retain": true,
     "topic": "test/ruuvitag/cc:dd/availability",
@@ -353,7 +373,7 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/aa:bb/my_fridge_acceleration_z/config",
   },
   {
-    "payload": "{"name":"Humidex","object_id":"my_fridge_humidex","unique_id":"my_fridge_humidex","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.humidex | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"Humidex","object_id":"my_fridge_humidex","unique_id":"my_fridge_humidex","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.humidex | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/aa:bb/my_fridge_humidex/config",
   },
@@ -368,12 +388,12 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/aa:bb/my_fridge_mac_address/config",
   },
   {
-    "payload": "{"name":"Measurement Sequence","object_id":"my_fridge_measurement_sequence","unique_id":"my_fridge_measurement_sequence","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.measurementSequence | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"Measurement Sequence","object_id":"my_fridge_measurement_sequence","unique_id":"my_fridge_measurement_sequence","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.measurementSequence | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"total","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/aa:bb/my_fridge_measurement_sequence/config",
   },
   {
-    "payload": "{"name":"Movement Counter","object_id":"my_fridge_movement_counter","unique_id":"my_fridge_movement_counter","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.movementCounter | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","suggested_display_precision":2}",
+    "payload": "{"name":"Movement Counter","object_id":"my_fridge_movement_counter","unique_id":"my_fridge_movement_counter","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.movementCounter | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"total","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/aa:bb/my_fridge_movement_counter/config",
   },
@@ -386,6 +406,16 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "payload": "{"name":"Battery","device_class":"battery","entity_category":"diagnostic","object_id":"my_fridge_battery_low","unique_id":"my_fridge_battery_low","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:battery","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"\\n{% set temperature = value_json.temperature | float %}\\n{% set batteryVoltage = value_json.batteryVoltage | float %}\\n{% if temperature < -20 %}\\n    {{ batteryVoltage < 2 }}\\n{% elif temperature < 0 %}\\n    {{ batteryVoltage < 2.3 }}\\n{% else %}\\n    {{ batteryVoltage < 2.5 }}\\n{% endif %}\\n        ","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"payload_on":true,"payload_off":false}",
     "retain": true,
     "topic": "homeassistant/binary_sensor/aa:bb/my_fridge_battery_low/config",
+  },
+  {
+    "payload": "{"name":"Breeze Indoor Climate Index","object_id":"my_fridge_breeze_indoor_climate_index","unique_id":"my_fridge_breeze_indoor_climate_index","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:home-thermometer-outline","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.breezeIndoorClimateIndex | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"","state_class":"measurement","suggested_display_precision":2}",
+    "retain": true,
+    "topic": "homeassistant/sensor/aa:bb/my_fridge_breeze_indoor_climate_index/config",
+  },
+  {
+    "payload": "{"name":"Breeze Indoor Climate Index Description","object_id":"my_fridge_breeze_indoor_climate_index_description","unique_id":"my_fridge_breeze_indoor_climate_index_description","availability_topic":"test/ruuvitag/aa:bb/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:home-thermometer-outline","device":{"manufacturer":"Ruuvi Innovations Oy","model":"RuuviTag","name":"Ruuvitag My Fridge","connections":[["mac","aa:bb"]],"identifiers":["aa:bb","aa:bb"]},"value_template":"{{ value_json.breezeIndoorClimateIndexDescription | default('None') }}","state_topic":"test/ruuvitag/aa:bb/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":""}",
+    "retain": true,
+    "topic": "homeassistant/sensor/aa:bb/my_fridge_breeze_indoor_climate_index_description/config",
   },
   {
     "payload": "{"state":"online"}",
@@ -481,6 +511,16 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "payload": "",
     "retain": true,
     "topic": "homeassistant/binary_sensor/aa:bb/fridge_battery_low/config",
+  },
+  {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/aa:bb/fridge_breeze_indoor_climate_index/config",
+  },
+  {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/aa:bb/fridge_breeze_indoor_climate_index_description/config",
   },
   {
     "payload": "{"state":"offline"}",

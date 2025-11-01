@@ -5,6 +5,10 @@ import { AtmoTubeAQIDescription, calculateAtmoTubeIAQI } from "./calculators/atm
 import { calculateDewPoint } from "./calculators/dew-point-calculator";
 import { calculateHeatIndex } from "./calculators/heat-index-calculator";
 import { calculateHumidex } from "./calculators/humidex-calculator";
+import {
+    BreezeIndoorClimateIndexDescription,
+    calculateBreezeIndoorClimateIndex,
+} from "./calculators/breeze-indoor-climate-index-calculator";
 import { AQI } from "../../units";
 
 interface SharedEnhancedRuuviTagSensorData {
@@ -12,6 +16,8 @@ interface SharedEnhancedRuuviTagSensorData {
     heatIndex: number | null;
     dewPoint: number | null;
     absoluteHumidity: number | null;
+    breezeIndoorClimateIndex: number | null;
+    breezeIndoorClimateIndexDescription: BreezeIndoorClimateIndexDescription | null;
 }
 
 export type EnhancedRuuviTagEnvironmentalSensorData = SharedEnhancedRuuviTagSensorData &
@@ -46,6 +52,10 @@ export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
         pm10: ruuviTagAirQualitySensorData.pm10,
         pm1: ruuviTagAirQualitySensorData.pm1,
     });
+    const breezeIndoorClimateIndexResult = calculateBreezeIndoorClimateIndex(
+        ruuviTagAirQualitySensorData.temperature,
+        ruuviTagAirQualitySensorData.relativeHumidityPercentage
+    );
 
     return {
         ...ruuviTagAirQualitySensorData,
@@ -63,6 +73,8 @@ export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
         ruuviIAQSDescription: ruuviIAQSCalculationResult?.description ?? null,
         atmoTubeAQI: atmoTubeAQICalculationResult?.index ?? null,
         atmoTubeAQIDescription: atmoTubeAQICalculationResult?.description ?? null,
+        breezeIndoorClimateIndex: breezeIndoorClimateIndexResult?.index ?? null,
+        breezeIndoorClimateIndexDescription: breezeIndoorClimateIndexResult?.description ?? null,
     };
 };
 
@@ -70,6 +82,11 @@ export const decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues = (
     ruuviTagSensorData: RuuviTagEnvironmentalSensorData
 ): EnhancedRuuviTagEnvironmentalSensorData => {
     const dewPoint = calculateDewPoint(ruuviTagSensorData.temperature, ruuviTagSensorData.relativeHumidityPercentage);
+    const breezeIndoorClimateIndexResult = calculateBreezeIndoorClimateIndex(
+        ruuviTagSensorData.temperature,
+        ruuviTagSensorData.relativeHumidityPercentage
+    );
+
     return {
         ...ruuviTagSensorData,
         humidex: calculateHumidex(ruuviTagSensorData.temperature, dewPoint),
@@ -79,5 +96,7 @@ export const decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues = (
             ruuviTagSensorData.temperature,
             ruuviTagSensorData.relativeHumidityPercentage
         ),
+        breezeIndoorClimateIndex: breezeIndoorClimateIndexResult?.index ?? null,
+        breezeIndoorClimateIndexDescription: breezeIndoorClimateIndexResult?.description ?? null,
     };
 };
