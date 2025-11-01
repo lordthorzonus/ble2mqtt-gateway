@@ -13,13 +13,21 @@ const GatewayLive = Layer.mergeAll(Config.Default, Logger.Default, MqttClient.De
 const program = Effect.gen(function* () {
     const logger = yield* Logger;
 
+    logger.info("Starting BLE2MQTT Gateway");
+
+    yield* Effect.addFinalizer(() =>
+        Effect.sync(() => {
+            logger.info("Shutting down BLE2MQTT Gateway");
+        })
+    );
+
     const bleGateway = yield* makeBleGateway();
     const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
 
     return yield* scan().pipe(
         bleGateway,
         Stream.flatMap((message) => homeAssistantMqttMessageProducer(message)),
-        Stream.tap((message) => publish(message)),
+        Stream.mapEffect((message) => publish(message), { concurrency: "unbounded" }),
         Stream.runDrain,
         Effect.catchTags({
             SensorConfigurationMissingError: (error) =>

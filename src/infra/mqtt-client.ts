@@ -32,7 +32,12 @@ const mqttClient = Effect.gen(function* () {
         logger.error("MQTT client error", { error });
     });
 
-    yield* Effect.addFinalizer(() => Effect.sync(() => client.end()));
+    yield* Effect.addFinalizer(() =>
+        Effect.gen(function* () {
+            yield* Effect.promise(() => client.endAsync());
+            logger.info("MQTT client connection closed");
+        })
+    );
 
     return client;
 });
@@ -64,14 +69,17 @@ export const publish = (message: MqttMessage): Effect.Effect<void, MqttClientErr
                 (error) => {
                     if (error) {
                         resume(
-                            new MqttClientError({
-                                message: "Failed to publish MQTT message",
-                                mqttMessage: message,
-                                cause: error,
-                            })
+                            Effect.fail(
+                                new MqttClientError({
+                                    message: "Failed to publish MQTT message",
+                                    mqttMessage: message,
+                                    cause: error,
+                                })
+                            )
                         );
+                    } else {
+                        resume(Effect.succeed(undefined));
                     }
-                    resume(Effect.succeed(undefined));
                 }
             );
         });

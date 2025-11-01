@@ -45,11 +45,23 @@ const startScanning = Effect.gen(function* () {
 export const scan = (): Stream.Stream<Peripheral, BleScannerError, Logger> =>
     Effect.gen(function* () {
         const logger = yield* Logger;
-        return Stream.acquireRelease(startScanning, () => Effect.promise(() => noble.stopScanningAsync())).pipe(
+        return Stream.acquireRelease(startScanning, () =>
+            Effect.gen(function* () {
+                yield* Effect.promise(() => noble.stopScanningAsync());
+                logger.info("BLE scanner stopped");
+            })
+        ).pipe(
             Stream.flatMap(() =>
                 Stream.async<Peripheral, BleScannerError>((emit) => {
-                    noble.on("discover", (peripheral: Peripheral) => {
+                    const onDiscover = (peripheral: Peripheral) => {
                         void emit(Effect.succeed(Chunk.of(peripheral)));
+                    };
+
+                    noble.on("discover", onDiscover);
+
+                    return Effect.sync(() => {
+                        logger.info("Cleaning up BLE scanner event listener");
+                        noble.removeListener("discover", onDiscover);
                     });
                 })
             ),
