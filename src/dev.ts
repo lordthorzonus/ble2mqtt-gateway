@@ -1,5 +1,5 @@
-import { makeBleGateway } from "./gateways/ble-gateway";
-import { scan, stopScanning } from "./infra/ble-scanner";
+import { getManufacturerId, makeBleGateway } from "./gateways/ble-gateway";
+import { scan } from "./infra/ble-scanner";
 import { Logger } from "./infra/logger";
 import { DeviceType } from "./types";
 import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
@@ -19,7 +19,7 @@ const bleMode = Effect.gen(function* () {
     return yield* scan().pipe(
         Stream.tap((peripheral) =>
             Effect.sync(() => {
-                const manufacturerId = peripheral.advertisement.manufacturerData?.readUInt16LE();
+                const manufacturerId = getManufacturerId(peripheral);
 
                 if (filterManufacturerId && filterManufacturerId !== manufacturerId) {
                     return;
@@ -86,7 +86,6 @@ const devProgram = Effect.gen(function* () {
     yield* Effect.addFinalizer(() =>
         Effect.sync(() => {
             logger.info("Stopping BLE scanner");
-            stopScanning();
         })
     );
 

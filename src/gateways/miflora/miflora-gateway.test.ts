@@ -3,7 +3,7 @@ import { getStubPeripheralWithServiceData } from "./miflora-parser/index.test";
 import { makeMiFloraGateway, isMiFloraPeripheral, makeMiFloraDeviceRegistry } from "./miflora-gateway";
 import { Settings } from "luxon";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../../infra/ble-scanner";
 import { Logger } from "../../infra/logger";
 import { Config, GlobalConfiguration } from "../../config";
 import { DeviceRegistryService } from "../gateway-helpers";

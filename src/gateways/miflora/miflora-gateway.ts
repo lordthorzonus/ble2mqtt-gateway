@@ -1,5 +1,5 @@
 import { GatewayError } from "../ble-gateway";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../../infra/ble-scanner";
 import { DeviceMessage, DeviceType } from "../../types";
 import { MiFloraGatewayConfiguration } from "../../config";
 import { DeviceRegistryService, handleBleAdvertisement } from "../gateway-helpers";

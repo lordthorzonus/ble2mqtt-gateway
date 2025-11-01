@@ -1,4 +1,4 @@
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../../infra/ble-scanner";
 import { DeviceRegistryEntry } from "../device-registry";
 import { MessageType, DeviceType, MifloraSensorMessage } from "../../types";
 import { v4 as uuid } from "uuid";

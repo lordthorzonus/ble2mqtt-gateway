@@ -1,68 +1,57 @@
 import { EventEmitter } from "events";
-const mockNobleScanner = jest.fn();
-const mockNobleStopScanning = jest.fn();
-const mockRemoveAllListeners = jest.fn();
-const mockNobleEventEmitter = new EventEmitter();
-const mockNobleEventListener = jest
-    .fn()
-    .mockImplementation((eventName: string, callback: (event: string) => unknown) => {
-        mockNobleEventEmitter.on(eventName, callback);
-    });
 
-jest.mock("@abandonware/noble", () => ({
-    on: mockNobleEventListener,
-    startScanning: mockNobleScanner,
-    stopScanning: mockNobleStopScanning,
-    removeAllListeners: mockRemoveAllListeners,
+const mockNobleEventEmitter = new EventEmitter();
+const mockWaitForPoweredOn = jest.fn();
+const mockStartScanning = jest.fn();
+const mockStopScanning = jest.fn();
+
+const mockNoble = {
+    waitForPoweredOnAsync: () => mockWaitForPoweredOn(),
+    startScanningAsync: (...args: unknown[]) => mockStartScanning(...args),
+    stopScanningAsync: () => mockStopScanning(),
+    on: (eventName: string, callback: (event: unknown) => unknown) => {
+        mockNobleEventEmitter.on(eventName, callback);
+    },
+};
+
+jest.mock("@stoprocent/noble", () => ({
+    __esModule: true,
+    default: mockNoble,
 }));
+
 import { Effect, Stream } from "effect";
-import { scan, stopScanning } from "./ble-scanner";
+import { scan } from "./ble-scanner";
 import { TestContext } from "../test/test-context";
 
 describe("BLE Scanner", () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        mockWaitForPoweredOn.mockResolvedValue(undefined);
+        mockStartScanning.mockResolvedValue(undefined);
+        mockStopScanning.mockResolvedValue(undefined);
     });
 
     const peripheral = {
         advertisement: {
             manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
+            serviceData: [],
         },
         address: "aa:bb",
         rssi: 23,
         uuid: "aa:bb",
     };
 
-    it("should register listeners to noble events when scan() is called", async () => {
+    it("should wait for noble to power on and start scanning", async () => {
         const stream = Stream.runCollect(Stream.take(scan(), 1));
 
         setTimeout(() => {
             mockNobleEventEmitter.emit("discover", peripheral);
-        }, 100);
-
-        await Effect.runPromise(Effect.provide(stream, TestContext));
-        expect(mockNobleEventListener).toHaveBeenCalledWith("discover", expect.any(Function));
-        expect(mockNobleEventListener).toHaveBeenCalledWith("stateChange", expect.any(Function));
-
-        stopScanning();
-        expect(mockNobleStopScanning).toHaveBeenCalledTimes(1);
-        expect(mockRemoveAllListeners).toHaveBeenCalledTimes(1);
-    });
-
-    it("should call nobles start scanning when noble emits that it is ready to scan", async () => {
-        const stream = Stream.runCollect(Stream.take(scan(), 1));
-
-        setTimeout(() => {
-            mockNobleEventEmitter.emit("stateChange", "poweredOn");
-        }, 100);
-
-        setTimeout(() => {
-            mockNobleEventEmitter.emit("discover", peripheral);
-        }, 100);
+        }, 10);
 
         await Effect.runPromise(Effect.provide(stream, TestContext));
 
-        expect(mockNobleScanner).toHaveBeenCalledWith([], true);
+        expect(mockWaitForPoweredOn).toHaveBeenCalledTimes(1);
+        expect(mockStartScanning).toHaveBeenCalledWith([], true);
     });
 
     it("should stream ble advertisements found", async () => {
@@ -71,11 +60,23 @@ describe("BLE Scanner", () => {
         setTimeout(() => {
             mockNobleEventEmitter.emit("discover", peripheral);
             mockNobleEventEmitter.emit("discover", peripheral);
-        }, 100);
+        }, 10);
 
         const result = await Effect.runPromise(Effect.provide(Stream.runCollect(Stream.take(stream, 2)), TestContext));
 
         const advertisements = Array.from(result);
         expect(advertisements).toEqual([peripheral, peripheral]);
-    }, 10000);
+    });
+
+    it("should call stopScanning when stream is finalized", async () => {
+        const stream = scan();
+
+        setTimeout(() => {
+            mockNobleEventEmitter.emit("discover", peripheral);
+        }, 10);
+
+        await Effect.runPromise(Effect.provide(Stream.runCollect(Stream.take(stream, 1)), TestContext));
+
+        expect(mockStopScanning).toHaveBeenCalledTimes(1);
+    });
 });

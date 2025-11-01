@@ -1,5 +1,5 @@
 import { DeviceRegistryEntry } from "./device-registry";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../infra/ble-scanner";
 import { DeviceAvailabilityMessage, MessageType } from "../types";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";

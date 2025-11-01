@@ -1,10 +1,10 @@
-import { Peripheral } from "@abandonware/noble";
 import { DeviceAvailabilityMessage, DeviceMessage, DeviceSensorMessage, DeviceType } from "../types";
 import { generateAvailabilityMessage } from "./message-generators";
 import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry";
 import { Data, Effect, Stream, Context, Option, pipe, Schedule } from "effect";
 import { Logger } from "../infra/logger";
 import { Config } from "../config";
+import { Peripheral } from "../infra/ble-scanner";
 
 export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")<{
     id: string;

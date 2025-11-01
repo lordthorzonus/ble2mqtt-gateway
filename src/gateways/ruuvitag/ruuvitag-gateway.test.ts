@@ -3,7 +3,7 @@ import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag-gate
 import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter";
 import { Settings } from "luxon";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../../infra/ble-scanner";
 import { Logger } from "../../infra/logger";
 import { Config, GlobalConfiguration, RuuviTagGatewayConfiguration } from "../../config";
 import { DeviceRegistryService } from "../gateway-helpers";

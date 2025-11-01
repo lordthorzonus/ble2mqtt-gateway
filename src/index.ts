@@ -4,7 +4,7 @@ import { makeBleGateway } from "./gateways/ble-gateway";
 import { publish, MqttClient } from "./infra/mqtt-client";
 import { Logger } from "./infra/logger";
 import { Effect, Stream, Layer } from "effect";
-import { scan, stopScanning } from "./infra/ble-scanner";
+import { scan } from "./infra/ble-scanner";
 import { NodeRuntime } from "@effect/platform-node";
 process.stdin.resume();
 
@@ -15,12 +15,6 @@ const program = Effect.gen(function* () {
 
     const bleGateway = yield* makeBleGateway();
     const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
-
-    yield* Effect.addFinalizer(() =>
-        Effect.sync(() => {
-            stopScanning();
-        })
-    );
 
     return yield* scan().pipe(
         bleGateway,
@@ -38,6 +32,7 @@ const program = Effect.gen(function* () {
             MqttClientError: (error) =>
                 Effect.sync(() => logger.error("Error publishing MQTT message", { message: error.mqttMessage })),
             GatewayError: (error) => Effect.sync(() => logger.error("Error from gateway", { error })),
+            BleScannerError: (error) => Effect.sync(() => logger.error("Error during BLE scanning", { error })),
         })
     );
 });

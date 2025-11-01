@@ -5,7 +5,7 @@ import {
     InvalidMiFloraAdvertisementError,
     UnsupportedMiFloraEventError,
 } from "./index";
-import { Peripheral } from "@abandonware/noble";
+import { Peripheral } from "../../../infra/ble-scanner";
 import { Effect } from "effect";
 import { testEffectWithContext } from "../../../test/test-context";
 

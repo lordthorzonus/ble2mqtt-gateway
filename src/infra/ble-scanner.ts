@@ -1,42 +1,58 @@
-import noble from "@abandonware/noble";
-import { Peripheral } from "@abandonware/noble";
-import { Logger, LoggerInterface } from "./logger";
-import { Effect, Stream, Chunk, Option } from "effect";
+import noble from "@stoprocent/noble";
+import { Logger } from "./logger";
+import { Effect, Stream, Data, Chunk } from "effect";
 
-const startScanning = (logger: LoggerInterface) => {
-    logger.info("Starting scanning BLE devices");
-    noble.startScanning([], true);
-};
+export class BleScannerError extends Data.TaggedError("BleScannerError")<{
+    message: string;
+}> {}
 
-export const scan = (): Stream.Stream<Peripheral, never, Logger> =>
-    Stream.asyncEffect<Peripheral, never, Logger>((emit) => {
-        return Effect.gen(function* () {
-            const logger = yield* Logger;
+export interface Advertisement {
+    localName?: string;
+    manufacturerData?: Buffer;
+    serviceData: {
+        uuid: string;
+        data: Buffer;
+    }[];
+}
 
-            if (noble.state === "poweredOn") {
-                startScanning(logger);
-            }
+export interface Peripheral {
+    address: string;
+    uuid: string;
+    advertisement: Advertisement;
+    rssi: number;
+}
 
-            noble.on("discover", (peripheral: Peripheral) => {
-                logger.debug("Received BLE advertisement %s", peripheral);
-                void emit(Effect.succeed(Chunk.of(peripheral)));
-            });
+const startScanning = Effect.gen(function* () {
+    const logger = yield* Logger;
+    yield* Effect.tryPromise({
+        try: () => noble.waitForPoweredOnAsync(),
+        catch: (e) =>
+            new BleScannerError({ message: e instanceof Error ? e.message : "Noble did not power on successfully" }),
+    });
+    logger.info("Noble is powered on");
 
-            noble.on("stateChange", (state) => {
-                logger.info("Noble state changed to %s", state);
-
-                if (state === "poweredOn") {
-                    startScanning(logger);
-                }
-
-                if (state === "poweredOff") {
-                    void emit(Effect.fail(Option.none()));
-                }
-            });
-        });
+    yield* Effect.tryPromise({
+        try: () => noble.startScanningAsync([], true),
+        catch: (e) =>
+            new BleScannerError({
+                message: e instanceof Error ? e.message : "Noble did not start scanning successfully",
+            }),
     });
 
-export const stopScanning = (): void => {
-    noble.stopScanning();
-    noble.removeAllListeners();
-};
+    logger.info("Starting scanning BLE devices");
+});
+
+export const scan = (): Stream.Stream<Peripheral, BleScannerError, Logger> =>
+    Effect.gen(function* () {
+        const logger = yield* Logger;
+        return Stream.acquireRelease(startScanning, () => Effect.promise(() => noble.stopScanningAsync())).pipe(
+            Stream.flatMap(() =>
+                Stream.async<Peripheral, BleScannerError>((emit) => {
+                    noble.on("discover", (peripheral: Peripheral) => {
+                        void emit(Effect.succeed(Chunk.of(peripheral)));
+                    });
+                })
+            ),
+            Stream.tap((peripheral) => Effect.sync(() => logger.debug("Received BLE advertisement %s", peripheral)))
+        );
+    }).pipe(Stream.unwrap);
