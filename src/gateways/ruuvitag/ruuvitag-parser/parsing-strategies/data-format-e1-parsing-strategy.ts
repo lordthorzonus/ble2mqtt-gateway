@@ -7,7 +7,7 @@ import {
     parseParticulateMatter,
     parseCO2,
     parseVOC,
-    parseNOX,
+    parseNOx,
     parseCalibrationInProgress,
     parseMacAddress48Bit,
     isInvalidMeasurementForUnsigned24BitInteger,
@@ -23,7 +23,7 @@ enum DataFormatE1Offset {
     PM100 = 15,
     CO2 = 17,
     VOC = 19,
-    NOX = 20,
+    NOx = 20,
     Luminosity = 21,
     Reserved1 = 24,
     Reserved2 = 25,
@@ -83,7 +83,7 @@ const parseMeasurementSequence = (rawData: Buffer, offset: number): number | nul
  * sends both in data format 6 and E1, the format 6 packet should be discarded.
  *
  * Data format E1 focuses on air quality measurements and includes environmental sensors for context.
- * It provides PM1.0, PM2.5, PM4.0, PM10.0, CO2, VOC, NOX measurements along with basic environmental data.
+ * It provides PM1.0, PM2.5, PM4.0, PM10.0, CO2, VOC, NOx measurements along with basic environmental data.
  *
  * Data field layout (40 bytes total):
  * Offset 0: Data format (E1)
@@ -96,11 +96,11 @@ const parseMeasurementSequence = (rawData: Buffer, offset: number): number | nul
  * Offset 13-14: PM 10.0 (0-1000.0 μg/m³ in 0.1 μg/m³ increments)
  * Offset 15-16: CO2 (0-40000 ppm in 1 ppm increments)
  * Offset 17: VOC index lower 8 bits (0-500, unitless)
- * Offset 18: NOX index lower 8 bits (0-500, unitless)
+ * Offset 18: NOx index lower 8 bits (0-500, unitless)
  * Offset 19-21: Luminosity (0-144284.00 lux, resolution 0.01/bit)
  * Offset 22-24: Reserved
  * Offset 25-27: Measurement sequence (0-16777214)
- * Offset 28: Flags (VOC/NOX upper bits + calibration status)
+ * Offset 28: Flags (VOC/NOx upper bits + calibration status)
  * Offset 29-33: Reserved
  * Offset 34-39: MAC address (48 bits)
  *
@@ -123,7 +123,7 @@ export const DataFormatE1ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTag
         pm10: pm10 !== null ? asPM10(pm10) : null,
         co2: parseCO2(rawRuuviTagData, DataFormatE1Offset.CO2),
         voc: parseVOC(rawRuuviTagData, DataFormatE1Offset.VOC, DataFormatE1Offset.Flags),
-        nox: parseNOX(rawRuuviTagData, DataFormatE1Offset.NOX, DataFormatE1Offset.Flags),
+        nox: parseNOx(rawRuuviTagData, DataFormatE1Offset.NOx, DataFormatE1Offset.Flags),
         luminosity: parseLuminosity(rawRuuviTagData, DataFormatE1Offset.Luminosity),
         measurementSequence: parseMeasurementSequence(rawRuuviTagData, DataFormatE1Offset.MeasurementSequence),
         macAddress: parseMacAddress48Bit(rawRuuviTagData, DataFormatE1Offset.MacAddress),

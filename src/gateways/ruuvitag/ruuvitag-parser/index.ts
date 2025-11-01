@@ -1,5 +1,5 @@
 import { RuuviModel } from "../../../types";
-import { Celsius, CO2Ppm, Lux, NOXIndex, Pascal, PM1, PM10, PM2_5, PM4, RelativeHumidity, VOCIndex } from "../../units";
+import { Celsius, CO2Ppm, Lux, NOxIndex, Pascal, PM1, PM10, PM2_5, PM4, RelativeHumidity, VOCIndex } from "../../units";
 import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
 import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
 import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy";
@@ -34,7 +34,7 @@ export interface RuuviAirSensorData {
     pm10: Nullable<PM10>;
     co2: Nullable<CO2Ppm>;
     voc: Nullable<VOCIndex>;
-    nox: Nullable<NOXIndex>;
+    nox: Nullable<NOxIndex>;
     luminosity: Nullable<Lux>;
     measurementSequence: Nullable<number>;
     macAddress: Nullable<string>;

@@ -162,7 +162,7 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
         nox: {
             component: HomeAssistantMQTTComponent.Sensor,
             deviceClass: HomeAssistantDeviceClass.None,
-            name: "NOX",
+            name: "NOx",
             unitOfMeasurement: "",
             uniqueId: "nox",
             device: ruuviAirDeviceConfiguration,

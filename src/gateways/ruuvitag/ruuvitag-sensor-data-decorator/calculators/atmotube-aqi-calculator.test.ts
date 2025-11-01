@@ -1,5 +1,5 @@
 import { calculateAtmoTubeIAQI, AtmoTubeAQIDescription } from "./atmotube-aqi-calculator";
-import { asCO2Ppm, asNOXIndex, asPM1, asPM10, asPM2_5, asVOCIndex } from "../../../units";
+import { asCO2Ppm, asNOxIndex, asPM1, asPM10, asPM2_5, asVOCIndex } from "../../../units";
 
 describe("AtmoTube IAQI Calculator", () => {
     describe("Individual pollutant AQI calculation", () => {
@@ -245,80 +245,80 @@ describe("AtmoTube IAQI Calculator", () => {
                 expectedAQI: 0,
             },
 
-            // NOX test cases
+            // NOx test cases
             {
-                description: "good NOX (1)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(1), pm10: null, pm1: null },
+                description: "good NOx (1)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(1), pm10: null, pm1: null },
                 expectedAQI: 100,
             },
             {
-                description: "good NOX (25)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(25), pm10: null, pm1: null },
+                description: "good NOx (25)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(25), pm10: null, pm1: null },
                 expectedAQI: 91,
             },
             {
-                description: "good NOX (49)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(49), pm10: null, pm1: null },
+                description: "good NOx (49)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(49), pm10: null, pm1: null },
                 expectedAQI: 80,
             },
             {
-                description: "good NOX (50)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(50), pm10: null, pm1: null },
+                description: "good NOx (50)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(50), pm10: null, pm1: null },
                 expectedAQI: 80,
             },
             {
-                description: "good NOX (75)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(75), pm10: null, pm1: null },
+                description: "good NOx (75)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(75), pm10: null, pm1: null },
                 expectedAQI: 70,
             },
             {
-                description: "good NOX (99)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(99), pm10: null, pm1: null },
+                description: "good NOx (99)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(99), pm10: null, pm1: null },
                 expectedAQI: 60,
             },
             {
-                description: "polluted NOX (100)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(100), pm10: null, pm1: null },
+                description: "polluted NOx (100)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(100), pm10: null, pm1: null },
                 expectedAQI: 60,
             },
             {
-                description: "polluted NOX (200)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(200), pm10: null, pm1: null },
+                description: "polluted NOx (200)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(200), pm10: null, pm1: null },
                 expectedAQI: 50,
             },
             {
-                description: "polluted NOX (299)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(299), pm10: null, pm1: null },
+                description: "polluted NOx (299)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(299), pm10: null, pm1: null },
                 expectedAQI: 40,
             },
             {
-                description: "very polluted NOX (300)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(300), pm10: null, pm1: null },
+                description: "very polluted NOx (300)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(300), pm10: null, pm1: null },
                 expectedAQI: 40,
             },
             {
-                description: "very polluted NOX (325)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(325), pm10: null, pm1: null },
+                description: "very polluted NOx (325)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(325), pm10: null, pm1: null },
                 expectedAQI: 30,
             },
             {
-                description: "very polluted NOX (349)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(349), pm10: null, pm1: null },
+                description: "very polluted NOx (349)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(349), pm10: null, pm1: null },
                 expectedAQI: 20,
             },
             {
-                description: "severely polluted NOX (350)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(350), pm10: null, pm1: null },
+                description: "severely polluted NOx (350)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(350), pm10: null, pm1: null },
                 expectedAQI: 20,
             },
             {
-                description: "severely polluted NOX (425)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(425), pm10: null, pm1: null },
+                description: "severely polluted NOx (425)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(425), pm10: null, pm1: null },
                 expectedAQI: 10,
             },
             {
-                description: "severely polluted NOX (500)",
-                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOXIndex(500), pm10: null, pm1: null },
+                description: "severely polluted NOx (500)",
+                sensorData: { pm2_5: null, co2: null, voc: null, nox: asNOxIndex(500), pm10: null, pm1: null },
                 expectedAQI: 0,
             },
 
@@ -489,7 +489,7 @@ describe("AtmoTube IAQI Calculator", () => {
                     pm2_5: asPM2_5(10),
                     co2: asCO2Ppm(500),
                     voc: asVOCIndex(100),
-                    nox: asNOXIndex(25),
+                    nox: asNOxIndex(25),
                     pm10: asPM10(15),
                     pm1: asPM1(7),
                 },

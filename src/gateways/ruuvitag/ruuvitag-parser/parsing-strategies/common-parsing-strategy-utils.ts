@@ -1,13 +1,13 @@
 import {
     asCelsius,
     asCO2Ppm,
-    asNOXIndex,
+    asNOxIndex,
     asPascal,
     asRelativeHumidity,
     asVOCIndex,
     Celsius,
     CO2Ppm,
-    NOXIndex,
+    NOxIndex,
     Pascal,
     RelativeHumidity,
     VOCIndex,
@@ -149,19 +149,19 @@ export const parseVOC = (rawData: Buffer, vocOffset: number, flagsOffset: number
 };
 
 /**
- * Parses the NOX (Nitrogen Oxides) index from the advertisement.
- * NOX is a unitless index which learns the installation environment and tracks changes over time.
+ * Parses the NOx (Nitrogen Oxides) index from the advertisement.
+ * NOx is a unitless index which learns the installation environment and tracks changes over time.
  * The index has a base value of 1, values higher than 1 meaning there's more nitrogen oxides
  * in the air than usual.
  * Uses 9 bits, with the least significant bit (bit 0) stored in the Flags byte (bit 7).
- * Bits 1-8 are stored in the NOX data byte.
+ * Bits 1-8 are stored in the NOx data byte.
  *
  * @param rawData - The raw buffer data
  * @param noxOffset - Byte offset for bits 1-8
  * @param flagsOffset - Byte offset for the flags containing bit 0 (LSB)
- * @returns The NOX index (unitless).
+ * @returns The NOx index (unitless).
  */
-export const parseNOX = (rawData: Buffer, noxOffset: number, flagsOffset: number): NOXIndex | null => {
+export const parseNOx = (rawData: Buffer, noxOffset: number, flagsOffset: number): NOxIndex | null => {
     const noxBits1to8 = rawData.readUInt8(noxOffset);
     const flags = rawData.readUInt8(flagsOffset);
     const noxBit0 = (flags & 0b10000000) >> 7;
@@ -172,7 +172,7 @@ export const parseNOX = (rawData: Buffer, noxOffset: number, flagsOffset: number
         return null;
     }
 
-    return asNOXIndex(nox);
+    return asNOxIndex(nox);
 };
 
 /**

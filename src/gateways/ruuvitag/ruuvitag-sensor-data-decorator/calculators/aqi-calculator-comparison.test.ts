@@ -1,6 +1,6 @@
 import { calculateRuuviIAQS } from "./ruuvi-iaqs-calculator";
 import { calculateAtmoTubeIAQI } from "./atmotube-aqi-calculator";
-import { asCO2Ppm, asNOXIndex, asPM2_5, asVOCIndex } from "../../../units";
+import { asCO2Ppm, asNOxIndex, asPM2_5, asVOCIndex } from "../../../units";
 
 function runComparison(sensorData: {
     pm2_5: number | null;
@@ -17,7 +17,7 @@ function runComparison(sensorData: {
         pm2_5: sensorData.pm2_5 !== null ? asPM2_5(sensorData.pm2_5) : null,
         co2: sensorData.co2 !== null ? asCO2Ppm(sensorData.co2) : null,
         voc: sensorData.voc !== null ? asVOCIndex(sensorData.voc) : null,
-        nox: sensorData.nox !== null ? asNOXIndex(sensorData.nox) : null,
+        nox: sensorData.nox !== null ? asNOxIndex(sensorData.nox) : null,
         pm10: null,
         pm1: null,
     };
@@ -135,7 +135,7 @@ describe("AQI Calculator Comparison", () => {
         `);
     });
 
-    it("mixed quality - high NOX, low others", () => {
+    it("mixed quality - high NOx, low others", () => {
         const result = runComparison({
             pm2_5: 8,
             co2: 400,
@@ -186,7 +186,7 @@ describe("AQI Calculator Comparison", () => {
         `);
     });
 
-    it("partial data - only VOC and NOX", () => {
+    it("partial data - only VOC and NOx", () => {
         const result = runComparison({
             pm2_5: null,
             co2: null,
