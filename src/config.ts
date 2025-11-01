@@ -42,6 +42,13 @@ const miFloraSchema = z.object({
         .min(0),
 });
 
+const concurrencySchema = z
+    .union([z.literal("unbounded"), z.number().int().positive()])
+    .default("unbounded")
+    .describe(
+        "Concurrency level for stream processing. Use 'unbounded' for maximum throughput or a positive number to limit."
+    );
+
 const configSchema = z.object({
     log_level: z.union([z.literal("info"), z.literal("debug"), z.literal("error")]).default("info"),
     decimal_precision: z.number().int().default(2),
@@ -49,6 +56,17 @@ const configSchema = z.object({
     gateway_version: z.string().default("development"),
     mqtt: mqttSchema,
     unavailable_devices_check_interval_ms: z.number().int().default(10000),
+    concurrency: z
+        .object({
+            ble_gateway_processing: concurrencySchema,
+            mqtt_message_production: concurrencySchema,
+            mqtt_publishing: concurrencySchema,
+        })
+        .default({
+            ble_gateway_processing: "unbounded",
+            mqtt_message_production: "unbounded",
+            mqtt_publishing: "unbounded",
+        }),
     gateways: z.object({
         base_topic: z.string().default("ble2mqtt"),
         ruuvitag: ruuvitagSchema.optional(),

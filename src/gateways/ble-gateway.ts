@@ -111,14 +111,16 @@ export const makeBleGateway = () =>
         ): Stream.Stream<DeviceMessage, GatewayError | BleScannerError, Logger | Config> =>
             peripheralMessage.pipe(
                 Stream.filterMap((p) => resolveGatewayForPeripheral(p, configuredGateways)),
-                Stream.flatMap(({ peripheral, gateway }) =>
-                    Stream.fromIterableEffect(
-                        Effect.provideService(
-                            gateway.mapMessage(peripheral),
-                            DeviceRegistryService,
-                            gateway.deviceRegistry
-                        )
-                    )
+                Stream.flatMap(
+                    ({ peripheral, gateway }) =>
+                        Stream.fromIterableEffect(
+                            Effect.provideService(
+                                gateway.mapMessage(peripheral),
+                                DeviceRegistryService,
+                                gateway.deviceRegistry
+                            )
+                        ),
+                    { concurrency: config.concurrency.ble_gateway_processing }
                 ),
                 Stream.merge(makeUnavailableDevicesStream(configuredGateways))
             );

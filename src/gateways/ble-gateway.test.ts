@@ -184,6 +184,11 @@ describe("BLE Gateway", () => {
                 gateway_name: "test",
                 unavailable_devices_check_interval_ms: 1000,
                 gateway_version: "1.0.0",
+                concurrency: {
+                    ble_gateway_processing: "unbounded",
+                    mqtt_message_production: "unbounded",
+                    mqtt_publishing: "unbounded",
+                },
                 mqtt: {
                     host: "test",
                     port: 1883,
