@@ -83,6 +83,11 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_temperature/config",
   },
   {
+    "payload": "{"name":"Humidity","device_class":"humidity","object_id":"air_quality_sensor_humidity","unique_id":"air_quality_sensor_humidity","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"icon":"mdi:water-percent","device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.relativeHumidityPercentage | float(2) }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"%","suggested_display_precision":2}",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_humidity/config",
+  },
+  {
     "payload": "{"name":"Pressure","device_class":"pressure","object_id":"air_quality_sensor_pressure","unique_id":"air_quality_sensor_pressure","availability_topic":"test/ruuvitag/cc:dd/availability","availability_template":"{{ value_json.state }}","expire_after":10,"device":{"manufacturer":"Ruuvi Innovations Oy","model":"Ruuvi Air","name":"Ruuvitag Air Quality Sensor","connections":[["mac","cc:dd"]],"identifiers":["cc:dd","cc:dd"]},"value_template":"{{ value_json.pressure | default('None') }}","state_topic":"test/ruuvitag/cc:dd/state","origin":{"name":"test","sw_version":"1.0.0","support_url":"https://github.com/lordthorzonus/ble2mqtt-gateway"},"unit_of_measurement":"hPa","suggested_display_precision":2}",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_quality_sensor_pressure/config",
@@ -206,6 +211,11 @@ exports[`HomeAssistant MQTT Message producer should generate corresponding disco
     "payload": "",
     "retain": true,
     "topic": "homeassistant/sensor/cc:dd/air_sensor_temperature/config",
+  },
+  {
+    "payload": "",
+    "retain": true,
+    "topic": "homeassistant/sensor/cc:dd/air_sensor_humidity/config",
   },
   {
     "payload": "",

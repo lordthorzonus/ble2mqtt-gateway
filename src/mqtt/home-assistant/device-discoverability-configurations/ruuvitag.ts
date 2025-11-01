@@ -134,6 +134,10 @@ export const ruuviTagAirQualitySensorConfiguration: HomeAssistantSensorConfigura
     {
         absoluteHumidity: { ...absoluteHumiditySensorConfiguration, device: ruuviAirDeviceConfiguration },
         temperature: { ...temperatureSensorConfiguration, device: ruuviAirDeviceConfiguration },
+        relativeHumidityPercentage: {
+            ...relativeHumidityPercentageSensorConfiguration,
+            device: ruuviAirDeviceConfiguration,
+        },
         pressure: { ...pressureSensorConfiguration, device: ruuviAirDeviceConfiguration },
         pm1: {
             component: HomeAssistantMQTTComponent.Sensor,
