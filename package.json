@@ -24,10 +24,10 @@
     "author": "Juuso Leinonen",
     "license": "MIT",
     "dependencies": {
-        "@stoprocent/noble": "2.3.6",
-        "@effect/platform-node": "0.94.0",
+        "@stoprocent/noble": "2.3.7",
+        "@effect/platform-node": "0.98.4",
         "dotenv": "17.2.3",
-        "effect": "3.18.4",
+        "effect": "3.18.5",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",
@@ -38,17 +38,17 @@
         "zod": "4.1.12"
     },
     "devDependencies": {
-        "@effect/language-service": "0.53.1",
-        "@eslint/js": "9.39.0",
+        "@effect/language-service": "0.54.0",
+        "@eslint/js": "9.39.1",
         "@types/jest": "30.0.0",
         "@types/js-yaml": "4.0.9",
         "@types/lodash": "4.17.20",
         "@types/lodash.snakecase": "4.1.9",
         "@types/luxon": "3.7.1",
         "@types/noble": "0.0.44",
-        "@types/node": "22.18.13",
+        "@types/node": "22.19.0",
         "@types/ws": "8.18.1",
-        "eslint": "9.38.0",
+        "eslint": "9.39.1",
         "eslint-config-prettier": "10.1.8",
         "eslint-plugin-jest": "29.0.1",
         "eslint-plugin-prettier": "5.5.4",
@@ -57,7 +57,7 @@
         "ts-jest": "29.4.5",
         "ts-node": "10.9.2",
         "typescript": "5.9.3",
-        "typescript-eslint": "8.46.2"
+        "typescript-eslint": "8.46.3"
     },
     "jest": {
         "moduleFileExtensions": [
