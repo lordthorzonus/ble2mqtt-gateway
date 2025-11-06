@@ -27,7 +27,7 @@
         "@stoprocent/noble": "2.3.8",
         "@effect/platform-node": "0.100.0",
         "dotenv": "17.2.3",
-        "effect": "3.19.0",
+        "effect": "3.19.1",
         "js-yaml": "4.1.0",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",
