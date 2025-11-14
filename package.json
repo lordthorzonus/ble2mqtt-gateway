@@ -38,7 +38,7 @@
         "zod": "4.1.12"
     },
     "devDependencies": {
-        "@effect/language-service": "0.55.3",
+        "@effect/language-service": "0.55.5",
         "@eslint/js": "9.39.1",
         "@types/jest": "30.0.0",
         "@types/js-yaml": "4.0.9",
