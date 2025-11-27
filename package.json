@@ -25,7 +25,7 @@
     "license": "MIT",
     "dependencies": {
         "@stoprocent/noble": "2.3.8",
-        "@effect/platform-node": "0.101.1",
+        "@effect/platform-node": "0.101.2",
         "dotenv": "17.2.3",
         "effect": "3.19.6",
         "js-yaml": "4.1.1",
@@ -38,7 +38,7 @@
         "zod": "4.1.13"
     },
     "devDependencies": {
-        "@effect/language-service": "0.56.0",
+        "@effect/language-service": "0.57.0",
         "@eslint/js": "9.39.1",
         "@types/jest": "30.0.0",
         "@types/js-yaml": "4.0.9",
