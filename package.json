@@ -24,7 +24,7 @@
     "author": "Juuso Leinonen",
     "license": "MIT",
     "dependencies": {
-        "@stoprocent/noble": "2.3.8",
+        "@stoprocent/noble": "2.3.9",
         "@effect/platform-node": "0.103.0",
         "dotenv": "17.2.3",
         "effect": "3.19.8",
