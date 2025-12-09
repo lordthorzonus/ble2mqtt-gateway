@@ -24,10 +24,10 @@
     "author": "Juuso Leinonen",
     "license": "MIT",
     "dependencies": {
-        "@stoprocent/noble": "2.3.9",
+        "@stoprocent/noble": "2.3.10",
         "@effect/platform-node": "0.103.0",
         "dotenv": "17.2.3",
-        "effect": "3.19.9",
+        "effect": "3.19.10",
         "js-yaml": "4.1.1",
         "lodash": "4.17.21",
         "lodash.snakecase": "4.1.1",
@@ -46,7 +46,7 @@
         "@types/lodash.snakecase": "4.1.9",
         "@types/luxon": "3.7.1",
         "@types/noble": "0.0.44",
-        "@types/node": "22.19.1",
+        "@types/node": "22.19.2",
         "@types/ws": "8.18.1",
         "eslint": "9.39.1",
         "eslint-config-prettier": "10.1.8",
@@ -57,7 +57,7 @@
         "ts-jest": "29.4.6",
         "ts-node": "10.9.2",
         "typescript": "5.9.3",
-        "typescript-eslint": "8.48.1"
+        "typescript-eslint": "8.49.0"
     },
     "jest": {
         "moduleFileExtensions": [
