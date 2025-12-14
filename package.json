@@ -38,7 +38,7 @@
         "zod": "4.1.13"
     },
     "devDependencies": {
-        "@effect/language-service": "0.62.1",
+        "@effect/language-service": "0.62.2",
         "@eslint/js": "9.39.2",
         "@types/jest": "30.0.0",
         "@types/js-yaml": "4.0.9",
@@ -46,11 +46,11 @@
         "@types/lodash.snakecase": "4.1.9",
         "@types/luxon": "3.7.1",
         "@types/noble": "0.0.44",
-        "@types/node": "22.19.2",
+        "@types/node": "22.19.3",
         "@types/ws": "8.18.1",
         "eslint": "9.39.2",
         "eslint-config-prettier": "10.1.8",
-        "eslint-plugin-jest": "29.2.2",
+        "eslint-plugin-jest": "29.4.0",
         "eslint-plugin-prettier": "5.5.4",
         "jest": "30.2.0",
         "prettier": "3.7.4",
