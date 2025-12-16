@@ -35,7 +35,7 @@
         "mqtt": "5.14.1",
         "uuid": "11.1.0",
         "winston": "3.19.0",
-        "zod": "4.2.0"
+        "zod": "4.2.1"
     },
     "devDependencies": {
         "@effect/language-service": "0.62.3",
