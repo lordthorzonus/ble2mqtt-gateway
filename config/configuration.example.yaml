@@ -34,5 +34,12 @@ gateways:
             - name: My super plant
               id: c47c8d6e07cf
               timeout: 40000
+    oralb:
+        allow_unknown: false
+        timeout: 60000
+        devices:
+            - name: Bathroom Toothbrush
+              id: aa:bb:cc:dd:ee:ff
+              # model: io_series_6_7  # Optional: override auto-detected model
 homeassistant:
     discovery_topic: homeassistant

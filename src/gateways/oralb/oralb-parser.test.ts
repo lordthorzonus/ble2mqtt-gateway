@@ -1,0 +1,320 @@
+import { parse, parseOralBModel } from "./oralb-parser";
+import { Effect } from "effect";
+import { asSeconds, asSectorNumber } from "../units";
+
+describe("oralb-parser", () => {
+    describe("parse", () => {
+        it("should parse 9-byte advertisement and return sensor data", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00, // manufacturer ID (220) - 2 bytes
+                0x08,
+                0x36, // model bytes (IO Series 6/7) - bytes 0-1
+                0x03, // gap/reserved? - byte 2
+                0x02, // state: idle - byte 3
+                0x00, // pressure: normal - byte 4
+                0x00, // time minutes - byte 5
+                0x00, // time seconds - byte 6
+                0x01, // mode: 1 (sensitive for IO) - byte 7
+                0x01, // sector: 1 - byte 8
+            ]);
+
+            const result = Effect.runSync(parse(manufacturerData));
+
+            expect(result.state).toBe("idle");
+            expect(result.pressure).toBe("normal");
+            expect(result.brushingTimeSeconds).toBe(asSeconds(0));
+            expect(result.brushingMode).toBe("sensitive");
+            expect(result.sector).toBe("no_sector");
+            expect(result.isBrushing).toBe(false);
+            expect(result.sectorTimer).toBeUndefined();
+            expect(result.numberOfSectors).toBeUndefined();
+        });
+
+        it("should keep mapped sector while running even when brushing time is zero", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0x08,
+                0x36,
+                0x03,
+                0x03, // state: running
+                0x00,
+                0x00, // time minutes
+                0x00, // time seconds
+                0x01,
+                0x01, // sector: 1
+            ]);
+
+            const result = Effect.runSync(parse(manufacturerData));
+
+            expect(result.sector).toBe("sector_1");
+        });
+
+        it("should parse 11-byte advertisement with sector timer and number of sectors", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00, // manufacturer ID - 2 bytes
+                0x06,
+                0x32, // model bytes (IO Series 6/7) - bytes 0-1
+                0x03, // gap/reserved? - byte 2
+                0x03, // state: running - byte 3
+                0x90, // pressure: high (144) - byte 4
+                0x01, // time minutes: 1 - byte 5
+                0x1e, // time seconds: 30 - byte 6
+                0x00, // mode: 0 (daily_clean for IO) - byte 7
+                0x02, // sector: 2 - byte 8
+                0x0f, // sector timer: 15 - byte 9
+                0x04, // number of sectors: 4 - byte 10
+            ]);
+
+            const result = Effect.runSync(parse(manufacturerData));
+
+            expect(result.state).toBe("running");
+            expect(result.pressure).toBe("high");
+            expect(result.brushingTimeSeconds).toBe(asSeconds(90));
+            expect(result.brushingMode).toBe("daily_clean");
+            expect(result.sector).toBe("sector_2");
+            expect(result.isBrushing).toBe(true);
+            expect(result.sectorTimer).toBe(asSeconds(15));
+            expect(result.numberOfSectors).toBe(asSectorNumber(4));
+        });
+
+        it("should use model override when provided", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0xff,
+                0xff, // unknown model bytes
+                0x03,
+                0x02,
+                0x00,
+                0x00,
+                0x00,
+                0x01, // mode: 1
+                0x01,
+            ]);
+
+            const result = Effect.runSync(parse(manufacturerData, "smart_series_4000"));
+
+            // Smart Series mode 1 is "daily_clean"
+            expect(result.brushingMode).toBe("daily_clean");
+        });
+
+        it("should fail with UnknownOralBModelError for unknown model bytes without override", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0xff,
+                0xff, // unknown model bytes
+                0x03,
+                0x02,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+                0x01,
+            ]);
+
+            const result = Effect.runSyncExit(parse(manufacturerData));
+
+            expect(result._tag).toBe("Failure");
+            expect(result).toHaveProperty("cause");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cause = (result as any).cause;
+            expect(cause._tag).toBe("Fail");
+            expect(cause.error._tag).toBe("UnknownOralBModelError");
+            expect(cause.error.modelBytes).toBe("ffff");
+        });
+
+        it("should handle unknown state values", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0x08,
+                0x36,
+                0x03,
+                0xff, // unknown state: 255
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+            ]);
+
+            const result = Effect.runSync(parse(manufacturerData));
+
+            expect(result.state).toBe("unknown_state_255");
+        });
+
+        it("should handle unknown pressure values", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0x08,
+                0x36,
+                0x03,
+                0x02,
+                0x63, // unknown pressure: 99
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+            ]);
+
+            const result = Effect.runSync(parse(manufacturerData));
+
+            expect(result.pressure).toBe("unknown_pressure_99");
+        });
+
+        it("should handle unknown mode values", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0x08,
+                0x36,
+                0x03,
+                0x02,
+                0x00,
+                0x00,
+                0x00,
+                0x63, // unknown mode: 99
+                0x01,
+            ]);
+
+            const result = Effect.runSync(parse(manufacturerData));
+
+            expect(result.brushingMode).toBe("unknown_mode_99");
+        });
+
+        it("should handle unknown sector values", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0x08,
+                0x36,
+                0x03,
+                0x02,
+                0x00,
+                0x00,
+                0x01,
+                0x00,
+                0x63, // unknown sector: 99
+            ]);
+
+            const result = Effect.runSync(parse(manufacturerData));
+
+            expect(result.sector).toBe("unknown_sector_99");
+        });
+
+        it("should fail when manufacturer ID is not OralB", () => {
+            const manufacturerData = Buffer.from([
+                0xff,
+                0x00, // wrong manufacturer ID
+                0x08,
+                0x36,
+                0x03,
+                0x02,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+                0x01,
+            ]);
+
+            const result = Effect.runSyncExit(parse(manufacturerData));
+
+            expect(result._tag).toBe("Failure");
+            expect(result).toHaveProperty("cause");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cause = (result as any).cause;
+            expect(cause._tag).toBe("Fail");
+            expect(cause.error._tag).toBe("NotValidOralBManufacturerIdError");
+        });
+
+        it("should fail when data length is invalid (not 9 or 11 bytes after manufacturer ID)", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00, // manufacturer ID
+                0x08,
+                0x36,
+                0x03,
+                0x02,
+                0x00,
+                0x00, // only 6 data bytes
+            ]);
+
+            const result = Effect.runSyncExit(parse(manufacturerData));
+
+            expect(result._tag).toBe("Failure");
+            expect(result).toHaveProperty("cause");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cause = (result as any).cause;
+            expect(cause._tag).toBe("Fail");
+            expect(cause.error._tag).toBe("InvalidOralBDataLengthError");
+        });
+    });
+
+    describe("parseOralBModel", () => {
+        it("should resolve IO Series 6/7 from model bytes 0x08 0x36", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0x08,
+                0x36, // IO Series 6/7
+                0x03,
+                0x02,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+            ]);
+            const result = Effect.runSync(parseOralBModel(manufacturerData));
+            expect(result).toBe("io_series_6_7");
+        });
+
+        it("should resolve IO Series 6/7 from model bytes 0x06 0x32", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0x06,
+                0x32, // IO Series 6/7
+                0x03,
+                0x02,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+            ]);
+            const result = Effect.runSync(parseOralBModel(manufacturerData));
+            expect(result).toBe("io_series_6_7");
+        });
+
+        it("should fail with UnknownOralBModelError for unknown model bytes", () => {
+            const manufacturerData = Buffer.from([
+                0xdc,
+                0x00,
+                0xff,
+                0xff, // unknown model
+                0x03,
+                0x02,
+                0x00,
+                0x00,
+                0x00,
+                0x00,
+                0x01,
+            ]);
+            const result = Effect.runSyncExit(parseOralBModel(manufacturerData));
+
+            expect(result._tag).toBe("Failure");
+            expect(result).toHaveProperty("cause");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const cause = (result as any).cause;
+            expect(cause._tag).toBe("Fail");
+            expect(cause.error._tag).toBe("UnknownOralBModelError");
+            expect(cause.error.modelBytes).toBe("ffff");
+        });
+    });
+});

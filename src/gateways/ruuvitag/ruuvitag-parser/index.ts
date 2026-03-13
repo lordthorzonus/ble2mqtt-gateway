@@ -138,7 +138,9 @@ export const parseRuuviDataFormat = (
     if (!validateRuuviTag(rawRuuviTagData)) {
         return new NotValidRuuviManufacturerIdError({ manufacturerId });
     }
+
     const dataFormat = rawRuuviTagData.readUInt8(RuuviTagDataOffsets.DataFormatOffset);
+
     if (!assertValidDataFormat(dataFormat)) {
         return new UnsupportedDataFormatError({ dataFormat });
     }

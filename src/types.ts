@@ -4,10 +4,12 @@ import {
 } from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
 import { DateTime } from "luxon";
 import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer";
+import { OralBSensorData } from "./gateways/oralb/oralb-sensor-data";
 
 export enum DeviceType {
     Ruuvitag = "ruuvitag",
     MiFlora = "miflora",
+    OralB = "oralb",
 }
 
 export enum MessageType {
@@ -42,8 +44,9 @@ export type RuuvitagSensorMessage =
     | SensorMessageForType<DeviceType.Ruuvitag, "environmental", EnhancedRuuviTagEnvironmentalSensorData>
     | SensorMessageForType<DeviceType.Ruuvitag, "air-quality", EnhancedRuuviAirSensorData>;
 export type MifloraSensorMessage = SensorMessageForType<DeviceType.MiFlora, "miflora", MiFloraSensorData>;
+export type OralBSensorMessage = SensorMessageForType<DeviceType.OralB, string, OralBSensorData>;
 
-export type DeviceSensorMessage = MifloraSensorMessage | RuuvitagSensorMessage;
+export type DeviceSensorMessage = MifloraSensorMessage | RuuvitagSensorMessage | OralBSensorMessage;
 
 export type RuuviModel = "environmental" | "air-quality";
 

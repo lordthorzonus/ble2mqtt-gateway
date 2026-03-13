@@ -14,6 +14,7 @@ import {
 } from "./device-discoverability-configurations/ruuvitag";
 import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../mqtt-topic-factory";
 import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora";
+import { oralbSensorConfiguration } from "./device-discoverability-configurations/oralb";
 import { capitalize, snakeCase } from "lodash";
 import { Data, Effect, Match, Stream } from "effect";
 import { Config, ConfigurationError, GlobalConfiguration } from "../../config";
@@ -30,6 +31,7 @@ const getHASensorConfiguration = Match.type<DeviceAvailabilityMessage>().pipe(
         Effect.succeed(ruuviTagAirQualitySensorConfiguration)
     ),
     Match.when({ device: { type: DeviceType.MiFlora } }, () => Effect.succeed(miFloraSensorConfiguration)),
+    Match.when({ device: { type: DeviceType.OralB } }, () => Effect.succeed(oralbSensorConfiguration)),
     Match.orElse((message) => Effect.fail(new SensorConfigurationMissingError({ message })))
 );
 

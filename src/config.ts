@@ -42,6 +42,37 @@ const miFloraSchema = z.object({
         .min(0),
 });
 
+const oralbSchema = z.object({
+    allow_unknown: z.boolean().default(false),
+    timeout: z.number().int().default(60000),
+    devices: z
+        .array(
+            z.object({
+                name: z.string(),
+                id: z.string(),
+                timeout: z.number().int().optional(),
+                model: z
+                    .enum([
+                        "io_series_4",
+                        "io_series_6_7",
+                        "io_series_8",
+                        "io_series_9",
+                        "io_series_8_9",
+                        "smart_series_4000",
+                        "smart_series_6000",
+                        "smart_series_7000",
+                        "smart_series_8000",
+                        "smart_series_9000",
+                        "triumph_v2",
+                        "pro_6000",
+                        "genius_x",
+                    ])
+                    .optional(),
+            })
+        )
+        .min(0),
+});
+
 const concurrencySchema = z
     .union([z.literal("unbounded"), z.number().int().positive()])
     .default("unbounded")
@@ -71,6 +102,7 @@ const configSchema = z.object({
         base_topic: z.string().default("ble2mqtt"),
         ruuvitag: ruuvitagSchema.optional(),
         miflora: miFloraSchema.optional(),
+        oralb: oralbSchema.optional(),
     }),
     homeassistant: z
         .object({
@@ -97,6 +129,7 @@ export class ConfigurationError extends Data.TaggedError("ConfigurationError")<{
 
 export type RuuviTagGatewayConfiguration = z.infer<typeof ruuvitagSchema>;
 export type MiFloraGatewayConfiguration = z.infer<typeof miFloraSchema>;
+export type OralBGatewayConfiguration = z.infer<typeof oralbSchema>;
 export type GlobalConfiguration = z.infer<typeof configSchema>;
 
 const getConfiguration: Effect.Effect<z.infer<typeof configSchema>, ConfigurationError> = Effect.gen(function* () {

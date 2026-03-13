@@ -41,3 +41,9 @@ export const asSoilConductivity = Brand.nominal<SoilConductivity>();
 
 export type AQI = number & Brand.Brand<"AQI">;
 export const asAQI = Brand.nominal<AQI>();
+
+export type Seconds = number & Brand.Brand<"Seconds">;
+export const asSeconds = Brand.nominal<Seconds>();
+
+export type SectorNumber = number & Brand.Brand<"SectorNumber">;
+export const asSectorNumber = Brand.nominal<SectorNumber>();

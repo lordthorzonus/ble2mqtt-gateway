@@ -1,0 +1,90 @@
+import {
+    HomeAssistantDeviceClass,
+    HomeAssistantMQTTComponent,
+    HomeAssistantSensorConfiguration,
+    HomeAssistantSensorConfigurationForDevice,
+} from "../../../types";
+import { OralBSensorData } from "../../../gateways/oralb/oralb-sensor-data";
+
+const oralbDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = {
+    manufacturer: "Oral-B",
+    model: "Smart Toothbrush",
+};
+
+export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice<OralBSensorData> = {
+    state: {
+        component: HomeAssistantMQTTComponent.Sensor,
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "State",
+        unitOfMeasurement: undefined,
+        uniqueId: "state",
+        device: oralbDeviceConfiguration,
+        suggestedDecimalPrecision: null,
+    },
+    pressure: {
+        component: HomeAssistantMQTTComponent.Sensor,
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "Pressure",
+        unitOfMeasurement: undefined,
+        uniqueId: "pressure",
+        device: oralbDeviceConfiguration,
+        suggestedDecimalPrecision: null,
+    },
+    brushingTimeSeconds: {
+        component: HomeAssistantMQTTComponent.Sensor,
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "Brushing Time",
+        unitOfMeasurement: "s",
+        uniqueId: "brushing_time_seconds",
+        device: oralbDeviceConfiguration,
+        icon: "mdi:timer-outline",
+    },
+    brushingMode: {
+        component: HomeAssistantMQTTComponent.Sensor,
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "Brushing Mode",
+        unitOfMeasurement: undefined,
+        uniqueId: "brushing_mode",
+        device: oralbDeviceConfiguration,
+        icon: "mdi:toothbrush-electric",
+        suggestedDecimalPrecision: null,
+    },
+    sector: {
+        component: HomeAssistantMQTTComponent.Sensor,
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "Sector",
+        unitOfMeasurement: undefined,
+        uniqueId: "sector",
+        device: oralbDeviceConfiguration,
+        icon: "mdi:grid",
+        suggestedDecimalPrecision: null,
+    },
+    sectorTimer: {
+        component: HomeAssistantMQTTComponent.Sensor,
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "Sector Timer",
+        unitOfMeasurement: "s",
+        uniqueId: "sector_timer",
+        device: oralbDeviceConfiguration,
+        icon: "mdi:timer-outline",
+    },
+    numberOfSectors: {
+        component: HomeAssistantMQTTComponent.Sensor,
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "Number of Sectors",
+        unitOfMeasurement: undefined,
+        uniqueId: "number_of_sectors",
+        device: oralbDeviceConfiguration,
+        icon: "mdi:numeric",
+    },
+    isBrushing: {
+        component: HomeAssistantMQTTComponent.BinarySensor,
+        deviceClass: HomeAssistantDeviceClass.None,
+        name: "Brushing",
+        uniqueId: "is_brushing",
+        device: oralbDeviceConfiguration,
+        icon: "mdi:toothbrush",
+        payloadOn: true,
+        payloadOff: false,
+    },
+};

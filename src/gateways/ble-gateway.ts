@@ -7,11 +7,13 @@ import {
     mifloraGatewayId,
     makeMiFloraGateway,
 } from "./miflora/miflora-gateway";
+import { makeOralbDeviceRegistry, makeOralbGateway } from "./oralb/oralb-gateway";
 import { Effect, Stream, Option, Data } from "effect";
 import { DeviceRegistry } from "./device-registry";
 import { DeviceRegistryService, streamUnavailableDevices } from "./gateway-helpers";
 import { Logger } from "../infra/logger";
 import { ruuviTagManufacturerId } from "./ruuvitag/ruuvitag-parser";
+import { oralbManufacturerId } from "./oralb/oralb-parser";
 import { BleScannerError, Peripheral } from "../infra/ble-scanner";
 
 export interface Gateway {
@@ -104,6 +106,16 @@ export const makeBleGateway = () =>
             });
 
             logger.info("configured gateway to work with MiFlora");
+        }
+
+        if (config.gateways.oralb !== undefined) {
+            const oralbGateway = makeOralbGateway(config.gateways.oralb);
+            configuredGateways.set(oralbManufacturerId, {
+                mapMessage: oralbGateway,
+                deviceRegistry: makeOralbDeviceRegistry(config.gateways.oralb, globalDefaults),
+            });
+
+            logger.info("configured gateway to work with Oral-B toothbrushes");
         }
 
         return (
