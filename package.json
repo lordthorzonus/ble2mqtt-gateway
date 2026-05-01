@@ -39,7 +39,7 @@
     },
     "devDependencies": {
         "@effect/language-service": "0.62.4",
-        "@eslint/js": "9.39.2",
+        "@eslint/js": "10.0.1",
         "@types/jest": "30.0.0",
         "@types/js-yaml": "4.0.9",
         "@types/lodash": "4.17.21",
@@ -48,7 +48,7 @@
         "@types/noble": "0.0.44",
         "@types/node": "22.19.3",
         "@types/ws": "8.18.1",
-        "eslint": "9.39.2",
+        "eslint": "10.3.0",
         "eslint-config-prettier": "10.1.8",
         "eslint-plugin-jest": "29.9.0",
         "eslint-plugin-prettier": "5.5.4",
