@@ -43,7 +43,9 @@ export interface SensorMessageForType<TDeviceType extends DeviceType, TModel ext
 export type RuuvitagSensorMessage =
     | SensorMessageForType<DeviceType.Ruuvitag, "environmental", EnhancedRuuviTagEnvironmentalSensorData>
     | SensorMessageForType<DeviceType.Ruuvitag, "air-quality", EnhancedRuuviAirSensorData>;
+
 export type MifloraSensorMessage = SensorMessageForType<DeviceType.MiFlora, "miflora", MiFloraSensorData>;
+
 /** Sensor message for an Oral-B toothbrush; `model` is the model resolved for that advertisement. */
 export type OralBSensorMessage = SensorMessageForType<DeviceType.OralB, ResolvedOralBModel, OralBSensorData>;
 
@@ -97,6 +99,7 @@ export enum HomeAssistantMQTTComponent {
     Sensor = "sensor",
     BinarySensor = "binary_sensor",
 }
+
 export enum HomeAssistantEntityCategory {
     Diagnostic = "diagnostic",
 }

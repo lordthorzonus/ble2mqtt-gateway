@@ -104,6 +104,7 @@ const calculateIndividualAQI = (concentration: number, breakpoints: readonly Bre
     }
 
     let index = 0;
+
     for (const bp of breakpoints) {
         const isLast = index === breakpoints.length - 1;
 
@@ -116,10 +117,13 @@ const calculateIndividualAQI = (concentration: number, breakpoints: readonly Bre
                 ((bp.aqiHigh - bp.aqiLow) / (bp.breakpointHigh - bp.breakpointLow)) *
                     (concentration - bp.breakpointLow) +
                 bp.aqiLow;
+
             return asAQI(Math.round(aqi));
         }
+
         index++;
     }
+
     return asAQI(0);
 };
 
@@ -167,6 +171,7 @@ export const calculateAtmoTubeIAQI = (sensorData: SensorData): AtmoTubeAQICalcul
             if (concentration !== null) {
                 worstAQI.hasValidData = true;
                 const aqi = calculateIndividualAQI(concentration, BREAKPOINTS[pollutant]);
+
                 if (aqi < worstAQI.index) {
                     worstAQI.index = aqi;
                 }
@@ -182,5 +187,6 @@ export const calculateAtmoTubeIAQI = (sensorData: SensorData): AtmoTubeAQICalcul
     }
 
     const index = asAQI(worstAQI.index);
+
     return { index, description: toDescription(index) };
 };

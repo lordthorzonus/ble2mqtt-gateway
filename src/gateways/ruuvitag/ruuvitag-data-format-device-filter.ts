@@ -14,6 +14,7 @@ export class RuuvitagDataFormatDeviceFilter {
         }
 
         const lastE1 = this.deviceE1Cache.get(deviceId);
+
         return lastE1 ? DateTime.now().diff(lastE1).toMillis() < PACKET_DEDUPLICATION_TTL.toMillis() : false;
     }
 

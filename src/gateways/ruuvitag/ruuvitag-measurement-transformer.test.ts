@@ -28,6 +28,7 @@ import {
 } from "../units.js";
 
 Settings.defaultZone = "UTC";
+
 const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
 
 vi.mock("./ruuvitag-sensor-data-decorator/index.js");
@@ -138,6 +139,7 @@ describe("RuuviTag Measurement Transformer", () => {
                     dummyParsedData
                 )
             );
+
             expect(result).toStrictEqual(expectedMessage);
 
             expect(mockedRuuviTagDecorator).toHaveBeenCalledWith(dummyParsedData);
@@ -146,10 +148,12 @@ describe("RuuviTag Measurement Transformer", () => {
 
         it("should use the mac address from the peripheral advertisement if one is not available in sensor data", () => {
             const dummyParsedData = { type: "environmental", temperature: 24.3 } as unknown as RuuviTagSensorData;
+
             const sensorDataWithoutMacAddress = {
                 ...expectedMessage.payload,
                 macAddress: null,
             };
+
             mockedRuuviTagDecorator.mockReturnValue(sensorDataWithoutMacAddress);
             mockedUuid.mockReturnValue(mockId);
 
@@ -160,6 +164,7 @@ describe("RuuviTag Measurement Transformer", () => {
                     dummyParsedData
                 )
             );
+
             expect(result).toStrictEqual({
                 ...expectedMessage,
                 device: {
@@ -240,6 +245,7 @@ describe("RuuviTag Measurement Transformer", () => {
                 type: "air-quality",
                 temperature: -163.835,
             } as unknown as RuuviTagSensorData;
+
             mockedRuuviTagAirQualityDecorator.mockReturnValue(airQualitySensorData);
             mockedUuid.mockReturnValue(mockId);
 

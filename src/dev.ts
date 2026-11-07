@@ -128,4 +128,5 @@ const devProgram = Effect.gen(function* () {
 });
 
 const configuredDevProgram = Effect.provide(Effect.scoped(devProgram), DevLive);
+
 NodeRuntime.runMain(configuredDevProgram);

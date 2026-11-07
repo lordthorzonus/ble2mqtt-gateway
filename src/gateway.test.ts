@@ -23,6 +23,7 @@ vi.mock("./infra/ble-scanner.js", () => ({
 
 describe("gateway", () => {
     const originalNow = Settings.now;
+
     const createConfig = () =>
         Config.of({
             mqtt: {
@@ -110,14 +111,17 @@ describe("gateway", () => {
     });
 
     const mifloraMoisturePeripheral = getMiFloraPeripheralWithServiceData("71209800a864aed0a8654c0d08100112", "bb");
+
     const mifloraTemperaturePeripheral = getMiFloraPeripheralWithServiceData(
         "71209800239c066e8d7cc40d0410020401",
         "bb"
     );
+
     const mifloraIlluminancePeripheral = getMiFloraPeripheralWithServiceData(
         "71209800c3cf076e8d7cc40d071003370000",
         "bb"
     );
+
     const mifloraSoilConductivityPeripheral = getMiFloraPeripheralWithServiceData(
         "71209800b1cf076e8d7cc40d091002c600",
         "bb"
@@ -158,6 +162,7 @@ describe("gateway", () => {
     }): Promise<PublishedMessage[]> => {
         const publishedMessages: PublishedMessage[] = [];
         let resolveDone: (() => void) | undefined;
+
         const done = new Promise<void>((resolve) => {
             resolveDone = resolve;
         });
@@ -228,6 +233,7 @@ describe("gateway", () => {
                 mifloraSoilConductivityPeripheral,
             ])
         );
+
         const publishedMessages = await runGatewayUntil({
             stopWhen: hasTopics([
                 "test/ruuvitag/aa:aa/state",
@@ -239,6 +245,7 @@ describe("gateway", () => {
         const availabilityMessage = publishedMessages.find(
             (message) => message.topic === "test/ruuvitag/aa:aa/availability"
         );
+
         const stateMessage = publishedMessages.find((message) => message.topic === "test/ruuvitag/aa:aa/state");
 
         expect(availabilityMessage).toEqual({
@@ -280,10 +287,13 @@ describe("gateway", () => {
         const mifloraAvailabilityMessage = publishedMessages.find(
             (message) => message.topic === "test/miflora/bb/availability"
         );
+
         const mifloraStateMessage = publishedMessages.find((message) => message.topic === "test/miflora/bb/state");
+
         const oralbAvailabilityMessage = publishedMessages.find(
             (message) => message.topic === "test/oralb/aa:bb:cc:dd:ee:ff/availability"
         );
+
         const oralbStateMessage = publishedMessages.find(
             (message) => message.topic === "test/oralb/aa:bb:cc:dd:ee:ff/state"
         );
@@ -325,6 +335,7 @@ describe("gateway", () => {
 
     it("logs gateway errors and continues with later messages", async () => {
         mockScan.mockReturnValue(Stream.fromIterable([invalidRuuviPeripheral, ruuviPeripheral]));
+
         const publishedMessages = await runGatewayUntil({
             stopWhen: hasTopics(["test/ruuvitag/aa:aa/availability", "test/ruuvitag/aa:aa/state"]),
         });
@@ -344,11 +355,13 @@ describe("gateway", () => {
             ...ruuviPeripheral,
             advertisement: { ...ruuviPeripheral.advertisement, manufacturerData: Buffer.from("99040512FC", "hex") },
         };
+
         const truncatedMifloraPeripheral = getMiFloraPeripheralWithServiceData("71209800239c066e8d7cc40d0410", "bb");
 
         mockScan.mockReturnValue(
             Stream.fromIterable([truncatedRuuviPeripheral, truncatedMifloraPeripheral, ruuviPeripheral])
         );
+
         const publishedMessages = await runGatewayUntil({
             stopWhen: hasTopics(["test/ruuvitag/aa:aa/state"]),
         });
@@ -390,6 +403,7 @@ describe("gateway", () => {
         };
 
         mockScan.mockReturnValue(Stream.fromIterable([ruuviPeripheral]));
+
         const publishedMessages = await runGatewayUntil({
             stopWhen: hasTopics(["test/ruuvitag/aa:aa/state"]),
             layer: makeTestLayer(invalidConfig),
@@ -422,11 +436,13 @@ describe("gateway", () => {
                 payload: payload as string,
                 retain: (options as { retain: boolean }).retain,
             } satisfies PublishedMessage;
+
             const attempt = (attempts.get(message.payload + message.topic) ?? 0) + 1;
             attempts.set(message.payload + message.topic, attempt);
 
             if (failPublish(message, attempt)) {
                 callback(new Error("temporary network error"));
+
                 return;
             }
 
@@ -455,6 +471,7 @@ describe("gateway", () => {
         const stateAttempts = mockMqttClient.publish.mock.calls.filter(
             ([topic]) => topic === "test/ruuvitag/aa:aa/state"
         );
+
         expect(stateAttempts).toHaveLength(1);
         expect(mockLogger.error).toHaveBeenCalledWith(
             "Error publishing MQTT message",
@@ -476,6 +493,7 @@ describe("gateway", () => {
         const availabilityAttempts = mockMqttClient.publish.mock.calls.filter(
             ([topic]) => topic === "test/ruuvitag/aa:aa/availability"
         );
+
         expect(availabilityAttempts).toHaveLength(4);
         expect(mockLogger.error).toHaveBeenCalledWith(
             "Error publishing MQTT message",
@@ -503,6 +521,7 @@ describe("gateway", () => {
         const availabilityPayloads = publishedMessages
             .filter((message) => message.topic === "test/ruuvitag/aa:aa/availability")
             .map((message) => message.payload);
+
         expect(availabilityPayloads).toEqual([
             JSON.stringify({ state: "online" }),
             JSON.stringify({ state: "offline" }),
@@ -514,9 +533,11 @@ describe("gateway", () => {
         Settings.now = () => Date.now();
         const config = createConfig();
         const ruuvitagConfig = config.gateways.ruuvitag;
+
         if (ruuvitagConfig === undefined) {
             throw new Error("Test config is missing ruuvitag gateway configuration");
         }
+
         config.gateways.ruuvitag = { ...ruuvitagConfig, timeout: 60_000 };
         const peripheralWithDistinctMac = { ...ruuviPeripheral, address: "c4:00:00:00:00:aa" };
         mockScan.mockReturnValue(
@@ -535,9 +556,11 @@ describe("gateway", () => {
         expect(publishedMessages.filter((message) => message.topic === "test/ruuvitag/aa:aa/availability")).toEqual([
             { topic: "test/ruuvitag/aa:aa/availability", payload: JSON.stringify({ state: "online" }), retain: true },
         ]);
+
         const temperatureConfigs = publishedMessages.filter(
             (message) => message.topic === "test/sensor/aa:aa/fridge_temperature/config"
         );
+
         expect(temperatureConfigs).toHaveLength(2);
         expect(JSON.parse(temperatureConfigs[1]?.payload ?? "{}")).toEqual(
             expect.objectContaining({
@@ -555,6 +578,7 @@ describe("gateway", () => {
         mockScan.mockReturnValue(
             Stream.suspend(() => {
                 scanAttempts += 1;
+
                 return scanAttempts === 1
                     ? Stream.fail(new ScannerError({ message: "adapter not powered on" }))
                     : Stream.make(ruuviPeripheral);
@@ -574,6 +598,7 @@ describe("gateway", () => {
 
     it("processes multiple BLE elements", async () => {
         mockScan.mockReturnValue(Stream.fromIterable([ruuviPeripheral, ruuviPeripheral]));
+
         const publishedMessages = await runGatewayUntil({
             stopWhen: hasTopicCount("test/ruuvitag/aa:aa/state", 2),
         });

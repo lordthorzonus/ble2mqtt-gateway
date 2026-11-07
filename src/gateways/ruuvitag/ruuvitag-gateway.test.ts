@@ -11,6 +11,7 @@ import { DeviceRegistryService } from "../gateway-helpers.js";
 import { getTestConfig } from "../../test/test-context.js";
 
 vi.mock("uuid");
+
 const mockedUuid = uuid as Mock;
 const defaultTimeout = 30000;
 
@@ -47,6 +48,7 @@ const TestLayer = Layer.provideMerge(
 
 describe("RuuviTag Gateway", () => {
     const originalNow = Settings.now;
+
     const peripheral = {
         advertisement: {
             manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
@@ -116,6 +118,7 @@ describe("RuuviTag Gateway", () => {
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(ruuviTagSettings);
                 const messages = yield* gateway(peripheral);
+
                 return Array.from(messages);
             });
 
@@ -134,11 +137,14 @@ describe("RuuviTag Gateway", () => {
                     },
                 ],
             };
+
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(airQualitySettings);
                 const messages = yield* gateway(format6Peripheral);
+
                 return Array.from(messages);
             });
+
             const messages = await Effect.runPromise(testWithFreshDeviceRegistry(airQualitySettings, program));
             expect(messages).toMatchSnapshot();
         });
@@ -146,10 +152,12 @@ describe("RuuviTag Gateway", () => {
         it("should complete without emitting messages if unknown ruuvitag advertisement is received", async () => {
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(ruuviTagSettings);
+
                 const messages = yield* gateway({
                     ...peripheral,
                     uuid: "no-such-ruuvitag",
                 });
+
                 return Array.from(messages);
             });
 
@@ -190,6 +198,7 @@ describe("RuuviTag Gateway", () => {
 
                 // Second call to get sensor data
                 const secondMessages = yield* gateway(unknownPeripheral);
+
                 return [...Array.from(firstMessages), ...Array.from(secondMessages)];
             });
 
@@ -221,6 +230,7 @@ describe("RuuviTag Gateway", () => {
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(airQualitySettings, cache);
                 const messages = yield* gateway(formatE1Peripheral);
+
                 return Array.from(messages);
             });
 
@@ -236,6 +246,7 @@ describe("RuuviTag Gateway", () => {
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(airQualitySettings, cache);
                 const messages = yield* gateway(format6Peripheral);
+
                 return Array.from(messages);
             });
 
@@ -264,6 +275,7 @@ describe("RuuviTag Gateway", () => {
                 expect(Array.from(e1Messages)).toHaveLength(2);
 
                 const format6Messages = yield* gateway(format6Peripheral);
+
                 return Array.from(format6Messages);
             });
 
@@ -282,6 +294,7 @@ describe("RuuviTag Gateway", () => {
                 Settings.now = () => new Date("2019-10-10T00:06:00.000Z").valueOf();
 
                 const format6Messages = yield* gateway(format6Peripheral);
+
                 return Array.from(format6Messages);
             });
 
@@ -332,6 +345,7 @@ describe("RuuviTag Gateway", () => {
                 expect(Array.from(device1Format6Messages)).toHaveLength(0);
 
                 const device2E1Messages = yield* gateway(device2FormatE1);
+
                 return Array.from(device2E1Messages);
             });
 

@@ -70,6 +70,7 @@ describe("parseMiFloraPeripheralAdvertisement()", () => {
             testEffectWithContext(
                 Effect.gen(function* () {
                     const properPeripheral = getStubPeripheralWithServiceData("");
+
                     const peripheral = {
                         ...properPeripheral,
                         advertisement: { ...properPeripheral.advertisement, serviceData: [] },
@@ -157,6 +158,7 @@ describe("parseMiFloraPeripheralAdvertisement()", () => {
                         (prefix, tail) => {
                             const data = Buffer.concat([prefix, Buffer.from(eventTypeBytes), tail]);
                             const exit = parseServiceData(data);
+
                             const isLengthError =
                                 Exit.isFailure(exit) &&
                                 Cause.findErrorOption(exit.cause).pipe(

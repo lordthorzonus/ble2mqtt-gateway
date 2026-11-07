@@ -66,6 +66,7 @@ export class DeviceRegistry {
             decimalPrecision: this.defaultDecimalPrecision,
             lastPublishedAvailability: "offline",
         };
+
         this.devices.set(peripheral.uuid, deviceRegistryEntry);
     }
 

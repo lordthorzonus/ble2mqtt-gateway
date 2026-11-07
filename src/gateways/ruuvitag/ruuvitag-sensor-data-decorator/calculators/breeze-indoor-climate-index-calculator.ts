@@ -27,6 +27,7 @@ const CLIMATE_INDEX_LOOKUP = {
 } as const;
 
 type HumidityLevel = keyof typeof CLIMATE_INDEX_LOOKUP;
+
 type TemperatureLevel = keyof (typeof CLIMATE_INDEX_LOOKUP)[HumidityLevel];
 
 const HUMIDITY_LEVELS: readonly HumidityLevel[] = Object.keys(CLIMATE_INDEX_LOOKUP)
@@ -67,8 +68,10 @@ const clamp = (value: number, min: number, max: number): number => Math.min(Math
 const findBracketIndex = (value: number, levels: readonly number[]): number => {
     const index = levels.findIndex((level, i) => {
         const nextLevel = levels[i + 1];
+
         return i < levels.length - 1 && nextLevel !== undefined && value >= level && value <= nextLevel;
     });
+
     return index === -1 ? 0 : index;
 };
 
@@ -116,6 +119,7 @@ const interpolateIndex = (temperature: number, humidity: number): number | null 
 
     const indexAtLowerHumidity =
         indexAtLowerHumidityLowerTemp * (1 - tempWeight) + indexAtLowerHumidityUpperTemp * tempWeight;
+
     const indexAtUpperHumidity =
         indexAtUpperHumidityLowerTemp * (1 - tempWeight) + indexAtUpperHumidityUpperTemp * tempWeight;
 

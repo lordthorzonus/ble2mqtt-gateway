@@ -319,11 +319,13 @@ describe("BLE Gateway", () => {
         expect(messages).toEqual(
             expect.arrayContaining([expect.objectContaining(handledMessage), expect.objectContaining(handledMessage)])
         );
+
         // Gateways run concurrently, so only the order within one gateway is deterministic.
         const unavailableMessagesOf = (deviceType: DeviceType) =>
             messages.filter(
                 (message) => message.type === MessageType.Availability && message.device.type === deviceType
             );
+
         const withGeneratedFields = (message: typeof ruuviTag1UnavailableMessage) => ({
             ...message,
             id: expect.any(String),

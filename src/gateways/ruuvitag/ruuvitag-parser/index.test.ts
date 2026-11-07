@@ -2,7 +2,9 @@ import { describe, expect, it, vi, type Mock } from "vitest";
 import { Effect } from "effect";
 
 vi.mock("./parsing-strategies/data-format-3-parsing-strategy.js");
+
 vi.mock("./parsing-strategies/data-format-5-parsing-strategy.js");
+
 vi.mock("./parsing-strategies/data-format-6-parsing-strategy.js");
 
 import {
@@ -70,6 +72,7 @@ describe("RuuviTagParser", () => {
             Effect.runPromise(
                 Effect.gen(function* () {
                     const ruuviTagData = Buffer.from(rawStringData, "hex");
+
                     const expectedError = new InvalidRuuviDataLengthError({
                         dataFormat: null,
                         length: ruuviTagData.length,

@@ -23,6 +23,7 @@ export const makeRuuvitagDeviceRegistry = (
         },
         timeout: tag.timeout,
     }));
+
     const defaultDecimalPrecision = ruuviTagSettings.decimal_precision ?? globalDefaults.defaultDecimalPrecision;
 
     return new DeviceRegistry(deviceSettings, ruuviTagSettings.timeout, defaultDecimalPrecision);

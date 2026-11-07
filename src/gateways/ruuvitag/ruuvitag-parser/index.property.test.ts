@@ -56,6 +56,7 @@ describe("RuuviTag parser properties", () => {
                     (body) => {
                         const data = Buffer.from([...header, ...body]);
                         const exit = Effect.runSyncExit(parse(data));
+
                         const isLengthError =
                             Exit.isFailure(exit) &&
                             Cause.findErrorOption(exit.cause).pipe(

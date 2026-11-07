@@ -23,6 +23,7 @@ enum DataFormatV3Offset {
  */
 const parseAcceleration = (rawData: Buffer, dataOffset: DataFormatV3Offset): number => {
     const acceleration = rawData.readInt16BE(dataOffset);
+
     return acceleration / 1000;
 };
 
@@ -78,6 +79,7 @@ const parseBatteryVoltage = (rawData: Buffer): number => {
  */
 const parsePressure = (rawData: Buffer): Pascal => {
     const minimumSupportedPascalMeasurement = 50000;
+
     return asPascal(rawData.readUInt16BE(DataFormatV3Offset.Pressure) + minimumSupportedPascalMeasurement);
 };
 

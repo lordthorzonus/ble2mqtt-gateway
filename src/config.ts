@@ -98,6 +98,7 @@ const configSchema = z.object({
 
 const produceErrorMessage = (error: ZodError) => {
     const errorMessage = "Found following errors in configuration: \n";
+
     return error.issues.reduce((acc, issue) => {
         const errorPath = issue.path.join(".");
 
@@ -111,9 +112,12 @@ export class ConfigurationError extends Data.TaggedError("ConfigurationError")<{
 }> {}
 
 export type RuuviTagGatewayConfiguration = z.infer<typeof ruuvitagSchema>;
+
 export type MiFloraGatewayConfiguration = z.infer<typeof miFloraSchema>;
+
 /** Parsed `gateways.oralb` configuration section. */
 export type OralBGatewayConfiguration = z.infer<typeof oralbSchema>;
+
 export type GlobalConfiguration = z.infer<typeof configSchema>;
 
 const getConfiguration: Effect.Effect<z.infer<typeof configSchema>, ConfigurationError> = Effect.gen(function* () {

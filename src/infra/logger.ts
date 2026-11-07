@@ -3,6 +3,7 @@ import { Context, Effect, Layer } from "effect";
 import { Config } from "../config.js";
 
 export type LoggerInterface = ReturnType<typeof createLogger>;
+
 const makeLogger = Effect.gen(function* () {
     const config = yield* Config;
 

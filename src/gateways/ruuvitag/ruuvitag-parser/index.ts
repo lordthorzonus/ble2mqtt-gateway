@@ -19,6 +19,7 @@ import { Data, Effect, Match } from "effect";
 import { RuuvitagSensorProtocolDataFormat } from "./data-format.js";
 
 export { RuuvitagSensorProtocolDataFormat };
+
 import { InvalidRuuviDataLengthError } from "./parsing-strategies/common-parsing-strategy-utils.js";
 
 export { InvalidRuuviDataLengthError };
@@ -63,6 +64,7 @@ export type RuuviTagSensorData = RuuviTagEnvironmentalSensorData | RuuviAirSenso
 export type RuuviTagParsingStrategy = (
     rawRuuviTagData: Buffer
 ) => Effect.Effect<RuuviTagEnvironmentalSensorData, InvalidRuuviDataLengthError>;
+
 export type RuuviAirParsingStrategy = (
     rawRuuviTagData: Buffer
 ) => Effect.Effect<RuuviAirSensorData, InvalidRuuviDataLengthError>;

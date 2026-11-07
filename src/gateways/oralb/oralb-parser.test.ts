@@ -280,6 +280,7 @@ describe("oralb-parser", () => {
                 0x00,
                 0x01,
             ]);
+
             const result = Effect.runSync(parseOralBModel(manufacturerData));
             expect(result).toBe("io_series_6_7");
         });
@@ -298,6 +299,7 @@ describe("oralb-parser", () => {
                 0x00,
                 0x01,
             ]);
+
             const result = Effect.runSync(parseOralBModel(manufacturerData));
             expect(result).toBe("io_series_6_7");
         });
@@ -316,6 +318,7 @@ describe("oralb-parser", () => {
                 0x00,
                 0x01,
             ]);
+
             const result = Effect.runSync(parseOralBModel(manufacturerData));
 
             expect(result).toBe("unknown");

@@ -32,6 +32,7 @@ describe("HomeAssistant MQTT Message producer", () => {
 
         const testProgram = Effect.gen(function* () {
             const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+
             return yield* Stream.runCollect(homeAssistantMqttMessageProducer(deviceMessage));
         });
 
@@ -69,6 +70,7 @@ describe("HomeAssistant MQTT Message producer", () => {
 
         const testProgram = Effect.gen(function* () {
             const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+
             return yield* Stream.runCollect(homeAssistantMqttMessageProducer(deviceMessage));
         });
 
@@ -107,6 +109,7 @@ describe("HomeAssistant MQTT Message producer", () => {
 
         const testProgram = Effect.gen(function* () {
             const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+
             return yield* Stream.runCollect(homeAssistantMqttMessageProducer(deviceMessage));
         });
 
@@ -235,11 +238,13 @@ describe("HomeAssistant MQTT Message producer", () => {
             },
         ],
     ];
+
     it.each(availabilityTestCases)(
         "should generate corresponding discovery messages for given device in case of %s availability message is given",
         async (_, availabilityMessage) => {
             const testProgram = Effect.gen(function* () {
                 const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+
                 return yield* Stream.runCollect(homeAssistantMqttMessageProducer(availabilityMessage));
             });
 

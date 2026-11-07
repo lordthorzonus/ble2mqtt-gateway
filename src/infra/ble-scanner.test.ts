@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 // vi.mock factories are hoisted above the imports, so the mock state must be hoisted with them.
 const { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStopScanning, mockNoble } =
     await vi.hoisted(async () => {

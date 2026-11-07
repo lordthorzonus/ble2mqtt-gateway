@@ -1,7 +1,11 @@
 import { describe, expect, it, vi, type Mock } from "vitest";
+
 vi.mock("./calculators/absolute-humidity-calculator.js");
+
 vi.mock("./calculators/dew-point-calculator.js");
+
 vi.mock("./calculators/heat-index-calculator.js");
+
 vi.mock("./calculators/humidex-calculator.js");
 
 import { RuuviTagSensorData, RuuviAirSensorData } from "../ruuvitag-parser/index.js";
@@ -49,6 +53,7 @@ describe("RuuviTag sensor data decorator", () => {
                 relativeHumidityPercentage: asRelativeHumidity(80),
                 temperature: asCelsius(20),
             };
+
             const dewPoint = 1;
             const absoluteHumidity = 2;
             const humidex = 30;
@@ -104,6 +109,7 @@ describe("RuuviTag sensor data decorator", () => {
                 luminosity: asLux(13026.67),
                 calibrationInProgress: false,
             };
+
             const dewPoint = 15.2;
             const absoluteHumidity = 14.8;
             const humidex = 32.1;

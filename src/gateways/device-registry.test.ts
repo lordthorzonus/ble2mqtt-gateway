@@ -6,6 +6,7 @@ import { Peripheral } from "../infra/ble-scanner.js";
 
 const defaultRuuviTagId = "da21045d81a8";
 const defaultTimeout = 30000;
+
 function makeDeviceRegistry(settings: DeviceSettings[] = []) {
     return new DeviceRegistry(
         [
@@ -144,6 +145,7 @@ describe("Device Registry", () => {
 
         it("should respect the timeout given to individual devices", () => {
             const customTimeoutDeviceId = "da21045d81a9";
+
             const deviceRegistryWithIndividualTimeouts = makeDeviceRegistry([
                 {
                     device: {
@@ -238,6 +240,7 @@ describe("Device Registry", () => {
             const id = "my-uuid";
 
             expect(deviceRegistry.get(id)).toBeNull();
+
             const peripheral = {
                 uuid: id,
             };

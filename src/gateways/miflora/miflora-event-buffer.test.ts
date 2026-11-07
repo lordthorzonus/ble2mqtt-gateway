@@ -40,18 +40,22 @@ describe("MiFlora Event Buffer", () => {
         measurementType: MifloraMeasurementEventType.Moisture,
         data: 1,
     };
+
     const illuminanceEvent: MiFloraMeasurement<MifloraMeasurementEventType.Illuminance> = {
         measurementType: MifloraMeasurementEventType.Illuminance,
         data: 200,
     };
+
     const soilConductivityEvent: MiFloraMeasurement<MifloraMeasurementEventType.SoilConductivity> = {
         measurementType: MifloraMeasurementEventType.SoilConductivity,
         data: 300,
     };
+
     const temperatureEvent: MiFloraMeasurement<MifloraMeasurementEventType.Temperature> = {
         measurementType: MifloraMeasurementEventType.Temperature,
         data: 10,
     };
+
     const lowBatteryEvent: MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent> = {
         measurementType: MifloraMeasurementEventType.LowBatteryEvent,
         data: 1,

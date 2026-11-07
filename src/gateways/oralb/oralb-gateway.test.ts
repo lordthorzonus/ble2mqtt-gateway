@@ -11,6 +11,7 @@ import { getTestConfig } from "../../test/test-context.js";
 import { DeviceMessage, DeviceType, MessageType, OralBSensorMessage } from "../../types.js";
 
 vi.mock("uuid");
+
 const mockedUuid = uuid as Mock;
 const defaultTimeout = 60000;
 
@@ -46,6 +47,7 @@ const TestLayer = Layer.provideMerge(
 
 describe("OralB Gateway", () => {
     const originalNow = Settings.now;
+
     const peripheral = {
         advertisement: {
             manufacturerData: Buffer.from([
@@ -90,6 +92,7 @@ describe("OralB Gateway", () => {
     describe("makeOralbGateway", () => {
         it("should parse advertisement and return device message for known device", async () => {
             const gateway = makeOralbGateway(oralbSettings);
+
             const deviceRegistry = makeOralbDeviceRegistry(oralbSettings, {
                 defaultDecimalPrecision: 2,
             });
@@ -128,6 +131,7 @@ describe("OralB Gateway", () => {
             };
 
             const gateway = makeOralbGateway(oralbSettings);
+
             const deviceRegistry = makeOralbDeviceRegistry(oralbSettings, {
                 defaultDecimalPrecision: 2,
             });
@@ -157,6 +161,7 @@ describe("OralB Gateway", () => {
             };
 
             const gateway = makeOralbGateway(config);
+
             const deviceRegistry = makeOralbDeviceRegistry(config, {
                 defaultDecimalPrecision: 2,
             });
@@ -189,11 +194,13 @@ describe("OralB Gateway", () => {
             };
 
             const oralbConfig = configWithModelOverride.oralb;
+
             if (!oralbConfig) {
                 throw new Error("OralB configuration is required for this test");
             }
 
             const gateway = makeOralbGateway(oralbConfig);
+
             const deviceRegistry = makeOralbDeviceRegistry(oralbConfig, {
                 defaultDecimalPrecision: 2,
             });

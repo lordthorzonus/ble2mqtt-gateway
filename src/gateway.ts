@@ -62,6 +62,7 @@ export const gateway = Effect.gen(function* () {
                         "Encountered a device message that does not have corresponding Home Assistant configuration",
                         { message: error.message }
                     );
+
                     return [];
                 })
             )

@@ -73,6 +73,7 @@ export const makeOralbGateway = (oralbSettings: NonNullable<OralBGatewayConfigur
             device.model === undefined ? [] : ([[device.id, device.model]] as const)
         )
     );
+
     const resolveDeviceModel = makeResolveDeviceModel(modelOverrides);
     const transformAdvertisementToSensorMessage = makeTransformAdvertisementToSensorMessage(resolveDeviceModel);
 

@@ -122,6 +122,7 @@ const parseMacAddress = (rawData: Buffer, offset: number): string | null => {
     }
 
     const macAddressArray = macAddress.match(/.{1,2}/g);
+
     return macAddressArray ? macAddressArray.join(":").toUpperCase() : null;
 };
 

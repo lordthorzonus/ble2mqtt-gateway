@@ -62,6 +62,7 @@ export const scan = (): Stream.Stream<Peripheral, BleScannerError, Logger> =>
                         };
 
                         noble.on("discover", onDiscover);
+
                         return onDiscover;
                     }),
                     (onDiscover) =>

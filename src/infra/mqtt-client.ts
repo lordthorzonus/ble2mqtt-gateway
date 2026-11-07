@@ -24,6 +24,7 @@ const mqttClient = Effect.gen(function* () {
         // Retained availability and discovery messages are re-sent by the availability heartbeat.
         queueQoSZero: false,
     });
+
     client.on("connect", () => {
         logger.info("MQTT client connected");
     });
@@ -82,6 +83,7 @@ const publishOnce = (message: MqttMessage): Effect.Effect<void, MqttClientError,
         const logger = yield* Logger;
 
         logger.debug("Publishing MQTT Message", { message });
+
         return yield* Effect.callback<undefined, MqttClientError>((resume) => {
             client.publish(
                 message.topic,

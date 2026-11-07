@@ -7,6 +7,7 @@ import { DataFormat5ParsingStrategy } from "./data-format-5-parsing-strategy.js"
 
 describe("Data Format 5 Parsing Strategy", () => {
     const macAddress = "CB:B8:33:4C:88:4F";
+
     const testCases: [string, RuuviTagEnvironmentalSensorData][] = [
         [
             "99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F",

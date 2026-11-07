@@ -180,6 +180,7 @@ const SECTOR_MAP: Record<number, string> = {
 
 const DATA_LENGTH_WITHOUT_SECTORS = 11;
 const DATA_LENGTH_WITH_SECTORS = 13;
+
 /** Manufacturer data lengths, including the 2-byte manufacturer id. */
 const VALID_DATA_LENGTHS: readonly number[] = [DATA_LENGTH_WITHOUT_SECTORS, DATA_LENGTH_WITH_SECTORS];
 
@@ -220,6 +221,7 @@ const mapPressure = (pressure: number): OralBPressure | `unknown_pressure_${numb
 
 const mapMode = (mode: number, model: ResolvedOralBModel): string => {
     const modes = MODEL_MODES[model];
+
     return modes[mode] ?? `unknown_mode_${mode}`;
 };
 

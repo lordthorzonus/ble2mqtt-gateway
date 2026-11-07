@@ -57,6 +57,7 @@ const handleMifloraMeasurement =
 
         if (miFloraEventBuffer.isBufferReady(buffer)) {
             miFloraEventBuffer.clearBuffer(id);
+
             return Effect.succeed(
                 Option.some(transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer))
             );

@@ -56,6 +56,7 @@ const takeAvailabilityMessage = (
     }
 
     deviceRegistry.registerDeviceStatusPublished(device.device.id);
+
     return Option.some(generateAvailabilityMessage(device, "online", peripheral));
 };
 

@@ -11,6 +11,7 @@ import { DeviceRegistryService } from "../gateway-helpers.js";
 import { getTestConfig } from "../../test/test-context.js";
 
 vi.mock("uuid");
+
 const mockedUuid = uuid as Mock;
 const defaultTimeout = 30000;
 
@@ -46,14 +47,17 @@ const TestLayer = Layer.provideMerge(
 describe("MiFlora Gateway", () => {
     const originalNow = Settings.now;
     const moisturePeripheralAdvertisement = getStubPeripheralWithServiceData("71209800a864aed0a8654c0d08100112", "a");
+
     const soilConductivityPeripheralAdvertisement = getStubPeripheralWithServiceData(
         "71209800b1cf076e8d7cc40d091002c600",
         "a"
     );
+
     const temperaturePeripheralAdvertisement = getStubPeripheralWithServiceData(
         "71209800239c066e8d7cc40d0410020401",
         "a"
     );
+
     const illuminancePeripheralAdvertisement = getStubPeripheralWithServiceData(
         "71209800c3cf076e8d7cc40d071003370000",
         "a"
@@ -82,6 +86,7 @@ describe("MiFlora Gateway", () => {
                 const program = Effect.gen(function* () {
                     const gateway = makeMiFloraGateway(mifloraSettings);
                     const messages = yield* gateway(advertisement);
+
                     return Array.from(messages);
                 });
 
@@ -113,10 +118,12 @@ describe("MiFlora Gateway", () => {
 
             const program = Effect.gen(function* () {
                 const gateway = makeMiFloraGateway(mifloraSettings);
+
                 const messages = yield* gateway({
                     ...moisturePeripheralAdvertisement,
                     uuid: "no-such-miflora",
                 });
+
                 return Array.from(messages);
             });
 
@@ -161,6 +168,7 @@ describe("MiFlora Gateway", () => {
                     })
                 );
             });
+
             const TestLayerWithDeviceRegistry = Layer.merge(
                 TestLayer,
                 Layer.succeed(

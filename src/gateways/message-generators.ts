@@ -10,6 +10,7 @@ export const generateAvailabilityMessage = (
     peripheral?: Peripheral
 ): DeviceAvailabilityMessage => {
     const { id, friendlyName } = deviceRegistryEntry.device;
+
     return {
         id: uuid(),
         type: MessageType.Availability,

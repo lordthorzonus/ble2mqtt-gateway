@@ -40,10 +40,12 @@ export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
         ruuviTagAirQualitySensorData.temperature,
         ruuviTagAirQualitySensorData.relativeHumidityPercentage
     );
+
     const ruuviIAQSCalculationResult = calculateRuuviIAQS({
         pm25: ruuviTagAirQualitySensorData.pm2_5,
         co2: ruuviTagAirQualitySensorData.co2,
     });
+
     const atmoTubeAQICalculationResult = calculateAtmoTubeIAQI({
         pm2_5: ruuviTagAirQualitySensorData.pm2_5,
         co2: ruuviTagAirQualitySensorData.co2,
@@ -52,6 +54,7 @@ export const decorateRuuviTagAirQualitySensorDataWithCalculatedValues = (
         pm10: ruuviTagAirQualitySensorData.pm10,
         pm1: ruuviTagAirQualitySensorData.pm1,
     });
+
     const breezeIndoorClimateIndexResult = calculateBreezeIndoorClimateIndex(
         ruuviTagAirQualitySensorData.temperature,
         ruuviTagAirQualitySensorData.relativeHumidityPercentage
@@ -82,6 +85,7 @@ export const decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues = (
     ruuviTagSensorData: RuuviTagEnvironmentalSensorData
 ): EnhancedRuuviTagEnvironmentalSensorData => {
     const dewPoint = calculateDewPoint(ruuviTagSensorData.temperature, ruuviTagSensorData.relativeHumidityPercentage);
+
     const breezeIndoorClimateIndexResult = calculateBreezeIndoorClimateIndex(
         ruuviTagSensorData.temperature,
         ruuviTagSensorData.relativeHumidityPercentage

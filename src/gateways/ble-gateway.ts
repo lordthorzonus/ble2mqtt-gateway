@@ -35,6 +35,7 @@ const AVAILABILITY_HEARTBEAT_INTERVAL = Duration.minutes(5);
 
 export const getManufacturerId = (peripheral: Peripheral): number | undefined => {
     const manufacturerData = peripheral.advertisement.manufacturerData;
+
     return manufacturerData && manufacturerData.length >= 2 ? manufacturerData.readUInt16LE(0) : undefined;
 };
 
@@ -149,6 +150,7 @@ export const makeBleGateway = (): Effect.Effect<BleGateway, never, Config | Logg
             Effect.catchTag(routePeripheral(peripheral), "GatewayError", (error) =>
                 Effect.sync(() => {
                     logger.error("BLE Gateway error", { peripheral: error.peripheral, message: error.message });
+
                     return [];
                 })
             );

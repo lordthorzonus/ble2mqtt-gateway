@@ -211,6 +211,7 @@ export const parseNOx = (rawData: Buffer, noxOffset: number, flagsOffset: number
  */
 export const parseCalibrationInProgress = (rawData: Buffer, flagsOffset: number): boolean => {
     const flags = rawData.readUInt8(flagsOffset);
+
     return (flags & 0b00000001) === 1;
 };
 
@@ -232,5 +233,6 @@ export const parseMacAddress48Bit = (rawData: Buffer, offset: number): string | 
     }
 
     const macAddressArray = macAddress.match(/.{1,2}/g);
+
     return macAddressArray ? macAddressArray.join(":").toUpperCase() : null;
 };

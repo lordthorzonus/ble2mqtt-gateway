@@ -32,6 +32,7 @@ export class MiFloraEventBuffer {
 
         const isBufferTooOld =
             buffer.bufferReleasedLast.diffNow("seconds").seconds <= -RETAIN_MIFLORA_BUFFER_FOR_SECONDS;
+
         return isBufferFull || isBufferTooOld;
     }
 
