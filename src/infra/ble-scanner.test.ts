@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Peripheral } from "./ble-scanner.js";
 
-// vi.mock factories are hoisted above the imports, so the mock state must be hoisted with them.
+// Vitest moves vi.mock factories above the imports, so vi.hoisted has to create the mock state too.
 const { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStopScanning, mockNoble } =
     await vi.hoisted(async () => {
         const { EventEmitter } = await import("node:events");
@@ -52,7 +52,7 @@ describe("BLE Scanner", () => {
     };
 
     it("should wait for noble to power on and start scanning", async () => {
-        const stream = Stream.runCollect(Stream.take(scan(), 1));
+        const stream = Stream.runCollect(Stream.take(scan, 1));
 
         setTimeout(() => {
             mockNobleEventEmitter.emit("discover", peripheral);
@@ -65,7 +65,7 @@ describe("BLE Scanner", () => {
     });
 
     it("should stream ble advertisements found", async () => {
-        const stream = scan();
+        const stream = scan;
 
         setTimeout(() => {
             mockNobleEventEmitter.emit("discover", peripheral);
@@ -79,7 +79,7 @@ describe("BLE Scanner", () => {
     });
 
     it("should call stopScanning when stream is finalized", async () => {
-        const stream = scan();
+        const stream = scan;
 
         setTimeout(() => {
             mockNobleEventEmitter.emit("discover", peripheral);

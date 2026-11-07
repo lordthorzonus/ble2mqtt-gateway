@@ -65,7 +65,7 @@ describe("RuuviTag Measurement Transformer", () => {
             uuid: "123",
         };
 
-        // The decorators are mocked, so the parsed data only has to be well-typed.
+        // The decorators are mocked, so the parsed data only needs the right type.
         const parsedEnvironmentalData: RuuviTagSensorData = {
             type: "environmental",
             temperature: asCelsius(24.3),

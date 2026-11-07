@@ -3,13 +3,20 @@
         "module": "nodenext",
         "moduleResolution": "nodenext",
         "target": "ES2023",
-        "lib": ["ES2023"],
-        "types": ["node"],
+        "lib": [
+            "ES2023"
+        ],
+        "types": [
+            "node"
+        ],
         "strict": true,
         "sourceMap": true,
         "rootDir": "src",
         "outDir": "dist",
         "noUncheckedIndexedAccess": true,
+        "exactOptionalPropertyTypes": true,
+        "noImplicitOverride": true,
+        "noFallthroughCasesInSwitch": true,
         "skipLibCheck": true,
         "plugins": [
             {
@@ -17,6 +24,12 @@
             }
         ]
     },
-    "exclude": ["dist", "node_modules"],
-    "include": ["src/**/*.ts", "src/**/*.d.ts"]
+    "exclude": [
+        "dist",
+        "node_modules"
+    ],
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts"
+    ]
 }

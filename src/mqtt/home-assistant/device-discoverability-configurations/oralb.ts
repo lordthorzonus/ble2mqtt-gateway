@@ -11,13 +11,11 @@ const oralbDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = {
     model: "Smart Toothbrush",
 };
 
-/** Home Assistant discovery configuration for Oral-B toothbrush entities. */
 export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice<OralBSensorData> = {
     state: {
         component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "State",
-        unitOfMeasurement: undefined,
         uniqueId: "state",
         device: oralbDeviceConfiguration,
         suggestedDecimalPrecision: null,
@@ -26,7 +24,6 @@ export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice
         component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Pressure",
-        unitOfMeasurement: undefined,
         uniqueId: "pressure",
         device: oralbDeviceConfiguration,
         suggestedDecimalPrecision: null,
@@ -45,7 +42,6 @@ export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice
         component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Brushing Mode",
-        unitOfMeasurement: undefined,
         uniqueId: "brushing_mode",
         device: oralbDeviceConfiguration,
         icon: "mdi:toothbrush-electric",
@@ -55,7 +51,6 @@ export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice
         component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Sector",
-        unitOfMeasurement: undefined,
         uniqueId: "sector",
         device: oralbDeviceConfiguration,
         icon: "mdi:grid",
@@ -75,7 +70,6 @@ export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice
         component: HomeAssistantMQTTComponent.Sensor,
         deviceClass: HomeAssistantDeviceClass.None,
         name: "Number of Sectors",
-        unitOfMeasurement: undefined,
         uniqueId: "number_of_sectors",
         device: oralbDeviceConfiguration,
         icon: "mdi:numeric",

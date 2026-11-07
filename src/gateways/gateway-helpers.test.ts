@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { Data, Effect, Option, Result } from "effect";
+import { Data, Effect, Result } from "effect";
 import { DeviceRegistry } from "./device-registry.js";
 import { DeviceRegistryService, handleBleAdvertisement } from "./gateway-helpers.js";
 import { Peripheral } from "../infra/ble-scanner.js";
@@ -27,14 +27,14 @@ const handle = (registry: DeviceRegistry, parseAdvertisement: () => Effect.Effec
         unknownDevices: "ignore",
         parseAdvertisement,
         resolveDeviceModel: () => "environmental",
-        handleDeviceSensorData: () => Effect.succeed(Option.none()),
+        handleDeviceSensorData: () => Effect.succeedNone,
     }).pipe(Effect.provideService(DeviceRegistryService, registry), Effect.result, Effect.runSync);
 
 describe("handleBleAdvertisement()", () => {
     it("parses the advertisement once and passes the result to model resolution and sensor handling", () => {
         const parseAdvertisement = vi.fn(() => Effect.succeed("parsed"));
         const resolveDeviceModel = vi.fn(() => "environmental");
-        const handleDeviceSensorData = vi.fn(() => Effect.succeed(Option.none()));
+        const handleDeviceSensorData = vi.fn(() => Effect.succeedNone);
 
         handleBleAdvertisement(peripheral, {
             deviceType: DeviceType.Ruuvitag,
@@ -71,7 +71,7 @@ describe("handleBleAdvertisement()", () => {
                 unknownDevices: "ignore",
                 parseAdvertisement,
                 resolveDeviceModel: () => "environmental",
-                handleDeviceSensorData: () => Effect.succeed(Option.none()),
+                handleDeviceSensorData: () => Effect.succeedNone,
             }
         ).pipe(Effect.provideService(DeviceRegistryService, makeRegistry()), Effect.runSync);
 

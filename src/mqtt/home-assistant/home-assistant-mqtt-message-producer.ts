@@ -43,20 +43,21 @@ const getDeviceName = (deviceMessage: DeviceMessage) =>
 
 const getEntityName = (configEntry: HomeAssistantSensorConfiguration) => configEntry.name;
 
+// Optional fields accept undefined because JSON.stringify leaves undefined fields out of the published payload.
 interface CommonHADiscoveryPayload {
     name: string;
-    device_class?: string;
+    device_class?: string | undefined;
     expire_after: number;
     object_id: string;
     unique_id: string;
-    entity_category?: string;
+    entity_category?: string | undefined;
     availability_topic: string;
     availability_template: string;
-    payload_available?: string;
-    payload_not_available?: string;
+    payload_available?: string | undefined;
+    payload_not_available?: string | undefined;
     value_template: string;
     state_topic: string;
-    icon?: string;
+    icon?: string | undefined;
     origin: {
         name: string;
         sw_version: string;
@@ -74,17 +75,17 @@ interface CommonHADiscoveryPayload {
 interface SensorHADiscoveryPayload {
     component: HomeAssistantMQTTComponent.Sensor;
     payload: CommonHADiscoveryPayload & {
-        unit_of_measurement?: string;
-        suggested_display_precision?: number;
-        state_class?: string;
+        unit_of_measurement?: string | undefined;
+        suggested_display_precision?: number | undefined;
+        state_class?: string | undefined;
     };
 }
 
 interface BinarySensorHADiscoveryPayload {
     component: HomeAssistantMQTTComponent.BinarySensor;
     payload: CommonHADiscoveryPayload & {
-        payload_on?: string | boolean;
-        payload_off?: string | boolean;
+        payload_on?: string | boolean | undefined;
+        payload_off?: string | boolean | undefined;
     };
 }
 
@@ -198,24 +199,21 @@ const generateStateMessage = (deviceMessage: DeviceMessage, config: GlobalConfig
     payload: JSON.stringify({ ...deviceMessage.payload, time: deviceMessage.time, id: deviceMessage.id }),
 });
 
-export const makeHomeAssistantMqttMessageProducer = (): Effect.Effect<
+export const makeHomeAssistantMqttMessageProducer: Effect.Effect<
     (deviceMessage: DeviceMessage) => Stream.Stream<MqttMessage, SensorConfigurationMissingError>,
     ConfigurationError | SensorConfigurationMissingError,
     Config
-> =>
-    Effect.gen(function* () {
-        const config = yield* Config;
+> = Effect.gen(function* () {
+    const config = yield* Config;
 
-        return Match.type<DeviceMessage>().pipe(
-            Match.when({ type: MessageType.Availability }, (message) =>
-                Stream.concat(
-                    Stream.fromIterableEffect(haDiscoverAdapter(message, config)),
-                    Stream.make(generateAvailabilityMessage(message, config))
-                )
-            ),
-            Match.when({ type: MessageType.SensorData }, (message) =>
-                Stream.make(generateStateMessage(message, config))
-            ),
-            Match.exhaustive
-        );
-    });
+    return Match.type<DeviceMessage>().pipe(
+        Match.when({ type: MessageType.Availability }, (message) =>
+            Stream.concat(
+                Stream.fromIterableEffect(haDiscoverAdapter(message, config)),
+                Stream.make(generateAvailabilityMessage(message, config))
+            )
+        ),
+        Match.when({ type: MessageType.SensorData }, (message) => Stream.make(generateStateMessage(message, config))),
+        Match.exhaustive
+    );
+});

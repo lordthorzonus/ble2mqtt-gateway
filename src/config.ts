@@ -115,7 +115,6 @@ export type RuuviTagGatewayConfiguration = z.infer<typeof ruuvitagSchema>;
 
 export type MiFloraGatewayConfiguration = z.infer<typeof miFloraSchema>;
 
-/** Parsed `gateways.oralb` configuration section. */
 export type OralBGatewayConfiguration = z.infer<typeof oralbSchema>;
 
 export type GlobalConfiguration = z.infer<typeof configSchema>;

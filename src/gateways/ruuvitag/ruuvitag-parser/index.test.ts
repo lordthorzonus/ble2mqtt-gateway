@@ -20,7 +20,7 @@ import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-p
 import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy.js";
 
 describe("RuuviTagParser", () => {
-    // Both strategy kinds fit this signature, so one typed sentinel can stand in for either result.
+    // Both strategy types are assignable to this signature, so one fixture works as the result of either.
     type AnyParsingStrategy = (
         rawRuuviTagData: Buffer
     ) => Effect.Effect<RuuviTagSensorData, InvalidRuuviDataLengthError>;

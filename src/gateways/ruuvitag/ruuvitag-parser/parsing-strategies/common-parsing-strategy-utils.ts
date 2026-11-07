@@ -24,9 +24,6 @@ export class InvalidRuuviDataLengthError extends Data.TaggedError("InvalidRuuviD
     minimumLength: number;
 }> {}
 
-/**
- * Fails when `rawData` is shorter than the bytes a data format reads, so strategies never read out of range.
- */
 export const requireMinimumLength = (
     rawData: Buffer,
     dataFormat: number,

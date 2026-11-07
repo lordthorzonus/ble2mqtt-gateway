@@ -14,7 +14,7 @@ const SCANNER_RETRY_POLICY = Schedule.min([
 
 const scanWithRetry = (logger: LoggerInterface) =>
     pipe(
-        scan(),
+        scan,
         Stream.retry(
             SCANNER_RETRY_POLICY.pipe(
                 Schedule.tap(({ input: error }) =>
@@ -32,9 +32,8 @@ const makePublishConcurrencyLimit = (
         : Effect.map(Semaphore.make(concurrency), (semaphore) => semaphore.withPermits(1));
 
 /**
- * The BLE-to-MQTT pipeline: scans advertisements, maps them to device messages, produces Home Assistant
- * MQTT messages and publishes them in order per topic. Runs until interrupted; scanner failures restart the
- * scanner and per-message failures are logged and dropped.
+ * Runs until interrupted. A scanner failure restarts the scanner. A failure for one message is logged,
+ * and the message is dropped.
  */
 export const gateway = Effect.gen(function* () {
     const logger = yield* Logger;
@@ -48,8 +47,8 @@ export const gateway = Effect.gen(function* () {
         })
     );
 
-    const bleGateway = yield* makeBleGateway();
-    const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+    const bleGateway = yield* makeBleGateway;
+    const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer;
     const limitPublishConcurrency = yield* makePublishConcurrencyLimit(config.concurrency.mqtt_publishing);
 
     const produceMqttMessages = (message: DeviceMessage): Effect.Effect<readonly MqttMessage[]> =>
@@ -89,7 +88,7 @@ export const gateway = Effect.gen(function* () {
         Stream.mapEffect(produceMqttMessages, { concurrency: config.concurrency.mqtt_message_production }),
         Stream.flattenIterable,
         Stream.groupByKey((message) => message.topic),
-        // Topics publish concurrently; messages within one topic stay in order.
+        // Messages for different topics publish concurrently. Messages for the same topic publish in order.
         Stream.flatMap(([_topic, messages]) => Stream.mapEffect(messages, publishMessage), {
             concurrency: "unbounded",
         }),

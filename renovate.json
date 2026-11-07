@@ -13,7 +13,7 @@
     ],
     "packageRules": [
         {
-            "description": "Node 24+ has no 32-bit ARM build, and the Raspberry Pis still need linux/arm/v7.",
+            "description": "Node 24 and newer have no 32-bit ARM build, and the Raspberry Pis still need linux/arm/v7.",
             "matchDepNames": ["node", "@types/node"],
             "allowedVersions": "<23"
         },

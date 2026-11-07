@@ -103,7 +103,7 @@ const publishOnce = (message: MqttMessage): Effect.Effect<void, MqttClientError,
                             )
                         );
                     } else {
-                        resume(Effect.succeed(undefined));
+                        resume(Effect.undefined);
                     }
                 }
             );

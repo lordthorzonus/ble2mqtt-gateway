@@ -19,7 +19,7 @@ RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 
 COPY package*.json .npmrc ./
-COPY tsconfig.json eslint.config.mjs  .prettierrc ./
+COPY tsconfig.json ./
 RUN npm ci --audit false
 
 COPY --chown=node:node  . ./

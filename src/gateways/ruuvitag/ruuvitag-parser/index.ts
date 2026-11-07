@@ -87,7 +87,9 @@ export class UnsupportedDataFormatError extends Data.TaggedError("UnsupportedDat
 }> {}
 
 export type RuuviParsingError =
-    NotValidRuuviManufacturerIdError | UnsupportedDataFormatError | InvalidRuuviDataLengthError;
+    | NotValidRuuviManufacturerIdError
+    | UnsupportedDataFormatError
+    | InvalidRuuviDataLengthError;
 
 const resolveParsingStrategy = Match.type<number>().pipe(
     Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed(DataFormat3ParsingStrategy)),
@@ -100,9 +102,6 @@ const resolveParsingStrategy = Match.type<number>().pipe(
 const assertValidDataFormat = (dataFormat: number): dataFormat is RuuvitagSensorProtocolDataFormat =>
     Object.values<number | string>(RuuvitagSensorProtocolDataFormat).includes(dataFormat);
 
-/**
- * Validates the manufacturer id and returns the raw data format byte.
- */
 const parseHeader = (
     rawRuuviTagData: Buffer
 ): Effect.Effect<number, NotValidRuuviManufacturerIdError | InvalidRuuviDataLengthError> => {
@@ -134,6 +133,8 @@ export const parse = (rawRuuviTagData: Buffer): Effect.Effect<RuuviTagSensorData
 export const parseRuuviDataFormat = (
     rawRuuviTagData: Buffer
 ): Effect.Effect<RuuvitagSensorProtocolDataFormat, RuuviParsingError> =>
-    Effect.flatMap(parseHeader(rawRuuviTagData), (dataFormat) =>
-        assertValidDataFormat(dataFormat) ? Effect.succeed(dataFormat) : new UnsupportedDataFormatError({ dataFormat })
+    Effect.filterOrFail(
+        parseHeader(rawRuuviTagData),
+        assertValidDataFormat,
+        (dataFormat) => new UnsupportedDataFormatError({ dataFormat })
     );

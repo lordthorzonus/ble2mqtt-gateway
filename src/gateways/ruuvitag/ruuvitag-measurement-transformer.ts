@@ -42,9 +42,6 @@ const transformRuuviTagData = (
         Match.exhaustive
     );
 
-/**
- * Decorates and formats parsed RuuviTag sensor data with the device's decimal precision.
- */
 export const transformRuuviTagSensorDataToDeviceMessage = (
     peripheral: PeripheralWithManufacturerData,
     deviceRegistryEntry: DeviceRegistryEntry,

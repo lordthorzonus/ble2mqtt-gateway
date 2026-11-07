@@ -108,12 +108,7 @@ describe("RuuviTag Gateway", () => {
             Layer.succeed(DeviceRegistryService, deviceRegistry)
         );
 
-        return Effect.provide(
-            Effect.gen(function* () {
-                return yield* program;
-            }),
-            TestLayerWithDeviceRegistry
-        );
+        return Effect.provide(program, TestLayerWithDeviceRegistry);
     };
 
     describe("ruuvitagGateway()", () => {

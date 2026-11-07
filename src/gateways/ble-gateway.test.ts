@@ -199,7 +199,7 @@ describe("BLE Gateway", () => {
 
     const collectDeviceMessages = (peripherals: Peripheral[], takeCount: number) =>
         Effect.gen(function* () {
-            const bleGateway = yield* makeBleGateway();
+            const bleGateway = yield* makeBleGateway;
             const eventStream = bleGateway.deviceMessages(Stream.fromIterable(peripherals));
 
             return yield* Stream.runCollect(Stream.take(eventStream, takeCount));
@@ -320,7 +320,7 @@ describe("BLE Gateway", () => {
             expect.arrayContaining([expect.objectContaining(handledMessage), expect.objectContaining(handledMessage)])
         );
 
-        // Gateways run concurrently, so only the order within one gateway is deterministic.
+        // The gateways run concurrently, so the test only checks message order within each gateway.
         const unavailableMessagesOf = (deviceType: DeviceType) =>
             messages.filter(
                 (message) => message.type === MessageType.Availability && message.device.type === deviceType

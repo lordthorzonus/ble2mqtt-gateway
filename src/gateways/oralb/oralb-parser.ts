@@ -12,7 +12,6 @@ import { asSeconds, asSectorNumber } from "../units.js";
 /** Bluetooth company identifier used by Oral-B toothbrushes (Procter & Gamble). */
 export const oralbManufacturerId = 220; // 0x00DC
 
-/** Raw values from an Oral-B advertisement, before mapping to sensor data. */
 export interface OralBRawData {
     modelBytes: Buffer;
     state: number;
@@ -25,7 +24,6 @@ export interface OralBRawData {
     numberOfSectors?: number;
 }
 
-/** The manufacturer data does not start with the Oral-B manufacturer id. */
 export class NotValidOralBManufacturerIdError extends Data.TaggedError("NotValidOralBManufacturerIdError")<{
     manufacturerId: number;
 }> {}
@@ -35,7 +33,6 @@ export class InvalidOralBDataLengthError extends Data.TaggedError("InvalidOralBD
     length: number;
 }> {}
 
-/** Failures from parsing an Oral-B advertisement. */
 export type OralBParsingError = NotValidOralBManufacturerIdError | InvalidOralBDataLengthError;
 
 const RUNNING_STATE = 3;
@@ -241,9 +238,7 @@ const resolveSector = (rawData: OralBRawData): string => {
     return mapSector(rawData.sector);
 };
 
-/**
- * Maps raw advertisement values to sensor data. Brushing mode names depend on the model.
- */
+/** Brushing mode names depend on the model. */
 export const toOralBSensorData = (rawData: OralBRawData, model: ResolvedOralBModel): OralBSensorData => {
     const sensorData: OralBSensorData = {
         state: mapState(rawData.state),
@@ -265,19 +260,12 @@ export const toOralBSensorData = (rawData: OralBRawData, model: ResolvedOralBMod
     return sensorData;
 };
 
-/** A parsed Oral-B advertisement. */
 export interface OralBAdvertisement {
     rawData: OralBRawData;
     /** `unknown` when the model bytes are not recognised. */
     detectedModel: ResolvedOralBModel;
 }
 
-/**
- * Parses Oral-B manufacturer data.
- *
- * @returns The raw values and the detected model, or `InvalidOralBDataLengthError` /
- * `NotValidOralBManufacturerIdError` when the data is not an Oral-B advertisement.
- */
 export const parseOralBAdvertisement = (
     manufacturerData: Buffer
 ): Effect.Effect<OralBAdvertisement, OralBParsingError> =>

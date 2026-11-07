@@ -7,7 +7,7 @@ import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry.js";
 import { MiFloraEventBuffer } from "./miflora-event-buffer.js";
 import { parseMiFloraPeripheralAdvertisement, SupportedMiFloraMeasurements } from "./miflora-parser/index.js";
 import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer.js";
-import { Effect, Option } from "effect";
+import { Effect } from "effect";
 
 export const mifloraGatewayId = 0x95fe;
 
@@ -58,12 +58,12 @@ const handleMifloraMeasurement =
         if (miFloraEventBuffer.isBufferReady(buffer)) {
             miFloraEventBuffer.clearBuffer(id);
 
-            return Effect.succeed(
-                Option.some(transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer))
+            return Effect.succeedSome(
+                transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer)
             );
         }
 
-        return Effect.succeed(Option.none());
+        return Effect.succeedNone;
     };
 
 export const makeMiFloraGateway = (miFloraSettings: MiFloraGatewayConfiguration) => {

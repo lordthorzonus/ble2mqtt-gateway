@@ -4,7 +4,8 @@ import { DateTime } from "luxon";
 
 export interface DeviceSettings {
     device: Device;
-    timeout?: number;
+    /** Offline timeout in milliseconds; `undefined` uses the gateway default. */
+    timeout?: number | undefined;
     decimalPrecision?: number;
 }
 

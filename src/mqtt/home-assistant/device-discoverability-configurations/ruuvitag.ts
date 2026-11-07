@@ -114,7 +114,6 @@ const macAddressSensorConfiguration: HomeAssistantSensorConfiguration = {
     deviceClass: HomeAssistantDeviceClass.None,
     entityCategory: HomeAssistantEntityCategory.Diagnostic,
     name: "Mac Address",
-    unitOfMeasurement: undefined,
     uniqueId: "mac_address",
     device: ruuviTagDeviceConfiguration,
     suggestedDecimalPrecision: null,

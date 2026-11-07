@@ -22,16 +22,12 @@ export interface MiFloraMeasurement<T extends MifloraMeasurementEventType> {
     data: number;
 }
 
-/** The service data is shorter than the bytes its measurement event reads. */
 export class InvalidMiFloraDataLengthError extends Data.TaggedError("InvalidMiFloraDataLengthError")<{
     eventType: MifloraMeasurementEventType;
     length: number;
     minimumLength: number;
 }> {}
 
-/**
- * Fails when `data` is shorter than the bytes an event reads, so strategies never read out of range.
- */
 const requireMinimumLength = (
     data: Buffer,
     eventType: MifloraMeasurementEventType,
@@ -41,9 +37,6 @@ const requireMinimumLength = (
         ? new InvalidMiFloraDataLengthError({ eventType, length: data.length, minimumLength })
         : Effect.succeed(data);
 
-/**
- * How a measurement value is stored: its size in bytes and how to read it at an offset.
- */
 interface MeasurementField {
     byteLength: number;
     read: (data: Buffer, offset: number) => number;
@@ -90,15 +83,17 @@ export const parseIlluminanceEvent = makeMiFloraMeasurementParser(
     UINT24_LE
 );
 
-export const parseLowBatteryEvent = (): Effect.Effect<
-    MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent>
-> =>
+export const parseLowBatteryEvent = (
+    _data: Buffer
+): Effect.Effect<MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent>> =>
     Effect.succeed({
         measurementType: MifloraMeasurementEventType.LowBatteryEvent,
         data: 1,
     });
 
-export const parseInvalidEvent = (): Effect.Effect<MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent>> =>
+export const parseInvalidEvent = (
+    _data: Buffer
+): Effect.Effect<MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent>> =>
     Effect.succeed({
         measurementType: MifloraMeasurementEventType.InvalidEvent,
         data: 0,

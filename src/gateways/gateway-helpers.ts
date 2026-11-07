@@ -9,18 +9,17 @@ export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")
     id: string;
 }> {}
 
+/** The device registry of the gateway that is handling the current advertisement. */
 export class DeviceRegistryService extends Context.Service<DeviceRegistryService, DeviceRegistry>()(
     "DeviceRegistryService"
 ) {}
 
-/** A peripheral whose advertisement carries manufacturer-specific data. */
 export interface PeripheralWithManufacturerData extends Peripheral {
     advertisement: Omit<Peripheral["advertisement"], "manufacturerData"> & {
         manufacturerData: Buffer;
     };
 }
 
-/** The advertisement has no manufacturer data, so gateways that parse manufacturer data can't handle it. */
 export class PeripheralWithoutManufacturerDataError extends Data.TaggedError("PeripheralWithoutManufacturerDataError")<{
     peripheral: Peripheral;
 }> {}
@@ -28,9 +27,6 @@ export class PeripheralWithoutManufacturerDataError extends Data.TaggedError("Pe
 const hasManufacturerData = (peripheral: Peripheral): peripheral is PeripheralWithManufacturerData =>
     peripheral.advertisement.manufacturerData !== undefined;
 
-/**
- * Narrows the peripheral to one with manufacturer data, or fails with `PeripheralWithoutManufacturerDataError`.
- */
 export const requireManufacturerData = (
     peripheral: Peripheral
 ): Effect.Effect<PeripheralWithManufacturerData, PeripheralWithoutManufacturerDataError> =>
@@ -60,10 +56,8 @@ const takeAvailabilityMessage = (
     return Option.some(generateAvailabilityMessage(device, "online", peripheral));
 };
 
-/** How `handleBleAdvertisement` parses and maps advertisements for one device type. */
 export interface HandleBleAdvertisementOptions<TError, TPeripheral extends Peripheral, TAdvertisement> {
     readonly deviceType: DeviceType;
-    /** Whether advertisements from devices that are not in the configuration are registered or ignored. */
     readonly unknownDevices: "allow" | "ignore";
     readonly parseAdvertisement: (peripheral: TPeripheral) => Effect.Effect<TAdvertisement, TError>;
     /** Model to register an unknown device with. */
@@ -76,9 +70,8 @@ export interface HandleBleAdvertisementOptions<TError, TPeripheral extends Perip
 }
 
 /**
- * Parses the advertisement once and turns it into availability and sensor messages.
- * Advertisements from unconfigured devices are ignored unless unknown devices are allowed.
- * When parsing or sensor handling fails, availability is not marked published.
+ * Parses the advertisement once. When parsing or sensor handling fails, availability is not marked
+ * published, so the next advertisement sends it again.
  */
 export const handleBleAdvertisement = <TError, TPeripheral extends Peripheral, TAdvertisement>(
     peripheral: TPeripheral,

@@ -1,6 +1,6 @@
 /**
  * RuuviTag data format byte, the first byte after the manufacturer id.
- * Kept in its own module so the parsing strategies can use it without importing the parser entrypoint.
+ * Separate from `index.ts` so the parsing strategies can use the enum without a circular import.
  *
  * @see https://docs.ruuvi.com/communication/bluetooth-advertisements
  */

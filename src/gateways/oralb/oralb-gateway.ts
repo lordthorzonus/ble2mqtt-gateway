@@ -10,8 +10,8 @@ import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 
 /**
- * Builds the device registry for configured Oral-B toothbrushes. Devices without a configured model are
- * registered with the unknown model; sensor messages carry the model resolved per advertisement.
+ * Devices without a configured model are registered with the unknown model. Sensor messages carry the
+ * model resolved for each advertisement instead.
  */
 export const makeOralbDeviceRegistry = (
     oralbSettings: NonNullable<OralBGatewayConfiguration>,
@@ -64,8 +64,8 @@ const makeTransformAdvertisementToSensorMessage =
     };
 
 /**
- * Maps Oral-B toothbrush advertisements to device messages. A configured model overrides the model detected
- * from the advertisement, which decides the brushing mode names.
+ * A configured model overrides the model detected from the advertisement. The model decides the brushing
+ * mode names.
  */
 export const makeOralbGateway = (oralbSettings: NonNullable<OralBGatewayConfiguration>): MapMessage => {
     const modelOverrides = new Map(

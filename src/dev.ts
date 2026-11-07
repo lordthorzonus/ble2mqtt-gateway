@@ -27,7 +27,7 @@ const bleMode = Effect.gen(function* () {
         })
     );
 
-    return yield* scan().pipe(
+    return yield* scan.pipe(
         Stream.tap((peripheral) =>
             Effect.sync(() => {
                 const manufacturerId = getManufacturerId(peripheral);
@@ -58,10 +58,10 @@ const gatewayMode = Effect.gen(function* () {
         })
     );
 
-    const bleGateway = yield* makeBleGateway();
+    const bleGateway = yield* makeBleGateway;
 
     const eventStream = bleGateway
-        .deviceMessages(scan())
+        .deviceMessages(scan)
         .pipe(Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType));
 
     return yield* eventStream.pipe(
@@ -83,8 +83,8 @@ const mqttMode = Effect.gen(function* () {
         })
     );
 
-    const bleGateway = yield* makeBleGateway();
-    const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+    const bleGateway = yield* makeBleGateway;
+    const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer;
 
     const filterDeviceType = isDeviceType(process.argv[3]) ? process.argv[3] : undefined;
 
@@ -93,7 +93,7 @@ const mqttMode = Effect.gen(function* () {
     }
 
     const eventStream = bleGateway
-        .deviceMessages(scan())
+        .deviceMessages(scan)
         .pipe(Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType));
 
     return yield* eventStream.pipe(
@@ -129,4 +129,5 @@ const devProgram = Effect.gen(function* () {
 
 const configuredDevProgram = Effect.provide(Effect.scoped(devProgram), DevLive);
 
+// oxlint-disable-next-line effecttsgo/unstable-api-usage -- runMain is Effect's recommended entry point because it handles signals and exit codes, and no stable API replaces it.
 NodeRuntime.runMain(configuredDevProgram);

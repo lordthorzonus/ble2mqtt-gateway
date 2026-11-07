@@ -6,9 +6,10 @@ import { MqttClient } from "./infra/mqtt-client.js";
 import { mockLogger, mockMqttClient } from "./test/test-context.js";
 import { Settings } from "luxon";
 import { Data, Duration, Effect, Layer, Schedule, Stream } from "effect";
+import type { BleScannerError, Peripheral } from "./infra/ble-scanner.js";
 import { v4 as uuid } from "uuid";
 
-const mockScan = vi.fn();
+const mockScan = vi.fn<() => Stream.Stream<Peripheral, BleScannerError>>();
 const mockedUuid = vi.mocked<() => string>(uuid);
 
 vi.mock("uuid");
@@ -16,10 +17,13 @@ vi.mock("uuid");
 // The scanner module is mocked, so its error class is not importable here.
 class ScannerError extends Data.TaggedError("BleScannerError")<{ message: string }> {}
 
-vi.mock("./infra/ble-scanner.js", () => ({
-    __esModule: true,
-    scan: vi.fn(() => mockScan()),
-}));
+vi.mock("./infra/ble-scanner.js", async () => {
+    // vi.mock factories run before this file's imports, so the factory imports effect itself.
+    const { Stream } = await import("effect");
+
+    // scan is a Stream value; suspend lets each test choose the stream through mockScan.
+    return { scan: Stream.suspend(() => mockScan()) };
+});
 
 describe("gateway", () => {
     const originalNow = Settings.now;
@@ -398,7 +402,7 @@ describe("gateway", () => {
                 {
                     id: "aa:aa",
                     name: "fridge",
-                    // SAFETY: an unsupported model is the input under test; config parsing would reject it.
+                    // SAFETY: this test needs an unsupported model, which config parsing would reject.
                     model: "invalid-model" as never,
                 },
             ],

@@ -8,9 +8,9 @@ describe("formatNumericSensorValue", () => {
         [1.23, 2, 1.23456789],
         [1.2, 1, 1.23456789],
         [1, 0, 1.23456789],
-        // prettier-ignore
+        // oxfmt-ignore
         [0.00, 2, 0.004],
-        // prettier-ignore
+        // oxfmt-ignore
         [1.00, 2, 1],
         [-1.2346, 4, -1.23456789],
     ] as const;

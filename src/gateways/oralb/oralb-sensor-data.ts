@@ -17,7 +17,6 @@ export const OralBModels = [
     "genius_x",
 ] as const;
 
-/** A known Oral-B model. */
 export type OralBModel = (typeof OralBModels)[number];
 
 /** Model reported when there is no configured override and the model bytes are not recognised. */
@@ -30,7 +29,6 @@ export const UNKNOWN_ORALB_MODEL = "unknown";
  */
 export type ResolvedOralBModel = OralBModel | typeof UNKNOWN_ORALB_MODEL;
 
-/** Toothbrush state reported in the advertisement. */
 export type OralBState =
     | "unknown"
     | "initializing"
@@ -46,7 +44,7 @@ export type OralBState =
     | "sleeping"
     | "transport";
 
-/** Brushing pressure reported in the advertisement. Button presses share the pressure byte. */
+/** Button presses share the pressure byte, so they appear as pressure values. */
 export type OralBPressure = "normal" | "high" | "button_pressed" | "power_button_pressed";
 
 /**
