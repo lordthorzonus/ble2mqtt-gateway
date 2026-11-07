@@ -10,7 +10,7 @@
         "typecheck": "tsc -p tsconfig.json --noEmit",
         "start": "node dist/index.js",
         "start:dev": "tsx src/index.ts",
-        "lint": "eslint src/"
+        "lint": "effect-tsgo oxlint --type-aware src/ && eslint src/"
     },
     "keywords": [
         "ruuvitag",
@@ -54,7 +54,10 @@
         "@vitest/eslint-plugin": "1.6.28",
         "eslint": "10.14.0",
         "eslint-config-prettier": "10.1.8",
+        "eslint-plugin-oxlint": "1.92.0",
         "eslint-plugin-prettier": "5.5.7",
+        "oxlint": "1.92.0",
+        "oxlint-tsgolint": "7.0.2006",
         "prettier": "3.9.10",
         "tsx": "4.23.15",
         "typescript": "npm:@typescript/typescript6@6.0.2",

@@ -6,6 +6,7 @@ import tseslint from "typescript-eslint";
 import vitest from "@vitest/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import oxlint from "eslint-plugin-oxlint";
 
 export default defineConfig(
     eslint.configs.recommended,
@@ -55,5 +56,11 @@ export default defineConfig(
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-return": "off",
         },
+    },
+    // Must stay last: turns off the ESLint rules that oxlint runs (see .oxlintrc.json).
+    ...oxlint.buildFromOxlintConfigFile("./.oxlintrc.json"),
+    {
+        // oxlint runs this rule, but eslint-plugin-oxlint 1.92 doesn't map it yet.
+        rules: { "no-useless-assignment": "off" },
     }
 );

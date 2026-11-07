@@ -12,7 +12,8 @@
 - Use Effect Schema for new validation. Existing Zod validation, including `src/config.ts`, is legacy code to migrate when that migration is part of the task.
 - Fix production types without type assertions. Tests may use assertions when needed for fixtures or mocks.
 - Use Luxon's `DateTime` and `Duration` for dates and time calculations.
-- Follow `.prettierrc`, `eslint.config.mjs`, and `tsconfig.json` for formatting, linting, and compiler settings.
+- Follow `.prettierrc`, `.oxlintrc.json`, `eslint.config.mjs`, and `tsconfig.json` for formatting, linting, and compiler settings.
+- `npm run lint` runs oxlint first (through `effect-tsgo oxlint`, which adds the Effect rules), then ESLint for Prettier and the few rules oxlint lacks. Plain `npx oxlint` cannot load the `effecttsgo` plugin.
 
 ## Task-specific references
 
