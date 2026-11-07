@@ -41,7 +41,7 @@
     },
     "devDependencies": {
         "@effect/tsgo": "0.67.5",
-        "@eslint/js": "9.39.5",
+        "@eslint/js": "10.0.1",
         "@types/js-yaml": "4.0.9",
         "@types/lodash": "4.17.27",
         "@types/lodash.snakecase": "4.1.9",
@@ -52,7 +52,7 @@
         "@typescript/native": "npm:typescript@7.0.2",
         "@vitest/coverage-v8": "5.1.0",
         "@vitest/eslint-plugin": "1.6.28",
-        "eslint": "9.39.5",
+        "eslint": "10.14.0",
         "eslint-config-prettier": "10.1.8",
         "eslint-plugin-prettier": "5.5.7",
         "prettier": "3.9.10",
