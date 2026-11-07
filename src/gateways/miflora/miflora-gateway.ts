@@ -5,10 +5,9 @@ import { MiFloraGatewayConfiguration } from "../../config";
 import { DeviceRegistryService, handleBleAdvertisement } from "../gateway-helpers";
 import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry";
 import { MiFloraEventBuffer } from "./miflora-event-buffer";
-import { parseMiFloraPeripheralAdvertisement } from "./miflora-parser";
+import { parseMiFloraPeripheralAdvertisement, SupportedMiFloraMeasurements } from "./miflora-parser";
 import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer";
 import { Effect, Option } from "effect";
-import { Logger } from "../../infra/logger";
 
 export const mifloraGatewayId = 0x95fe;
 
@@ -46,37 +45,37 @@ export const makeMiFloraDeviceRegistry = (
     return new DeviceRegistry(deviceSettings, miFloraSettings.timeout, defaultDecimalPrecision);
 };
 
-const handleMifloraBleAdvertisement =
-    (miFloraEventBuffer: MiFloraEventBuffer) => (peripheral: Peripheral, deviceRegistryEntry: DeviceRegistryEntry) =>
-        Effect.gen(function* () {
-            const id = peripheral.uuid;
-            const miFloraMeasurementEvent = yield* parseMiFloraPeripheralAdvertisement(peripheral);
+const handleMifloraMeasurement =
+    (miFloraEventBuffer: MiFloraEventBuffer) =>
+    (
+        peripheral: Peripheral,
+        deviceRegistryEntry: DeviceRegistryEntry,
+        miFloraMeasurementEvent: SupportedMiFloraMeasurements
+    ) => {
+        const id = peripheral.uuid;
+        const buffer = miFloraEventBuffer.bufferMeasurementEvent(id, miFloraMeasurementEvent);
 
-            const buffer = miFloraEventBuffer.bufferMeasurementEvent(id, miFloraMeasurementEvent);
+        if (miFloraEventBuffer.isBufferReady(buffer)) {
+            miFloraEventBuffer.clearBuffer(id);
+            return Effect.succeed(
+                Option.some(transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer))
+            );
+        }
 
-            if (miFloraEventBuffer.isBufferReady(buffer)) {
-                miFloraEventBuffer.clearBuffer(id);
-                return Option.some(
-                    transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer)
-                );
-            }
-
-            return Option.none();
-        });
+        return Effect.succeed(Option.none());
+    };
 
 export const makeMiFloraGateway = (miFloraSettings: MiFloraGatewayConfiguration) => {
     const sensorEventBuffer = new MiFloraEventBuffer(miFloraSettings.devices);
 
-    return (
-        peripheral: Peripheral
-    ): Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService | Logger> => {
-        return handleBleAdvertisement(
-            peripheral,
-            DeviceType.MiFlora,
-            false,
-            () => Effect.succeed("miflora"),
-            handleMifloraBleAdvertisement(sensorEventBuffer)
-        ).pipe(
+    return (peripheral: Peripheral): Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService> => {
+        return handleBleAdvertisement(peripheral, {
+            deviceType: DeviceType.MiFlora,
+            unknownDevices: "ignore",
+            parseAdvertisement: parseMiFloraPeripheralAdvertisement,
+            resolveDeviceModel: () => "miflora",
+            handleDeviceSensorData: handleMifloraMeasurement(sensorEventBuffer),
+        }).pipe(
             Effect.catchTags({
                 InvalidMiFloraAdvertisementError: (error) =>
                     new GatewayError({
@@ -92,6 +91,11 @@ export const makeMiFloraGateway = (miFloraSettings: MiFloraGatewayConfiguration)
                     new GatewayError({
                         peripheral,
                         message: `Unsupported MiFlora event: ${error.eventType}`,
+                    }),
+                InvalidMiFloraDataLengthError: (error) =>
+                    new GatewayError({
+                        peripheral,
+                        message: `Invalid MiFlora data length for event ${error.eventType}: ${error.length}, expected at least ${error.minimumLength}`,
                     }),
             })
         );

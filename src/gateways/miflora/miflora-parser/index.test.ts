@@ -4,9 +4,10 @@ import {
     SupportedMiFloraMeasurements,
     InvalidMiFloraAdvertisementError,
     UnsupportedMiFloraEventError,
+    InvalidMiFloraDataLengthError,
 } from "./index";
 import { Peripheral } from "../../../infra/ble-scanner";
-import { Effect } from "effect";
+import { Cause, Effect, Exit, FastCheck as fc, Option } from "effect";
 import { testEffectWithContext } from "../../../test/test-context";
 
 export const getStubPeripheralWithServiceData = (serviceData: string, id = "a"): Peripheral => {
@@ -88,6 +89,90 @@ describe("parseMiFloraPeripheralAdvertisement()", () => {
                     expect(result).toStrictEqual(new UnsupportedMiFloraEventError({ eventType: 1040 }));
                 })
             )
+        );
+    });
+
+    const truncatedEvents: [string, MifloraMeasurementEventType, number][] = [
+        ["71209800a864aed0a8654c0d0810", MifloraMeasurementEventType.Moisture, 16],
+        ["71209800b1cf076e8d7cc40d091002c6", MifloraMeasurementEventType.SoilConductivity, 17],
+        ["71209800239c066e8d7cc40d04100204", MifloraMeasurementEventType.Temperature, 17],
+        ["71209800c3cf076e8d7cc40d0710033700", MifloraMeasurementEventType.Illuminance, 18],
+    ];
+
+    it.each(truncatedEvents)(
+        "fails with InvalidMiFloraDataLengthError for truncated event data: %s",
+        (serviceData, eventType, minimumLength) =>
+            Effect.runPromise(
+                Effect.gen(function* () {
+                    const peripheral = getStubPeripheralWithServiceData(serviceData);
+                    const result = yield* Effect.flip(parseMiFloraPeripheralAdvertisement(peripheral));
+                    expect(result).toStrictEqual(
+                        new InvalidMiFloraDataLengthError({
+                            eventType,
+                            length: serviceData.length / 2,
+                            minimumLength,
+                        })
+                    );
+                })
+            )
+    );
+
+    describe("properties", () => {
+        const isDefect = (exit: Exit.Exit<unknown, unknown>): boolean =>
+            Exit.isFailure(exit) && Cause.isDie(exit.cause);
+
+        const parseServiceData = (data: Uint8Array) =>
+            Effect.runSyncExit(
+                parseMiFloraPeripheralAdvertisement(getStubPeripheralWithServiceData(Buffer.from(data).toString("hex")))
+            );
+
+        it("never fails with a defect for arbitrary service data", () => {
+            fc.assert(
+                fc.property(fc.uint8Array({ maxLength: 40 }), (data) => {
+                    expect(isDefect(parseServiceData(data))).toBe(false);
+                })
+            );
+        });
+
+        const minimumLengths: [MifloraMeasurementEventType, number][] = [
+            [MifloraMeasurementEventType.Temperature, 17],
+            [MifloraMeasurementEventType.SoilConductivity, 17],
+            [MifloraMeasurementEventType.Moisture, 16],
+            [MifloraMeasurementEventType.Illuminance, 18],
+        ];
+
+        it.each(minimumLengths)(
+            "fails with InvalidMiFloraDataLengthError exactly when event %s is shorter than %s bytes",
+            (eventType, minimumLength) => {
+                const eventTypeBytes = [eventType & 0xff, eventType >> 8];
+
+                fc.assert(
+                    fc.property(
+                        fc.uint8Array({ minLength: 12, maxLength: 12 }),
+                        fc
+                            .integer({ min: 0, max: 6 })
+                            .chain((length) => fc.uint8Array({ minLength: length, maxLength: length })),
+                        (prefix, tail) => {
+                            const data = Buffer.concat([prefix, Buffer.from(eventTypeBytes), tail]);
+                            const exit = parseServiceData(data);
+                            const isLengthError =
+                                Exit.isFailure(exit) &&
+                                Cause.failureOption(exit.cause).pipe(
+                                    Option.exists((error) => error instanceof InvalidMiFloraDataLengthError)
+                                );
+
+                            expect(isDefect(exit)).toBe(false);
+                            expect(isLengthError).toBe(data.length < minimumLength);
+                        }
+                    ),
+                    {
+                        examples: Array.from({ length: 7 }, (_, length): [Uint8Array, Uint8Array] => [
+                            new Uint8Array(12),
+                            new Uint8Array(length),
+                        ]),
+                    }
+                );
+            }
         );
     });
 });

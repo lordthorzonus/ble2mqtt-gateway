@@ -1,7 +1,7 @@
 import * as mqtt from "mqtt";
 
 import { MqttMessage } from "../types";
-import { Data, Effect } from "effect";
+import { Data, Duration, Effect, Schedule } from "effect";
 import { Logger } from "./logger";
 import { Config } from "../config";
 
@@ -18,7 +18,11 @@ const mqttClient = Effect.gen(function* () {
         rejectUnauthorized: true,
         hostname: config.mqtt.host,
         protocolVersion: 5,
-        connectTimeout: 50,
+        connectTimeout: 30_000,
+        // Fail QoS 0 publishes while disconnected instead of queueing them until reconnect.
+        // Queued sensor state would be stale, and the queue grows without bound during outages.
+        // Retained availability and discovery messages are re-sent by the availability heartbeat.
+        queueQoSZero: false,
     });
     client.on("connect", () => {
         logger.info("MQTT client connected");
@@ -26,6 +30,18 @@ const mqttClient = Effect.gen(function* () {
 
     client.on("disconnect", () => {
         logger.info("MQTT client disconnected");
+    });
+
+    client.on("reconnect", () => {
+        logger.info("MQTT client reconnecting");
+    });
+
+    client.on("offline", () => {
+        logger.warn("MQTT client offline");
+    });
+
+    client.on("close", () => {
+        logger.info("MQTT client connection closed");
     });
 
     client.on("error", (error) => {
@@ -53,13 +69,21 @@ export class MqttClientError extends Data.TaggedError("MqttClientError")<{
     cause?: Error;
 }> {}
 
-export const publish = (message: MqttMessage): Effect.Effect<void, MqttClientError, MqttClient | Logger> =>
+/**
+ * Retained messages (availability and discovery) are retried briefly. State messages are not retried,
+ * because a retried state message is stale and the next advertisement replaces it anyway.
+ */
+const RETAINED_PUBLISH_RETRY_POLICY = Schedule.exponential(Duration.millis(500)).pipe(
+    Schedule.intersect(Schedule.recurs(3))
+);
+
+const publishOnce = (message: MqttMessage): Effect.Effect<void, MqttClientError, MqttClient | Logger> =>
     Effect.gen(function* () {
         const client = yield* MqttClient;
         const logger = yield* Logger;
 
         logger.debug("Publishing MQTT Message", { message });
-        return yield* Effect.async<undefined, MqttClientError, MqttClient>((resume) => {
+        return yield* Effect.async<undefined, MqttClientError>((resume) => {
             client.publish(
                 message.topic,
                 message.payload,
@@ -84,3 +108,10 @@ export const publish = (message: MqttMessage): Effect.Effect<void, MqttClientErr
             );
         });
     });
+
+/**
+ * Publishes one message. Callers that need ordering per topic must not publish to the same topic concurrently,
+ * because a retried message would otherwise overwrite a newer one.
+ */
+export const publish = (message: MqttMessage): Effect.Effect<void, MqttClientError, MqttClient | Logger> =>
+    message.retain ? Effect.retry(publishOnce(message), RETAINED_PUBLISH_RETRY_POLICY) : publishOnce(message);

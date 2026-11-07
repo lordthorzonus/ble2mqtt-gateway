@@ -1,3 +1,4 @@
+import { OralBModels } from "./gateways/oralb/oralb-sensor-data";
 import { load } from "js-yaml";
 import fs from "fs";
 import { z, ZodError } from "zod";
@@ -51,23 +52,7 @@ const oralbSchema = z.object({
                 name: z.string(),
                 id: z.string(),
                 timeout: z.number().int().optional(),
-                model: z
-                    .enum([
-                        "io_series_4",
-                        "io_series_6_7",
-                        "io_series_8",
-                        "io_series_9",
-                        "io_series_8_9",
-                        "smart_series_4000",
-                        "smart_series_6000",
-                        "smart_series_7000",
-                        "smart_series_8000",
-                        "smart_series_9000",
-                        "triumph_v2",
-                        "pro_6000",
-                        "genius_x",
-                    ])
-                    .optional(),
+                model: z.enum(OralBModels).optional(),
             })
         )
         .min(0),
@@ -89,12 +74,10 @@ const configSchema = z.object({
     unavailable_devices_check_interval_ms: z.number().int().default(10000),
     concurrency: z
         .object({
-            ble_gateway_processing: concurrencySchema,
             mqtt_message_production: concurrencySchema,
             mqtt_publishing: concurrencySchema,
         })
         .default({
-            ble_gateway_processing: "unbounded",
             mqtt_message_production: "unbounded",
             mqtt_publishing: "unbounded",
         }),
@@ -129,6 +112,7 @@ export class ConfigurationError extends Data.TaggedError("ConfigurationError")<{
 
 export type RuuviTagGatewayConfiguration = z.infer<typeof ruuvitagSchema>;
 export type MiFloraGatewayConfiguration = z.infer<typeof miFloraSchema>;
+/** Parsed `gateways.oralb` configuration section. */
 export type OralBGatewayConfiguration = z.infer<typeof oralbSchema>;
 export type GlobalConfiguration = z.infer<typeof configSchema>;
 

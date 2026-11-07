@@ -10,7 +10,9 @@ import {
     RuuviTagParsingStrategy,
     UnsupportedDataFormatError,
     NotValidRuuviManufacturerIdError,
+    InvalidRuuviDataLengthError,
     RuuviAirParsingStrategy,
+    parseRuuviDataFormat,
 } from "./index";
 import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
 import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
@@ -31,7 +33,7 @@ describe("RuuviTagParser", () => {
                     const ruuviTagData = Buffer.from(rawStringData, "hex");
                     const mockedParse = expectedParsingStrategy as Mock;
 
-                    mockedParse.mockReturnValue("a");
+                    mockedParse.mockReturnValue(Effect.succeed("a"));
                     const result = yield* parse(ruuviTagData);
                     expect(result).toBe("a");
                     expect(mockedParse).toHaveBeenCalledWith(ruuviTagData);
@@ -61,4 +63,22 @@ describe("RuuviTagParser", () => {
             })
         );
     });
+
+    it.each(["", "99", "9904"])(
+        "fails with InvalidRuuviDataLengthError for a truncated header: '%s'",
+        (rawStringData) =>
+            Effect.runPromise(
+                Effect.gen(function* () {
+                    const ruuviTagData = Buffer.from(rawStringData, "hex");
+                    const expectedError = new InvalidRuuviDataLengthError({
+                        dataFormat: null,
+                        length: ruuviTagData.length,
+                        minimumLength: 3,
+                    });
+
+                    expect(yield* Effect.flip(parse(ruuviTagData))).toStrictEqual(expectedError);
+                    expect(yield* Effect.flip(parseRuuviDataFormat(ruuviTagData))).toStrictEqual(expectedError);
+                })
+            )
+    );
 });

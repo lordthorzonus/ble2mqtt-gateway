@@ -3,7 +3,6 @@
 exports[`Config Config should return the proper configuration given in the env variable 1`] = `
 Config {
   "concurrency": {
-    "ble_gateway_processing": "unbounded",
     "mqtt_message_production": "unbounded",
     "mqtt_publishing": "unbounded",
   },

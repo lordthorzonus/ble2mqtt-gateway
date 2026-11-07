@@ -1,3 +1,5 @@
+import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils";
+import { Effect } from "effect";
 import { RuuviAirSensorData } from "../index";
 import { DataFormat6ParsingStrategy } from "./data-format-6-parsing-strategy";
 import {
@@ -99,7 +101,15 @@ describe("Data Format 6 Parsing Strategy", () => {
         "should parse the raw data %s to a valid RuuviTagAirQualitySensorData",
         (rawStringData, expectedRuuviTagSensorData) => {
             const rawData = Buffer.from(rawStringData, "hex");
-            expect(DataFormat6ParsingStrategy(rawData)).toEqual(expectedRuuviTagSensorData);
+            expect(Effect.runSync(DataFormat6ParsingStrategy(rawData))).toEqual(expectedRuuviTagSensorData);
         }
     );
+
+    it("fails with InvalidRuuviDataLengthError when the data is shorter than the data format reads", () => {
+        const rawData = Buffer.from("99040680010000000000000000000000FF00004C88", "hex");
+
+        expect(Effect.runSync(Effect.flip(DataFormat6ParsingStrategy(rawData)))).toStrictEqual(
+            new InvalidRuuviDataLengthError({ dataFormat: 0x06, length: rawData.length, minimumLength: 22 })
+        );
+    });
 });

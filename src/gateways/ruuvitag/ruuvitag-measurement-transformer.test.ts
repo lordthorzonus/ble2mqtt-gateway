@@ -1,5 +1,5 @@
 import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
-import { parse } from "./ruuvitag-parser";
+import { RuuviTagSensorData } from "./ruuvitag-parser";
 import {
     decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues,
     decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
@@ -7,12 +7,11 @@ import {
     EnhancedRuuviAirSensorData,
 } from "./ruuvitag-sensor-data-decorator";
 import { v4 as uuid } from "uuid";
-import { PeripheralWithManufacturerData } from "./ruuvitag-gateway";
-import { transformPeripheralAdvertisementToSensorDataDeviceMessage } from "./ruuvitag-measurement-transformer";
+import { PeripheralWithManufacturerData } from "../gateway-helpers";
+import { transformRuuviTagSensorDataToDeviceMessage } from "./ruuvitag-measurement-transformer";
 import { DateTime, Settings } from "luxon";
 import { DeviceRegistryEntry } from "../device-registry";
-import { Effect } from "effect";
-import { testEffectWithContext } from "../../test/test-context";
+import { Option } from "effect";
 import {
     asCelsius,
     asCO2Ppm,
@@ -29,10 +28,6 @@ import {
 
 Settings.defaultZone = "UTC";
 const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
-
-jest.mock("./ruuvitag-parser");
-
-const mockedParse = parse as jest.Mock;
 
 jest.mock("./ruuvitag-sensor-data-decorator");
 
@@ -81,6 +76,7 @@ describe("RuuviTag Measurement Transformer", () => {
             availability: "offline",
             lastPublishedAvailability: "offline",
             lastSeen: null,
+            macAddress: null,
         };
 
         const mockId = "id-1";
@@ -129,141 +125,133 @@ describe("RuuviTag Measurement Transformer", () => {
             },
         };
 
-        it("should transform the given peripheral advertisement into RuuviTagMeasurement", () =>
-            Effect.runPromise(
-                testEffectWithContext(
-                    Effect.gen(function* () {
-                        const dummyParsedData = { type: "environmental" as const, temperature: 24.3 };
-                        mockedParse.mockReturnValue(Effect.succeed(dummyParsedData));
-                        mockedRuuviTagDecorator.mockReturnValue(sensorData);
-                        mockedUuid.mockReturnValue(mockId);
+        it("should transform the given peripheral advertisement into RuuviTagMeasurement", () => {
+            const dummyParsedData = { type: "environmental", temperature: 24.3 } as unknown as RuuviTagSensorData;
+            mockedRuuviTagDecorator.mockReturnValue(sensorData);
+            mockedUuid.mockReturnValue(mockId);
 
-                        const result = yield* yield* transformPeripheralAdvertisementToSensorDataDeviceMessage(
-                            peripheral as PeripheralWithManufacturerData,
-                            device
-                        );
-                        expect(result).toStrictEqual(expectedMessage);
-
-                        expect(mockedParse).toHaveBeenCalledWith(peripheral.advertisement.manufacturerData);
-                        expect(mockedRuuviTagDecorator).toHaveBeenCalledWith(dummyParsedData);
-                        expect(mockedUuid).toHaveBeenCalledTimes(1);
-                    })
+            const result = Option.getOrThrow(
+                transformRuuviTagSensorDataToDeviceMessage(
+                    peripheral as PeripheralWithManufacturerData,
+                    device,
+                    dummyParsedData
                 )
-            ));
+            );
+            expect(result).toStrictEqual(expectedMessage);
 
-        it("should use the mac address from the peripheral advertisement if one is not available in sensor data", () =>
-            Effect.runPromise(
-                testEffectWithContext(
-                    Effect.gen(function* () {
-                        const dummyParsedData = { type: "environmental" as const, temperature: 24.3 };
-                        const sensorDataWithoutMacAddress = {
-                            ...expectedMessage.payload,
-                            macAddress: null,
-                        };
-                        mockedParse.mockReturnValue(Effect.succeed(dummyParsedData));
-                        mockedRuuviTagDecorator.mockReturnValue(sensorDataWithoutMacAddress);
-                        mockedUuid.mockReturnValue(mockId);
+            expect(mockedRuuviTagDecorator).toHaveBeenCalledWith(dummyParsedData);
+            expect(mockedUuid).toHaveBeenCalledTimes(1);
+        });
 
-                        const result = yield* yield* transformPeripheralAdvertisementToSensorDataDeviceMessage(
-                            peripheral as PeripheralWithManufacturerData,
-                            device
-                        );
-                        expect(result).toStrictEqual({
-                            ...expectedMessage,
-                            device: {
-                                ...expectedMessage.device,
-                                macAddress: peripheral.address,
-                            },
-                            payload: { ...sensorDataWithoutMacAddress },
-                        });
-                    })
+        it("should use the mac address from the peripheral advertisement if one is not available in sensor data", () => {
+            const dummyParsedData = { type: "environmental", temperature: 24.3 } as unknown as RuuviTagSensorData;
+            const sensorDataWithoutMacAddress = {
+                ...expectedMessage.payload,
+                macAddress: null,
+            };
+            mockedRuuviTagDecorator.mockReturnValue(sensorDataWithoutMacAddress);
+            mockedUuid.mockReturnValue(mockId);
+
+            const result = Option.getOrThrow(
+                transformRuuviTagSensorDataToDeviceMessage(
+                    peripheral as PeripheralWithManufacturerData,
+                    device,
+                    dummyParsedData
                 )
-            ));
+            );
+            expect(result).toStrictEqual({
+                ...expectedMessage,
+                device: {
+                    ...expectedMessage.device,
+                    macAddress: peripheral.address,
+                },
+                payload: { ...sensorDataWithoutMacAddress },
+            });
+        });
 
-        it("should transform air quality sensor data from peripheral advertisement", () =>
-            Effect.runPromise(
-                testEffectWithContext(
-                    Effect.gen(function* () {
-                        const airQualityPeripheral = {
-                            advertisement: {
-                                manufacturerData: Buffer.from("99040680010000000000000000000000FF00004C884F", "hex"),
-                                localName: "RuuviTag Air",
-                                serviceData: [],
-                            },
-                            address: "4C:88:4F",
-                            rssi: -45,
-                            id: "air-quality-id",
-                            uuid: "air-quality-uuid",
-                        };
+        it("should transform air quality sensor data from peripheral advertisement", () => {
+            const airQualityPeripheral = {
+                advertisement: {
+                    manufacturerData: Buffer.from("99040680010000000000000000000000FF00004C884F", "hex"),
+                    localName: "RuuviTag Air",
+                    serviceData: [],
+                },
+                address: "4C:88:4F",
+                rssi: -45,
+                id: "air-quality-id",
+                uuid: "air-quality-uuid",
+            };
 
-                        const airQualitySensorData: EnhancedRuuviAirSensorData = {
-                            type: "air-quality",
-                            temperature: asCelsius(-163.835),
-                            pressure: asPascal(50000),
-                            relativeHumidityPercentage: asRelativeHumidity(0.0),
-                            measurementSequence: 0,
-                            macAddress: "4C:88:4F",
-                            pm1: asPM1(0.0),
-                            pm2_5: asPM2_5(0.0),
-                            pm4: asPM4(0.0),
-                            pm10: asPM10(0.0),
-                            co2: asCO2Ppm(0),
-                            voc: asVOCIndex(0),
-                            nox: asNOxIndex(0),
-                            luminosity: asLux(0.0),
-                            calibrationInProgress: false,
-                            absoluteHumidity: 0.1,
-                            dewPoint: asCelsius(-163.8),
-                            ruuviIAQS: null,
-                            ruuviIAQSDescription: null,
-                            atmoTubeAQI: null,
-                            atmoTubeAQIDescription: null,
-                            heatIndex: null,
-                            humidex: null,
-                            breezeIndoorClimateIndex: null,
-                            breezeIndoorClimateIndexDescription: null,
-                        };
+            const airQualitySensorData: EnhancedRuuviAirSensorData = {
+                type: "air-quality",
+                temperature: asCelsius(-163.835),
+                pressure: asPascal(50000),
+                relativeHumidityPercentage: asRelativeHumidity(0.0),
+                measurementSequence: 0,
+                macAddress: "4C:88:4F",
+                pm1: asPM1(0.0),
+                pm2_5: asPM2_5(0.0),
+                pm4: asPM4(0.0),
+                pm10: asPM10(0.0),
+                co2: asCO2Ppm(0),
+                voc: asVOCIndex(0),
+                nox: asNOxIndex(0),
+                luminosity: asLux(0.0),
+                calibrationInProgress: false,
+                absoluteHumidity: 0.1,
+                dewPoint: asCelsius(-163.8),
+                ruuviIAQS: null,
+                ruuviIAQSDescription: null,
+                atmoTubeAQI: null,
+                atmoTubeAQIDescription: null,
+                heatIndex: null,
+                humidex: null,
+                breezeIndoorClimateIndex: null,
+                breezeIndoorClimateIndexDescription: null,
+            };
 
-                        const expectedAirQualityMessage: DeviceSensorMessage = {
-                            id: mockId,
-                            type: MessageType.SensorData,
-                            device: {
-                                type: DeviceType.Ruuvitag,
-                                friendlyName: device.device.friendlyName,
-                                id: device.device.id,
-                                macAddress: airQualitySensorData.macAddress ?? "no-mac-address",
-                                rssi: airQualityPeripheral.rssi,
-                                model: "air-quality",
-                                timeout: 10000,
-                            },
-                            time: mockedTime,
-                            payload: {
-                                ...airQualitySensorData,
-                                temperature: asCelsius(-163.84),
-                                pressure: asPascal(50000),
-                                relativeHumidityPercentage: asRelativeHumidity(0),
-                                pm2_5: asPM2_5(0),
-                                luminosity: asLux(0),
-                                absoluteHumidity: 0.1,
-                                dewPoint: -163.8,
-                            },
-                        };
+            const expectedAirQualityMessage: DeviceSensorMessage = {
+                id: mockId,
+                type: MessageType.SensorData,
+                device: {
+                    type: DeviceType.Ruuvitag,
+                    friendlyName: device.device.friendlyName,
+                    id: device.device.id,
+                    macAddress: airQualitySensorData.macAddress ?? "no-mac-address",
+                    rssi: airQualityPeripheral.rssi,
+                    model: "air-quality",
+                    timeout: 10000,
+                },
+                time: mockedTime,
+                payload: {
+                    ...airQualitySensorData,
+                    temperature: asCelsius(-163.84),
+                    pressure: asPascal(50000),
+                    relativeHumidityPercentage: asRelativeHumidity(0),
+                    pm2_5: asPM2_5(0),
+                    luminosity: asLux(0),
+                    absoluteHumidity: 0.1,
+                    dewPoint: -163.8,
+                },
+            };
 
-                        const dummyParsedAirQualityData = { type: "air-quality" as const, temperature: -163.835 };
-                        mockedParse.mockReturnValue(Effect.succeed(dummyParsedAirQualityData));
-                        mockedRuuviTagAirQualityDecorator.mockReturnValue(airQualitySensorData);
-                        mockedUuid.mockReturnValue(mockId);
+            const dummyParsedAirQualityData = {
+                type: "air-quality",
+                temperature: -163.835,
+            } as unknown as RuuviTagSensorData;
+            mockedRuuviTagAirQualityDecorator.mockReturnValue(airQualitySensorData);
+            mockedUuid.mockReturnValue(mockId);
 
-                        const result = yield* yield* transformPeripheralAdvertisementToSensorDataDeviceMessage(
-                            airQualityPeripheral as PeripheralWithManufacturerData,
-                            device
-                        );
-
-                        expect(result).toStrictEqual(expectedAirQualityMessage);
-                        expect(mockedParse).toHaveBeenCalledWith(airQualityPeripheral.advertisement.manufacturerData);
-                        expect(mockedUuid).toHaveBeenCalledTimes(1);
-                    })
+            const result = Option.getOrThrow(
+                transformRuuviTagSensorDataToDeviceMessage(
+                    airQualityPeripheral as PeripheralWithManufacturerData,
+                    device,
+                    dummyParsedAirQualityData
                 )
-            ));
+            );
+
+            expect(result).toStrictEqual(expectedAirQualityMessage);
+            expect(mockedUuid).toHaveBeenCalledTimes(1);
+        });
     });
 });

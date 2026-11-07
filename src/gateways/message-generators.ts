@@ -14,7 +14,7 @@ export const generateAvailabilityMessage = (
         id: uuid(),
         type: MessageType.Availability,
         device: {
-            macAddress: peripheral?.address ?? id,
+            macAddress: peripheral?.address ?? deviceRegistryEntry.macAddress ?? id,
             id: id,
             friendlyName: friendlyName,
             type: deviceRegistryEntry.device.type,

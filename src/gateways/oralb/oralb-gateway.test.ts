@@ -7,7 +7,7 @@ import { Logger } from "../../infra/logger";
 import { Config, GlobalConfiguration, OralBGatewayConfiguration } from "../../config";
 import { DeviceRegistryService } from "../gateway-helpers";
 import { getTestConfig } from "../../test/test-context";
-import { MessageType, OralBSensorMessage } from "../../types";
+import { DeviceMessage, DeviceType, MessageType, OralBSensorMessage } from "../../types";
 
 jest.mock("uuid");
 const mockedUuid = uuid as jest.Mock;
@@ -218,6 +218,65 @@ describe("OralB Gateway", () => {
             const sensorMessage = messagesArray.find((m) => m.type === MessageType.SensorData) as OralBSensorMessage;
             expect(sensorMessage).toBeDefined();
             expect(sensorMessage.payload.brushingMode).toBe("daily_clean");
+        });
+
+        const unknownModelPeripheral = {
+            ...peripheral,
+            advertisement: {
+                ...peripheral.advertisement,
+                manufacturerData: Buffer.from([0xdc, 0x00, 0xff, 0xff, 0x03, 0x03, 0x90, 0x01, 0x1e, 0x01, 0x02]),
+            },
+        };
+
+        const runGateway = (settings: NonNullable<OralBGatewayConfiguration>, input: Peripheral) =>
+            Effect.runPromise(
+                makeOralbGateway(settings)(input).pipe(
+                    Effect.provideService(
+                        DeviceRegistryService,
+                        makeOralbDeviceRegistry(settings, { defaultDecimalPrecision: 2 })
+                    ),
+                    Effect.provide(TestLayer)
+                )
+            );
+
+        const findSensorMessage = (messages: Iterable<DeviceMessage>): OralBSensorMessage | undefined =>
+            Array.from(messages).find(
+                (message): message is OralBSensorMessage =>
+                    message.type === MessageType.SensorData && message.device.type === DeviceType.OralB
+            );
+
+        it("uses the configured model override when the model bytes are unknown", async () => {
+            const settings: NonNullable<OralBGatewayConfiguration> = {
+                ...oralbSettings,
+                devices: [{ id: "aa:bb:cc:dd:ee:ff", name: "my_toothbrush", model: "smart_series_4000" }],
+            };
+
+            const sensorMessage = findSensorMessage(await runGateway(settings, unknownModelPeripheral));
+
+            expect(sensorMessage?.device.model).toBe("smart_series_4000");
+            expect(sensorMessage?.payload.brushingMode).toBe("daily_clean");
+        });
+
+        it("publishes the unknown model with model independent values when the model bytes are unknown", async () => {
+            const sensorMessage = findSensorMessage(await runGateway(oralbSettings, unknownModelPeripheral));
+
+            expect(sensorMessage?.device.model).toBe("unknown");
+            expect(sensorMessage?.payload).toEqual(
+                expect.objectContaining({
+                    state: "running",
+                    pressure: "high",
+                    brushingTimeSeconds: 90,
+                    sector: "sector_2",
+                    brushingMode: "unknown_mode_1",
+                    isBrushing: true,
+                })
+            );
+        });
+
+        it("reports the detected model on sensor messages", async () => {
+            const sensorMessage = findSensorMessage(await runGateway(oralbSettings, peripheral));
+
+            expect(sensorMessage?.device.model).toBe("io_series_6_7");
         });
     });
 });

@@ -1,3 +1,4 @@
+import { Data, Effect } from "effect";
 import {
     asCelsius,
     asCO2Ppm,
@@ -12,6 +13,28 @@ import {
     RelativeHumidity,
     VOCIndex,
 } from "../../../units";
+
+/**
+ * The manufacturer data is shorter than the header or than the layout of its data format.
+ * `dataFormat` is null when the header itself is truncated.
+ */
+export class InvalidRuuviDataLengthError extends Data.TaggedError("InvalidRuuviDataLengthError")<{
+    dataFormat: number | null;
+    length: number;
+    minimumLength: number;
+}> {}
+
+/**
+ * Fails when `rawData` is shorter than the bytes a data format reads, so strategies never read out of range.
+ */
+export const requireMinimumLength = (
+    rawData: Buffer,
+    dataFormat: number,
+    minimumLength: number
+): Effect.Effect<Buffer, InvalidRuuviDataLengthError> =>
+    rawData.length < minimumLength
+        ? new InvalidRuuviDataLengthError({ dataFormat, length: rawData.length, minimumLength })
+        : Effect.succeed(rawData);
 
 export const isInvalidMeasurementForSigned16BitInteger = (value: number): boolean => {
     return value === 0x8000 || value === -0x8000;

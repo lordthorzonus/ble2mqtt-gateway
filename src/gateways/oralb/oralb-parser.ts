@@ -1,10 +1,19 @@
 import { Data, Effect } from "effect";
-import { OralBModel, OralBSensorData, OralBState, OralBPressure } from "./oralb-sensor-data";
+import {
+    OralBModel,
+    OralBSensorData,
+    OralBState,
+    OralBPressure,
+    ResolvedOralBModel,
+    UNKNOWN_ORALB_MODEL,
+} from "./oralb-sensor-data";
 import { asSeconds, asSectorNumber } from "../units";
 
+/** Bluetooth company identifier used by Oral-B toothbrushes (Procter & Gamble). */
 export const oralbManufacturerId = 220; // 0x00DC
 
-interface OralBRawData {
+/** Raw values from an Oral-B advertisement, before mapping to sensor data. */
+export interface OralBRawData {
     modelBytes: Buffer;
     state: number;
     pressure: number;
@@ -16,19 +25,20 @@ interface OralBRawData {
     numberOfSectors?: number;
 }
 
+/** The manufacturer data does not start with the Oral-B manufacturer id. */
 export class NotValidOralBManufacturerIdError extends Data.TaggedError("NotValidOralBManufacturerIdError")<{
     manufacturerId: number;
 }> {}
 
+/** The manufacturer data is not 11 or 13 bytes long (including the manufacturer id), so it can't be parsed. */
 export class InvalidOralBDataLengthError extends Data.TaggedError("InvalidOralBDataLengthError")<{
     length: number;
 }> {}
 
-export class UnknownOralBModelError extends Data.TaggedError("UnknownOralBModelError")<{
-    modelBytes: string;
-}> {}
+/** Failures from parsing an Oral-B advertisement. */
+export type OralBParsingError = NotValidOralBManufacturerIdError | InvalidOralBDataLengthError;
 
-export type OralBParsingError = NotValidOralBManufacturerIdError | InvalidOralBDataLengthError | UnknownOralBModelError;
+const RUNNING_STATE = 3;
 
 enum OralBDataOffset {
     ManufacturerIdStart = 0,
@@ -88,7 +98,8 @@ const IO_SERIES_MODES: Record<number, string> = {
     9: "off",
 };
 
-const MODEL_MODES: Record<OralBModel, Record<number, string>> = {
+const MODEL_MODES: Record<ResolvedOralBModel, Record<number, string>> = {
+    [UNKNOWN_ORALB_MODEL]: {},
     io_series_4: IO_SERIES_MODES,
     io_series_6_7: IO_SERIES_MODES,
     io_series_8: IO_SERIES_MODES,
@@ -167,65 +178,47 @@ const SECTOR_MAP: Record<number, string> = {
     55: "success",
 };
 
-const validateManufacturerId = (data: Buffer): Effect.Effect<void, NotValidOralBManufacturerIdError> =>
-    Effect.gen(function* () {
-        if (data.length < 2) {
-            return yield* new NotValidOralBManufacturerIdError({ manufacturerId: -1 });
-        }
+const DATA_LENGTH_WITHOUT_SECTORS = 11;
+const DATA_LENGTH_WITH_SECTORS = 13;
+/** Manufacturer data lengths, including the 2-byte manufacturer id. */
+const VALID_DATA_LENGTHS: readonly number[] = [DATA_LENGTH_WITHOUT_SECTORS, DATA_LENGTH_WITH_SECTORS];
 
-        const manufacturerId = data.readUInt16LE(0);
-        if (manufacturerId !== oralbManufacturerId) {
-            return yield* new NotValidOralBManufacturerIdError({ manufacturerId });
-        }
-    });
+const requireOralBDataLength = (data: Buffer): Effect.Effect<void, InvalidOralBDataLengthError> =>
+    VALID_DATA_LENGTHS.includes(data.length) ? Effect.void : new InvalidOralBDataLengthError({ length: data.length });
 
-const validateDataLength = (data: Buffer): Effect.Effect<void, InvalidOralBDataLengthError> =>
-    Effect.gen(function* () {
-        const dataLength = data.length - 2;
+const requireOralBManufacturerId = (data: Buffer): Effect.Effect<void, NotValidOralBManufacturerIdError> => {
+    const manufacturerId = data.readUInt16LE(OralBDataOffset.ManufacturerIdStart);
 
-        if (dataLength !== 9 && dataLength !== 11) {
-            return yield* new InvalidOralBDataLengthError({ length: dataLength });
-        }
-    });
-
-const extractRawData = (data: Buffer): OralBRawData => {
-    const dataLength = data.length - OralBDataOffset.ManufacturerIdEnd;
-
-    const rawData: OralBRawData = {
-        modelBytes: data.subarray(OralBDataOffset.ModelBytesStart, OralBDataOffset.ModelBytesEnd),
-        state: data.readUInt8(OralBDataOffset.State),
-        pressure: data.readUInt8(OralBDataOffset.Pressure),
-        timeMinutes: data.readUInt8(OralBDataOffset.TimeMinutes),
-        timeSeconds: data.readUInt8(OralBDataOffset.TimeSeconds),
-        mode: data.readUInt8(OralBDataOffset.Mode),
-        sector: data.readUInt8(OralBDataOffset.Sector),
-    };
-
-    if (dataLength === 11) {
-        rawData.sectorTimer = data.readUInt8(OralBDataOffset.SectorTimer);
-        rawData.numberOfSectors = data.readUInt8(OralBDataOffset.NumberOfSectors);
-    }
-
-    return rawData;
+    return manufacturerId === oralbManufacturerId
+        ? Effect.void
+        : new NotValidOralBManufacturerIdError({ manufacturerId });
 };
 
-const resolveModel = (modelBytes: Buffer): Effect.Effect<OralBModel, UnknownOralBModelError> => {
-    const modelKey = modelBytes.toString("hex");
-    const model = BYTES_TO_MODEL[modelKey];
+const extractRawData = (data: Buffer): OralBRawData => ({
+    modelBytes: data.subarray(OralBDataOffset.ModelBytesStart, OralBDataOffset.ModelBytesEnd),
+    state: data.readUInt8(OralBDataOffset.State),
+    pressure: data.readUInt8(OralBDataOffset.Pressure),
+    timeMinutes: data.readUInt8(OralBDataOffset.TimeMinutes),
+    timeSeconds: data.readUInt8(OralBDataOffset.TimeSeconds),
+    mode: data.readUInt8(OralBDataOffset.Mode),
+    sector: data.readUInt8(OralBDataOffset.Sector),
+    ...(data.length === DATA_LENGTH_WITH_SECTORS
+        ? {
+              sectorTimer: data.readUInt8(OralBDataOffset.SectorTimer),
+              numberOfSectors: data.readUInt8(OralBDataOffset.NumberOfSectors),
+          }
+        : {}),
+});
 
-    if (model === undefined) {
-        return new UnknownOralBModelError({ modelBytes: modelKey });
-    }
-
-    return Effect.succeed(model);
-};
+const detectModel = (modelBytes: Buffer): ResolvedOralBModel =>
+    BYTES_TO_MODEL[modelBytes.toString("hex")] ?? UNKNOWN_ORALB_MODEL;
 
 const mapState = (state: number): OralBState | `unknown_state_${number}` => STATES[state] ?? `unknown_state_${state}`;
 
 const mapPressure = (pressure: number): OralBPressure | `unknown_pressure_${number}` =>
     PRESSURE[pressure] ?? `unknown_pressure_${pressure}`;
 
-const mapMode = (mode: number, model: OralBModel): string => {
+const mapMode = (mode: number, model: ResolvedOralBModel): string => {
     const modes = MODEL_MODES[model];
     return modes[mode] ?? `unknown_mode_${mode}`;
 };
@@ -235,55 +228,47 @@ const mapSector = (sector: number): string => SECTOR_MAP[sector] ?? `unknown_sec
 const resolveSector = (rawData: OralBRawData): string => {
     const brushingTimeSeconds = rawData.timeMinutes * 60 + rawData.timeSeconds;
 
-    if (brushingTimeSeconds === 0 && rawData.state !== 3) {
+    if (brushingTimeSeconds === 0 && rawData.state !== RUNNING_STATE) {
         return "no_sector";
     }
 
     return mapSector(rawData.sector);
 };
 
-const transformRawDataToSensorData = (
-    rawData: OralBRawData,
-    modelOverride: OralBModel | undefined
-): Effect.Effect<OralBSensorData, UnknownOralBModelError> =>
+/**
+ * Maps raw advertisement values to sensor data. Brushing mode names depend on the model.
+ */
+export const toOralBSensorData = (rawData: OralBRawData, model: ResolvedOralBModel): OralBSensorData => ({
+    state: mapState(rawData.state),
+    pressure: mapPressure(rawData.pressure),
+    brushingTimeSeconds: asSeconds(rawData.timeMinutes * 60 + rawData.timeSeconds),
+    brushingMode: mapMode(rawData.mode, model),
+    sector: resolveSector(rawData),
+    isBrushing: rawData.state === RUNNING_STATE,
+    ...(rawData.sectorTimer === undefined ? {} : { sectorTimer: asSeconds(rawData.sectorTimer) }),
+    ...(rawData.numberOfSectors === undefined ? {} : { numberOfSectors: asSectorNumber(rawData.numberOfSectors) }),
+});
+
+/** A parsed Oral-B advertisement. */
+export interface OralBAdvertisement {
+    rawData: OralBRawData;
+    /** `unknown` when the model bytes are not recognised. */
+    detectedModel: ResolvedOralBModel;
+}
+
+/**
+ * Parses Oral-B manufacturer data.
+ *
+ * @returns The raw values and the detected model, or `InvalidOralBDataLengthError` /
+ * `NotValidOralBManufacturerIdError` when the data is not an Oral-B advertisement.
+ */
+export const parseOralBAdvertisement = (
+    manufacturerData: Buffer
+): Effect.Effect<OralBAdvertisement, OralBParsingError> =>
     Effect.gen(function* () {
-        const model = modelOverride ?? (yield* resolveModel(rawData.modelBytes));
-
-        const sensorData: OralBSensorData = {
-            state: mapState(rawData.state),
-            pressure: mapPressure(rawData.pressure),
-            brushingTimeSeconds: asSeconds(rawData.timeMinutes * 60 + rawData.timeSeconds),
-            brushingMode: mapMode(rawData.mode, model),
-            sector: resolveSector(rawData),
-            isBrushing: rawData.state === 3,
-        };
-
-        if (rawData.sectorTimer !== undefined) {
-            sensorData.sectorTimer = asSeconds(rawData.sectorTimer);
-        }
-
-        if (rawData.numberOfSectors !== undefined) {
-            sensorData.numberOfSectors = asSectorNumber(rawData.numberOfSectors);
-        }
-
-        return sensorData;
-    });
-
-export const parse = (
-    manufacturerData: Buffer,
-    modelOverride?: OralBModel
-): Effect.Effect<OralBSensorData, OralBParsingError> =>
-    Effect.gen(function* () {
-        yield* validateManufacturerId(manufacturerData);
-        yield* validateDataLength(manufacturerData);
+        yield* requireOralBDataLength(manufacturerData);
+        yield* requireOralBManufacturerId(manufacturerData);
         const rawData = extractRawData(manufacturerData);
-        return yield* transformRawDataToSensorData(rawData, modelOverride);
-    });
 
-export const parseOralBModel = (manufacturerData: Buffer): Effect.Effect<OralBModel, OralBParsingError> =>
-    Effect.gen(function* () {
-        yield* validateManufacturerId(manufacturerData);
-        yield* validateDataLength(manufacturerData);
-        const rawData = extractRawData(manufacturerData);
-        return yield* resolveModel(rawData.modelBytes);
+        return { rawData, detectedModel: detectModel(rawData.modelBytes) };
     });

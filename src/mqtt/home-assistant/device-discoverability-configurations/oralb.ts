@@ -11,6 +11,7 @@ const oralbDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = {
     model: "Smart Toothbrush",
 };
 
+/** Home Assistant discovery configuration for Oral-B toothbrush entities. */
 export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice<OralBSensorData> = {
     state: {
         component: HomeAssistantMQTTComponent.Sensor,
@@ -32,12 +33,13 @@ export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice
     },
     brushingTimeSeconds: {
         component: HomeAssistantMQTTComponent.Sensor,
-        deviceClass: HomeAssistantDeviceClass.None,
+        deviceClass: HomeAssistantDeviceClass.Duration,
         name: "Brushing Time",
         unitOfMeasurement: "s",
         uniqueId: "brushing_time_seconds",
         device: oralbDeviceConfiguration,
         icon: "mdi:timer-outline",
+        suggestedDecimalPrecision: null,
     },
     brushingMode: {
         component: HomeAssistantMQTTComponent.Sensor,
@@ -61,12 +63,13 @@ export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice
     },
     sectorTimer: {
         component: HomeAssistantMQTTComponent.Sensor,
-        deviceClass: HomeAssistantDeviceClass.None,
+        deviceClass: HomeAssistantDeviceClass.Duration,
         name: "Sector Timer",
         unitOfMeasurement: "s",
         uniqueId: "sector_timer",
         device: oralbDeviceConfiguration,
         icon: "mdi:timer-outline",
+        suggestedDecimalPrecision: null,
     },
     numberOfSectors: {
         component: HomeAssistantMQTTComponent.Sensor,
@@ -76,10 +79,11 @@ export const oralbSensorConfiguration: HomeAssistantSensorConfigurationForDevice
         uniqueId: "number_of_sectors",
         device: oralbDeviceConfiguration,
         icon: "mdi:numeric",
+        suggestedDecimalPrecision: null,
     },
     isBrushing: {
         component: HomeAssistantMQTTComponent.BinarySensor,
-        deviceClass: HomeAssistantDeviceClass.None,
+        deviceClass: HomeAssistantDeviceClass.Running,
         name: "Brushing",
         uniqueId: "is_brushing",
         device: oralbDeviceConfiguration,

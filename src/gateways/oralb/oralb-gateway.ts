@@ -1,30 +1,18 @@
 import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry";
-import { Peripheral } from "../../infra/ble-scanner";
 import { DeviceType, MessageType, OralBSensorMessage } from "../../types";
 import { OralBGatewayConfiguration } from "../../config";
-import { handleBleAdvertisement, DeviceRegistryService } from "../gateway-helpers";
-import { Data, Effect, Option } from "effect";
+import { handleBleAdvertisement, PeripheralWithManufacturerData, requireManufacturerData } from "../gateway-helpers";
+import { Effect, Option } from "effect";
 import { GatewayError, MapMessage } from "../ble-gateway";
-import { parse, parseOralBModel, OralBParsingError } from "./oralb-parser";
-import { decorateOralBSensorData } from "./oralb-sensor-data-decorator";
-import { OralBModel } from "./oralb-sensor-data";
+import { OralBAdvertisement, parseOralBAdvertisement, toOralBSensorData } from "./oralb-parser";
+import { OralBModel, ResolvedOralBModel, UNKNOWN_ORALB_MODEL } from "./oralb-sensor-data";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 
-export interface PeripheralWithManufacturerData extends Peripheral {
-    advertisement: Omit<Peripheral["advertisement"], "manufacturerData"> & {
-        manufacturerData: Buffer;
-    };
-}
-
-export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")<{
-    id: string;
-}> {}
-
-export class PeripheralWithoutManufacturerDataError extends Data.TaggedError("PeripheralWithoutManufacturerDataError")<{
-    peripheral: Peripheral;
-}> {}
-
+/**
+ * Builds the device registry for configured Oral-B toothbrushes. Devices without a configured model are
+ * registered with the unknown model; sensor messages carry the model resolved per advertisement.
+ */
 export const makeOralbDeviceRegistry = (
     oralbSettings: NonNullable<OralBGatewayConfiguration>,
     globalDefaults: {
@@ -36,7 +24,7 @@ export const makeOralbDeviceRegistry = (
             id: device.id,
             type: DeviceType.OralB,
             friendlyName: device.name,
-            model: device.model ?? "auto",
+            model: device.model ?? UNKNOWN_ORALB_MODEL,
         },
         timeout: device.timeout,
     }));
@@ -44,67 +32,65 @@ export const makeOralbDeviceRegistry = (
     return new DeviceRegistry(deviceSettings, oralbSettings.timeout, globalDefaults.defaultDecimalPrecision);
 };
 
-const validatePeripheral = (
-    peripheral: Peripheral
-): Effect.Effect<PeripheralWithManufacturerData, PeripheralWithoutManufacturerDataError> => {
-    if (peripheral.advertisement.manufacturerData === undefined) {
-        return new PeripheralWithoutManufacturerDataError({ peripheral });
-    }
+const makeResolveDeviceModel =
+    (modelOverrides: ReadonlyMap<string, OralBModel>) =>
+    (peripheral: PeripheralWithManufacturerData, advertisement: OralBAdvertisement): ResolvedOralBModel =>
+        modelOverrides.get(peripheral.uuid) ?? advertisement.detectedModel;
 
-    return Effect.succeed(peripheral as PeripheralWithManufacturerData);
-};
-
-const resolveDeviceModel = (peripheral: PeripheralWithManufacturerData): Effect.Effect<OralBModel, OralBParsingError> =>
-    parseOralBModel(peripheral.advertisement.manufacturerData);
-
-const makeTransformPeripheralToSensorMessage =
-    (modelOverride: OralBModel | undefined) =>
+const makeTransformAdvertisementToSensorMessage =
+    (resolveDeviceModel: ReturnType<typeof makeResolveDeviceModel>) =>
     (
         peripheral: PeripheralWithManufacturerData,
-        deviceRegistryEntry: DeviceRegistryEntry
-    ): Effect.Effect<Option.Option<OralBSensorMessage>, OralBParsingError> =>
-        Effect.gen(function* () {
-            const sensorData = yield* parse(peripheral.advertisement.manufacturerData, modelOverride);
-            const decoratedSensorData = decorateOralBSensorData(sensorData);
+        deviceRegistryEntry: DeviceRegistryEntry,
+        advertisement: OralBAdvertisement
+    ): Option.Option<OralBSensorMessage> => {
+        const model = resolveDeviceModel(peripheral, advertisement);
 
-            const message: OralBSensorMessage = {
-                id: uuid(),
-                device: {
-                    macAddress: peripheral.address,
-                    rssi: peripheral.rssi,
-                    id: deviceRegistryEntry.device.id,
-                    type: DeviceType.OralB,
-                    friendlyName: deviceRegistryEntry.device.friendlyName,
-                    model: deviceRegistryEntry.device.model,
-                    timeout: deviceRegistryEntry.timeout,
-                },
-                time: DateTime.now(),
-                type: MessageType.SensorData,
-                payload: decoratedSensorData,
-            };
-
-            return Option.some(message);
+        return Option.some({
+            id: uuid(),
+            device: {
+                macAddress: peripheral.address,
+                rssi: peripheral.rssi,
+                id: deviceRegistryEntry.device.id,
+                type: DeviceType.OralB,
+                friendlyName: deviceRegistryEntry.device.friendlyName,
+                model,
+                timeout: deviceRegistryEntry.timeout,
+            },
+            time: DateTime.now(),
+            type: MessageType.SensorData,
+            payload: toOralBSensorData(advertisement.rawData, model),
         });
+    };
 
-export const makeOralbGateway =
-    (oralbSettings: NonNullable<OralBGatewayConfiguration>): MapMessage =>
-    (peripheral) =>
+/**
+ * Maps Oral-B toothbrush advertisements to device messages. A configured model overrides the model detected
+ * from the advertisement, which decides the brushing mode names.
+ */
+export const makeOralbGateway = (oralbSettings: NonNullable<OralBGatewayConfiguration>): MapMessage => {
+    const modelOverrides = new Map(
+        oralbSettings.devices.flatMap((device) =>
+            device.model === undefined ? [] : ([[device.id, device.model]] as const)
+        )
+    );
+    const resolveDeviceModel = makeResolveDeviceModel(modelOverrides);
+    const transformAdvertisementToSensorMessage = makeTransformAdvertisementToSensorMessage(resolveDeviceModel);
+
+    return (peripheral) =>
         Effect.gen(function* () {
-            const validPeripheral = yield* validatePeripheral(peripheral);
-            const deviceRegistry = yield* DeviceRegistryService;
-            const deviceEntry = deviceRegistry.get(validPeripheral.uuid);
-            const modelOverride =
-                deviceEntry && deviceEntry.device.model !== "auto"
-                    ? (deviceEntry.device.model as OralBModel)
-                    : undefined;
+            const validPeripheral = yield* requireManufacturerData(peripheral);
 
-            return yield* handleBleAdvertisement(
-                validPeripheral,
-                DeviceType.OralB,
-                oralbSettings.allow_unknown,
+            return yield* handleBleAdvertisement(validPeripheral, {
+                deviceType: DeviceType.OralB,
+                unknownDevices: oralbSettings.allow_unknown ? "allow" : "ignore",
+                parseAdvertisement: (peripheralWithData) =>
+                    parseOralBAdvertisement(peripheralWithData.advertisement.manufacturerData),
                 resolveDeviceModel,
-                makeTransformPeripheralToSensorMessage(modelOverride)
-            );
+                handleDeviceSensorData: (peripheralWithData, deviceRegistryEntry, advertisement) =>
+                    Effect.succeed(
+                        transformAdvertisementToSensorMessage(peripheralWithData, deviceRegistryEntry, advertisement)
+                    ),
+            });
         }).pipe(
             Effect.catchTags({
                 PeripheralWithoutManufacturerDataError: (error) =>
@@ -127,10 +113,6 @@ export const makeOralbGateway =
                         peripheral,
                         message: `Invalid OralB data length: ${error.length}`,
                     }),
-                UnknownOralBModelError: (error) =>
-                    new GatewayError({
-                        peripheral,
-                        message: `Unknown OralB model: ${error.modelBytes}`,
-                    }),
             })
         );
+};

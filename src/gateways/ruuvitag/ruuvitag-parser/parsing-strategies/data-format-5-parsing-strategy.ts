@@ -1,4 +1,6 @@
-import { RuuviTagParsingStrategy } from "../index";
+import { RuuviTagParsingStrategy, RuuviTagEnvironmentalSensorData } from "../index";
+import { Effect } from "effect";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format";
 import {
     parseTemperature,
     parseRelativeHumidity,
@@ -6,6 +8,7 @@ import {
     parseMacAddress48Bit,
     isInvalidMeasurementForSigned16BitInteger,
     isInvalidMeasurementForUnsigned16BitInteger,
+    requireMinimumLength,
 } from "./common-parsing-strategy-utils";
 
 enum DataFormatV5Offset {
@@ -129,7 +132,7 @@ const parseMeasurementSequence = (rawData: Buffer, offset: number): number | nul
  * Parses the raw manufacturer specific data field according to the Data Format 5 Specification (RAWv2)
  * @see https://github.com/ruuvi/ruuvi-sensor-protocols/blob/master/dataformat_05.md
  */
-export const DataFormat5ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) => {
+const parseDataFormat5 = (rawRuuviTagData: Buffer): RuuviTagEnvironmentalSensorData => {
     return {
         type: "environmental",
         temperature: parseTemperature(rawRuuviTagData, DataFormatV5Offset.Temperature),
@@ -145,3 +148,11 @@ export const DataFormat5ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagD
         macAddress: parseMacAddress48Bit(rawRuuviTagData, DataFormatV5Offset.MacAddress),
     };
 };
+
+const MINIMUM_LENGTH = DataFormatV5Offset.MacAddress + 6;
+
+export const DataFormat5ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) =>
+    Effect.map(
+        requireMinimumLength(rawRuuviTagData, RuuvitagSensorProtocolDataFormat.DataFormat5, MINIMUM_LENGTH),
+        parseDataFormat5
+    );

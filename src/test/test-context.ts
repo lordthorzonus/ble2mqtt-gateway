@@ -28,7 +28,6 @@ const mockConfig: GlobalConfiguration = {
     gateway_name: "test",
     gateway_version: "1.0.0",
     concurrency: {
-        ble_gateway_processing: "unbounded",
         mqtt_message_production: "unbounded",
         mqtt_publishing: "unbounded",
     },

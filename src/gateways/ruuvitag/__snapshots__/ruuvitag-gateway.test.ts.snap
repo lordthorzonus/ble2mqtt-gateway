@@ -13,6 +13,7 @@ exports[`RuuviTag Gateway getUnavailableDevices() should produce unavailability 
     },
     "lastPublishedAvailability": "online",
     "lastSeen": "2019-10-10T00:00:00.000Z",
+    "macAddress": "a1:b2",
     "timeout": 30000,
   },
 ]

@@ -8,18 +8,30 @@ import {
     makeMiFloraGateway,
 } from "./miflora/miflora-gateway";
 import { makeOralbDeviceRegistry, makeOralbGateway } from "./oralb/oralb-gateway";
-import { Effect, Stream, Option, Data } from "effect";
+import { Effect, Stream, Option, Data, Duration } from "effect";
 import { DeviceRegistry } from "./device-registry";
-import { DeviceRegistryService, streamUnavailableDevices } from "./gateway-helpers";
+import { DeviceRegistryService, streamAvailabilityHeartbeat, streamUnavailableDevices } from "./gateway-helpers";
 import { Logger } from "../infra/logger";
 import { ruuviTagManufacturerId } from "./ruuvitag/ruuvitag-parser";
 import { oralbManufacturerId } from "./oralb/oralb-parser";
-import { BleScannerError, Peripheral } from "../infra/ble-scanner";
+import { Peripheral } from "../infra/ble-scanner";
 
 export interface Gateway {
     mapMessage: MapMessage;
     deviceRegistry: DeviceRegistry;
 }
+
+/** Routes BLE advertisements to the configured device gateways. */
+export interface BleGateway {
+    /**
+     * Maps advertisements to device messages one at a time, because gateways mutate their device registries.
+     * Merges in offline transitions and the availability heartbeat. Gateway errors are logged and the
+     * advertisement is dropped, so the stream only fails when `peripherals` fails.
+     */
+    deviceMessages: <E, R>(peripherals: Stream.Stream<Peripheral, E, R>) => Stream.Stream<DeviceMessage, E, R>;
+}
+
+const AVAILABILITY_HEARTBEAT_INTERVAL = Duration.minutes(5);
 
 export const getManufacturerId = (peripheral: Peripheral): number | undefined => {
     const manufacturerData = peripheral.advertisement.manufacturerData;
@@ -47,14 +59,17 @@ export class GatewayError extends Data.TaggedError("GatewayError")<{
 
 export type MapMessage = (
     peripheral: Peripheral
-) => Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService | Logger>;
+) => Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService>;
 
-const makeUnavailableDevicesStream = (
+const makeAvailabilityStream = (
     gateways: Map<number, Gateway>
 ): Stream.Stream<DeviceAvailabilityMessage, never, Config> => {
-    const gatewaysArray = Array.from(gateways.values());
-    const streams = gatewaysArray.map((gateway) =>
-        Stream.provideService(streamUnavailableDevices, DeviceRegistryService, gateway.deviceRegistry)
+    const streams = Array.from(gateways.values()).map((gateway) =>
+        Stream.provideService(
+            Stream.merge(streamUnavailableDevices, streamAvailabilityHeartbeat(AVAILABILITY_HEARTBEAT_INTERVAL)),
+            DeviceRegistryService,
+            gateway.deviceRegistry
+        )
     );
 
     return Stream.mergeAll(streams, {
@@ -79,7 +94,8 @@ const resolveGatewayForPeripheral = (
         };
     });
 
-export const makeBleGateway = () =>
+/** Builds the BLE gateway from the configured device gateways (RuuviTag, MiFlora, Oral-B). */
+export const makeBleGateway = (): Effect.Effect<BleGateway, never, Config | Logger> =>
     Effect.gen(function* () {
         const configuredGateways = new Map<number, Gateway>();
         const config = yield* Config;
@@ -118,22 +134,33 @@ export const makeBleGateway = () =>
             logger.info("configured gateway to work with Oral-B toothbrushes");
         }
 
-        return (
-            peripheralMessage: Stream.Stream<Peripheral, BleScannerError, Logger>
-        ): Stream.Stream<DeviceMessage, GatewayError | BleScannerError, Logger | Config> =>
-            peripheralMessage.pipe(
-                Stream.filterMap((p) => resolveGatewayForPeripheral(p, configuredGateways)),
-                Stream.flatMap(
-                    ({ peripheral, gateway }) =>
-                        Stream.fromIterableEffect(
-                            Effect.provideService(
-                                gateway.mapMessage(peripheral),
-                                DeviceRegistryService,
-                                gateway.deviceRegistry
-                            )
-                        ),
-                    { concurrency: config.concurrency.ble_gateway_processing }
-                ),
-                Stream.merge(makeUnavailableDevicesStream(configuredGateways))
+        const routePeripheral = (peripheral: Peripheral): Effect.Effect<Iterable<DeviceMessage>, GatewayError> =>
+            Option.match(resolveGatewayForPeripheral(peripheral, configuredGateways), {
+                onNone: () => Effect.succeed([]),
+                onSome: ({ gateway }) =>
+                    Effect.provideService(
+                        gateway.mapMessage(peripheral),
+                        DeviceRegistryService,
+                        gateway.deviceRegistry
+                    ),
+            });
+
+        const mapPeripheral = (peripheral: Peripheral): Effect.Effect<Iterable<DeviceMessage>> =>
+            Effect.catchTag(routePeripheral(peripheral), "GatewayError", (error) =>
+                Effect.sync(() => {
+                    logger.error("BLE Gateway error", { peripheral: error.peripheral, message: error.message });
+                    return [];
+                })
             );
+
+        const availabilityMessages = Stream.provideService(makeAvailabilityStream(configuredGateways), Config, config);
+
+        return {
+            deviceMessages: (peripherals) =>
+                peripherals.pipe(
+                    Stream.mapEffect(mapPeripheral),
+                    Stream.flattenIterables,
+                    Stream.merge(availabilityMessages)
+                ),
+        };
     });

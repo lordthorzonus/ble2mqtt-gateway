@@ -1,5 +1,8 @@
 import { asCelsius, asPascal, asRelativeHumidity, Celsius, Pascal, RelativeHumidity } from "../../../units";
-import { RuuviTagParsingStrategy } from "../index";
+import { RuuviTagParsingStrategy, RuuviTagEnvironmentalSensorData } from "../index";
+import { Effect } from "effect";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format";
+import { requireMinimumLength } from "./common-parsing-strategy-utils";
 
 enum DataFormatV3Offset {
     Humidity = 3,
@@ -82,7 +85,7 @@ const parsePressure = (rawData: Buffer): Pascal => {
  * Parses the raw manufacturer specific data field according to the Data Format 3 Specification (RAWv1)
  * @see https://github.com/ruuvi/ruuvi-sensor-protocols/blob/master/dataformat_03.md
  */
-export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) => {
+const parseDataFormat3 = (rawRuuviTagData: Buffer): RuuviTagEnvironmentalSensorData => {
     return {
         type: "environmental",
         accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationX),
@@ -98,3 +101,11 @@ export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagD
         macAddress: null,
     };
 };
+
+const MINIMUM_LENGTH = DataFormatV3Offset.BatteryVoltage + 2;
+
+export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) =>
+    Effect.map(
+        requireMinimumLength(rawRuuviTagData, RuuvitagSensorProtocolDataFormat.DataFormat3, MINIMUM_LENGTH),
+        parseDataFormat3
+    );

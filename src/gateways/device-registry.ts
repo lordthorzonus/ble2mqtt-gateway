@@ -10,6 +10,11 @@ export interface DeviceSettings {
 
 export interface DeviceRegistryEntry extends DeviceSettings {
     lastSeen: DateTime | null;
+    /**
+     * Address from the latest advertisement. Configured ids are not always MAC addresses,
+     * so messages generated without a peripheral need this for Home Assistant device connections.
+     */
+    macAddress: string | null;
     availability: "online" | "offline";
     lastPublishedAvailability: "online" | "offline";
     timeout: number;
@@ -26,6 +31,7 @@ export class DeviceRegistry {
             this.devices.set(setting.device.id, {
                 ...setting,
                 lastSeen: null,
+                macAddress: null,
                 availability: "offline",
                 lastPublishedAvailability: "offline",
                 timeout: setting.timeout ?? defaultTimeout,
@@ -55,6 +61,7 @@ export class DeviceRegistry {
             },
             availability: "offline",
             lastSeen: null,
+            macAddress: null,
             timeout: this.defaultTimeout,
             decimalPrecision: this.defaultDecimalPrecision,
             lastPublishedAvailability: "offline",
@@ -62,14 +69,14 @@ export class DeviceRegistry {
         this.devices.set(peripheral.uuid, deviceRegistryEntry);
     }
 
-    public registerFoundAdvertisement(deviceId: string): void {
+    public registerFoundAdvertisement(deviceId: string, macAddress: string): void {
         const device = this.devices.get(deviceId);
 
         if (!device) {
             return;
         }
 
-        const updatedDeviceEntry = DeviceRegistry.markDeviceAvailable(device);
+        const updatedDeviceEntry = DeviceRegistry.markDeviceAvailable(device, macAddress);
         this.devices.set(deviceId, updatedDeviceEntry);
     }
 
@@ -95,10 +102,11 @@ export class DeviceRegistry {
         return updatedDeviceEntry;
     }
 
-    private static markDeviceAvailable(device: DeviceRegistryEntry): DeviceRegistryEntry {
+    private static markDeviceAvailable(device: DeviceRegistryEntry, macAddress: string): DeviceRegistryEntry {
         return {
             ...device,
             lastSeen: DateTime.now(),
+            macAddress,
             availability: "online",
         };
     }
@@ -125,5 +133,17 @@ export class DeviceRegistry {
             .filter((device) => DeviceRegistry.isDeviceUnavailable(device))
             .filter((device) => device.availability === "online")
             .map((device) => this.registerDeviceAsUnavailable(device));
+    }
+
+    /**
+     * Devices whose latest published availability is online and that have not timed out yet.
+     */
+    public getPublishedOnlineDevices(): DeviceRegistryEntry[] {
+        return Array.from(this.devices.values()).filter(
+            (device) =>
+                device.availability === "online" &&
+                device.lastPublishedAvailability === "online" &&
+                !DeviceRegistry.isDeviceUnavailable(device)
+        );
     }
 }

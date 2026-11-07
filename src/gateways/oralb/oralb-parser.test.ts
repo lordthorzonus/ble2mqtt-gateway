@@ -1,6 +1,15 @@
-import { parse, parseOralBModel } from "./oralb-parser";
-import { Effect } from "effect";
+import { InvalidOralBDataLengthError, parseOralBAdvertisement, toOralBSensorData } from "./oralb-parser";
+import { ResolvedOralBModel } from "./oralb-sensor-data";
+import { Cause, Effect, Exit, FastCheck as fc } from "effect";
 import { asSeconds, asSectorNumber } from "../units";
+
+const parse = (manufacturerData: Buffer, model?: ResolvedOralBModel) =>
+    Effect.map(parseOralBAdvertisement(manufacturerData), ({ rawData, detectedModel }) =>
+        toOralBSensorData(rawData, model ?? detectedModel)
+    );
+
+const parseOralBModel = (manufacturerData: Buffer) =>
+    Effect.map(parseOralBAdvertisement(manufacturerData), ({ detectedModel }) => detectedModel);
 
 describe("oralb-parser", () => {
     describe("parse", () => {
@@ -101,30 +110,28 @@ describe("oralb-parser", () => {
             expect(result.brushingMode).toBe("daily_clean");
         });
 
-        it("should fail with UnknownOralBModelError for unknown model bytes without override", () => {
+        it("uses the unknown model for unknown model bytes without override", () => {
             const manufacturerData = Buffer.from([
                 0xdc,
                 0x00,
                 0xff,
                 0xff, // unknown model bytes
                 0x03,
-                0x02,
-                0x00,
-                0x00,
-                0x00,
-                0x01,
-                0x01,
+                0x03, // state: running
+                0x90, // pressure: high
+                0x01, // time minutes: 1
+                0x1e, // time seconds: 30
+                0x01, // mode: 1
+                0x02, // sector: 2
             ]);
 
-            const result = Effect.runSyncExit(parse(manufacturerData));
+            const result = Effect.runSync(parse(manufacturerData));
 
-            expect(result._tag).toBe("Failure");
-            expect(result).toHaveProperty("cause");
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const cause = (result as any).cause;
-            expect(cause._tag).toBe("Fail");
-            expect(cause.error._tag).toBe("UnknownOralBModelError");
-            expect(cause.error.modelBytes).toBe("ffff");
+            expect(result.state).toBe("running");
+            expect(result.pressure).toBe("high");
+            expect(result.brushingTimeSeconds).toBe(asSeconds(90));
+            expect(result.sector).toBe("sector_2");
+            expect(result.brushingMode).toBe("unknown_mode_1");
         });
 
         it("should handle unknown state values", () => {
@@ -232,6 +239,17 @@ describe("oralb-parser", () => {
             expect(cause.error._tag).toBe("NotValidOralBManufacturerIdError");
         });
 
+        it.each([[[]], [[0xdc]]])(
+            "fails with InvalidOralBDataLengthError instead of reading out of range: %j",
+            (bytes: number[]) => {
+                const manufacturerData = Buffer.from(bytes);
+
+                expect(Effect.runSync(Effect.flip(parseOralBAdvertisement(manufacturerData)))).toStrictEqual(
+                    new InvalidOralBDataLengthError({ length: bytes.length })
+                );
+            }
+        );
+
         it("should fail when data length is invalid (not 9 or 11 bytes after manufacturer ID)", () => {
             const manufacturerData = Buffer.from([
                 0xdc,
@@ -292,7 +310,7 @@ describe("oralb-parser", () => {
             expect(result).toBe("io_series_6_7");
         });
 
-        it("should fail with UnknownOralBModelError for unknown model bytes", () => {
+        it("returns the unknown model for unknown model bytes", () => {
             const manufacturerData = Buffer.from([
                 0xdc,
                 0x00,
@@ -306,15 +324,49 @@ describe("oralb-parser", () => {
                 0x00,
                 0x01,
             ]);
-            const result = Effect.runSyncExit(parseOralBModel(manufacturerData));
+            const result = Effect.runSync(parseOralBModel(manufacturerData));
 
-            expect(result._tag).toBe("Failure");
-            expect(result).toHaveProperty("cause");
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const cause = (result as any).cause;
-            expect(cause._tag).toBe("Fail");
-            expect(cause.error._tag).toBe("UnknownOralBModelError");
-            expect(cause.error.modelBytes).toBe("ffff");
+            expect(result).toBe("unknown");
+        });
+    });
+
+    describe("properties", () => {
+        const isDefect = (exit: Exit.Exit<unknown, unknown>): boolean =>
+            Exit.isFailure(exit) && Cause.isDie(exit.cause);
+
+        const oralbAdvertisement = (withSectorFields: boolean) =>
+            fc
+                .uint8Array({ minLength: withSectorFields ? 11 : 9, maxLength: withSectorFields ? 11 : 9 })
+                .map((payload) => Buffer.from([0xdc, 0x00, ...payload]));
+
+        it("never fails with a defect for arbitrary manufacturer data", () => {
+            fc.assert(
+                fc.property(fc.uint8Array({ maxLength: 20 }), (bytes) => {
+                    expect(isDefect(Effect.runSyncExit(parseOralBAdvertisement(Buffer.from(bytes))))).toBe(false);
+                })
+            );
+        });
+
+        it("parses every Oral-B advertisement of a valid length", () => {
+            fc.assert(
+                fc.property(fc.boolean().chain(oralbAdvertisement), (data) => {
+                    expect(Exit.isSuccess(Effect.runSyncExit(parseOralBAdvertisement(data)))).toBe(true);
+                })
+            );
+        });
+
+        it("derives brushing time, brushing state and sector fields from the raw bytes", () => {
+            fc.assert(
+                fc.property(fc.boolean().chain(oralbAdvertisement), (data) => {
+                    const { rawData, detectedModel } = Effect.runSync(parseOralBAdvertisement(data));
+                    const sensorData = toOralBSensorData(rawData, detectedModel);
+
+                    expect(sensorData.brushingTimeSeconds).toBe(rawData.timeMinutes * 60 + rawData.timeSeconds);
+                    expect(sensorData.isBrushing).toBe(rawData.state === 3);
+                    expect(sensorData.sectorTimer !== undefined).toBe(data.length === 13);
+                    expect(sensorData.numberOfSectors !== undefined).toBe(data.length === 13);
+                })
+            );
         });
     });
 });
