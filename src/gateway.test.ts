@@ -22,7 +22,8 @@ vi.mock("./infra/ble-scanner.js", async () => {
     const { Stream } = await import("effect");
 
     // scan is a Stream value; suspend lets each test choose the stream through mockScan.
-    return { scan: Stream.suspend(() => mockScan()) };
+    // The real scanner never completes, so the mock stays open after the test's peripherals.
+    return { scan: Stream.suspend(() => Stream.concat(mockScan(), Stream.never)) };
 });
 
 describe("gateway", () => {

@@ -9,8 +9,6 @@ import { parseMiFloraPeripheralAdvertisement, SupportedMiFloraMeasurements } fro
 import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer.js";
 import { Effect } from "effect";
 
-export const mifloraGatewayId = 0x95fe;
-
 export const isMiFloraPeripheral = (peripheral: Peripheral): boolean => {
     const knownMiFloraDeviceNames = ["flower care", "flower mate"];
     const MiFloraMacPrefix = "c4:7c:8d";

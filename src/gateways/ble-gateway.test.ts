@@ -29,7 +29,6 @@ vi.mock("./miflora/miflora-gateway.js", () => ({
         getUnavailableDevices: mockMiFloraUnavailableDevices,
         registerDeviceStatusPublished: mockMiFloraRegisterDeviceStatusPublished,
     })),
-    mifloraGatewayId: 0x95fe,
     isMiFloraPeripheral: vi.fn().mockImplementation((peripheral) => peripheral.uuid === "miflora"),
 }));
 
@@ -200,10 +199,87 @@ describe("BLE Gateway", () => {
     const collectDeviceMessages = (peripherals: Peripheral[], takeCount: number) =>
         Effect.gen(function* () {
             const bleGateway = yield* makeBleGateway;
-            const eventStream = bleGateway.deviceMessages(Stream.fromIterable(peripherals));
+
+            // Keeps the scanner open so availability messages can arrive after the peripherals.
+            const eventStream = bleGateway.deviceMessages(
+                Stream.concat(Stream.fromIterable(peripherals), Stream.never)
+            );
 
             return yield* Stream.runCollect(Stream.take(eventStream, takeCount));
         });
+
+    const collectAllDeviceMessages = (peripherals: Peripheral[]) =>
+        Effect.gen(function* () {
+            const bleGateway = yield* makeBleGateway;
+
+            return yield* Stream.runCollect(bleGateway.deviceMessages(Stream.fromIterable(peripherals)));
+        });
+
+    it("ends when the peripherals stream ends", async () => {
+        mockRuuviUnavailableDevices.mockReturnValue([]);
+        mockMiFloraUnavailableDevices.mockReturnValue([]);
+
+        mockRuuvitagMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+
+        const messages = Array.from(
+            await Effect.runPromise(
+                Effect.provide(collectAllDeviceMessages([ruuviPeripheral, ruuviPeripheral]), TestLayer)
+            )
+        );
+
+        expect(messages).toEqual([handledMessage, handledMessage]);
+    });
+
+    it("routes MiFlora peripherals that also advertise manufacturer data to the MiFlora gateway", async () => {
+        const mifloraPeripheralWithManufacturerData: Peripheral = {
+            ...mifloraPeripheral,
+            advertisement: {
+                ...mifloraPeripheral.advertisement,
+                // Xiaomi's company id 0x038F, which no other configured gateway matches.
+                manufacturerData: Buffer.from("8f030512", "hex"),
+            },
+        };
+
+        mockRuuviUnavailableDevices.mockReturnValue([]);
+        mockMiFloraUnavailableDevices.mockReturnValue([]);
+
+        mockMiFloraMapMessageFn.mockReturnValue(Effect.succeed([handledMessage]));
+
+        const messages = Array.from(
+            await Effect.runPromise(
+                Effect.provide(collectAllDeviceMessages([mifloraPeripheralWithManufacturerData]), TestLayer)
+            )
+        );
+
+        expect(messages).toEqual([handledMessage]);
+        expect(mockMiFloraMapMessageFn).toHaveBeenCalledWith(mifloraPeripheralWithManufacturerData);
+        expect(mockRuuvitagMapMessageFn).not.toHaveBeenCalled();
+    });
+
+    it("does not route non-MiFlora peripherals to the MiFlora gateway by manufacturer id", async () => {
+        const peripheralWithXiaomiServiceUuidAsManufacturerId: Peripheral = {
+            advertisement: {
+                manufacturerData: Buffer.from("fe950000", "hex"),
+                serviceData: [],
+            },
+            address: "ee:ee",
+            rssi: 23,
+            uuid: "ee:ee",
+        };
+
+        mockRuuviUnavailableDevices.mockReturnValue([]);
+        mockMiFloraUnavailableDevices.mockReturnValue([]);
+
+        const messages = Array.from(
+            await Effect.runPromise(
+                Effect.provide(collectAllDeviceMessages([peripheralWithXiaomiServiceUuidAsManufacturerId]), TestLayer)
+            )
+        );
+
+        expect(messages).toEqual([]);
+        expect(mockMiFloraMapMessageFn).not.toHaveBeenCalled();
+        expect(mockRuuvitagMapMessageFn).not.toHaveBeenCalled();
+    });
 
     it("uses the correct gateway for ruuvitag and miflora ble advertisements", async () => {
         mockRuuviUnavailableDevices.mockReturnValue([]);
