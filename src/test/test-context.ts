@@ -3,15 +3,22 @@ import { Logger, LoggerInterface } from "../infra/logger.js";
 import { Context, Effect } from "effect";
 import { Config, GlobalConfiguration } from "../config.js";
 
-export const mockLogger: LoggerInterface = {
+const loggerMethods: Partial<LoggerInterface> = {
     info: vi.fn(),
     debug: vi.fn(),
     error: vi.fn(),
     warn: vi.fn(),
-} as unknown as LoggerInterface;
+};
 
+// SAFETY: the code under test only calls info, debug, error and warn on the winston logger.
+export const mockLogger = loggerMethods as LoggerInterface;
+
+/** The part of the MQTT client that `publish` in `infra/mqtt-client.ts` calls. */
 export const mockMqttClient = {
-    publish: vi.fn(),
+    publish:
+        vi.fn<
+            (topic: string, payload: string, options: { retain: boolean }, callback: (error?: Error) => void) => void
+        >(),
 };
 
 const mockConfig: GlobalConfiguration = {

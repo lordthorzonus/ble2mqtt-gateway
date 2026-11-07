@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Peripheral } from "./ble-scanner.js";
 
 // vi.mock factories are hoisted above the imports, so the mock state must be hoisted with them.
 const { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStopScanning, mockNoble } =
@@ -13,10 +14,10 @@ const { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStop
             waitForPoweredOnAsync: () => mockWaitForPoweredOn(),
             startScanningAsync: (...args: unknown[]) => mockStartScanning(...args),
             stopScanningAsync: () => mockStopScanning(),
-            on: (eventName: string, callback: (event: unknown) => unknown) => {
+            on: (eventName: string, callback: (peripheral: Peripheral) => void) => {
                 mockNobleEventEmitter.on(eventName, callback);
             },
-            removeListener: (eventName: string, callback: (event: unknown) => unknown) => {
+            removeListener: (eventName: string, callback: (peripheral: Peripheral) => void) => {
                 mockNobleEventEmitter.removeListener(eventName, callback);
             },
         };

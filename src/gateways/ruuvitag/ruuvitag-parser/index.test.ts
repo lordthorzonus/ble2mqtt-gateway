@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, type Mock } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
 
 vi.mock("./parsing-strategies/data-format-3-parsing-strategy.js");
@@ -9,11 +9,10 @@ vi.mock("./parsing-strategies/data-format-6-parsing-strategy.js");
 
 import {
     parse,
-    RuuviTagParsingStrategy,
+    RuuviTagSensorData,
     UnsupportedDataFormatError,
     NotValidRuuviManufacturerIdError,
     InvalidRuuviDataLengthError,
-    RuuviAirParsingStrategy,
     parseRuuviDataFormat,
 } from "./index.js";
 import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy.js";
@@ -21,7 +20,27 @@ import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-p
 import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy.js";
 
 describe("RuuviTagParser", () => {
-    const ruuviTagDataParsingStrategyMap: [string, RuuviTagParsingStrategy | RuuviAirParsingStrategy][] = [
+    // Both strategy kinds fit this signature, so one typed sentinel can stand in for either result.
+    type AnyParsingStrategy = (
+        rawRuuviTagData: Buffer
+    ) => Effect.Effect<RuuviTagSensorData, InvalidRuuviDataLengthError>;
+
+    const parsedSentinel: RuuviTagSensorData = {
+        type: "environmental",
+        macAddress: null,
+        measurementSequence: null,
+        movementCounter: null,
+        txPower: null,
+        accelerationX: null,
+        accelerationY: null,
+        accelerationZ: null,
+        batteryVoltage: null,
+        pressure: null,
+        relativeHumidityPercentage: null,
+        temperature: null,
+    };
+
+    const ruuviTagDataParsingStrategyMap: [string, AnyParsingStrategy][] = [
         ["990403291A1ECE1EFC18F94202CA0B53", DataFormat3ParsingStrategy],
         ["9904058001000000008001800180010000000000CBB8334C884F", DataFormat5ParsingStrategy],
         ["99040680010000000000000000000000FF00004C884F", DataFormat6ParsingStrategy],
@@ -33,11 +52,11 @@ describe("RuuviTagParser", () => {
             return Effect.runPromise(
                 Effect.gen(function* () {
                     const ruuviTagData = Buffer.from(rawStringData, "hex");
-                    const mockedParse = expectedParsingStrategy as Mock;
+                    const mockedParse = vi.mocked(expectedParsingStrategy);
 
-                    mockedParse.mockReturnValue(Effect.succeed("a"));
+                    mockedParse.mockReturnValue(Effect.succeed(parsedSentinel));
                     const result = yield* parse(ruuviTagData);
-                    expect(result).toBe("a");
+                    expect(result).toBe(parsedSentinel);
                     expect(mockedParse).toHaveBeenCalledWith(ruuviTagData);
                 })
             );

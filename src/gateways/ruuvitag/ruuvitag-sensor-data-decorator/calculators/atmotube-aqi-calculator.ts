@@ -26,7 +26,7 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 999, breakpointHigh: 1499 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 1499, breakpointHigh: 2499 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 2499, breakpointHigh: 4000 },
-    ] as Breakpoint[],
+    ],
 
     voc: [
         { aqiLow: 100, aqiHigh: 81, breakpointLow: 1, breakpointHigh: 199 },
@@ -34,7 +34,7 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 249, breakpointHigh: 349 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 349, breakpointHigh: 399 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 399, breakpointHigh: 500 },
-    ] as Breakpoint[],
+    ],
 
     nox: [
         { aqiLow: 100, aqiHigh: 81, breakpointLow: 1, breakpointHigh: 49 },
@@ -42,7 +42,7 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 99, breakpointHigh: 299 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 299, breakpointHigh: 349 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 349, breakpointHigh: 500 },
-    ] as Breakpoint[],
+    ],
 
     ch20: [
         { aqiLow: 100, aqiHigh: 81, breakpointLow: 0, breakpointHigh: 0.05 },
@@ -50,7 +50,7 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 0.1, breakpointHigh: 0.3 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 0.3, breakpointHigh: 0.75 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 0.75, breakpointHigh: 1.0 },
-    ] as Breakpoint[],
+    ],
 
     pm1: [
         { aqiLow: 100, aqiHigh: 81, breakpointLow: 0, breakpointHigh: 14 },
@@ -58,7 +58,7 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 34, breakpointHigh: 61 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 61, breakpointHigh: 95 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 95, breakpointHigh: 150 },
-    ] as Breakpoint[],
+    ],
 
     pm2_5: [
         { aqiLow: 100, aqiHigh: 81, breakpointLow: 0, breakpointHigh: 20 },
@@ -66,7 +66,7 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 50, breakpointHigh: 90 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 90, breakpointHigh: 140 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 140, breakpointHigh: 200 },
-    ] as Breakpoint[],
+    ],
 
     pm10: [
         { aqiLow: 100, aqiHigh: 81, breakpointLow: 0, breakpointHigh: 30 },
@@ -74,7 +74,7 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 75, breakpointHigh: 125 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 125, breakpointHigh: 200 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 200, breakpointHigh: 300 },
-    ] as Breakpoint[],
+    ],
 
     co: [
         { aqiLow: 100, aqiHigh: 81, breakpointLow: 0, breakpointHigh: 1.7 },
@@ -82,7 +82,7 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 8.7, breakpointHigh: 10 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 10, breakpointHigh: 15 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 15, breakpointHigh: 30 },
-    ] as Breakpoint[],
+    ],
 
     o3: [
         { aqiLow: 100, aqiHigh: 81, breakpointLow: 0, breakpointHigh: 0.025 },
@@ -90,8 +90,8 @@ const BREAKPOINTS = {
         { aqiLow: 60, aqiHigh: 41, breakpointLow: 0.06, breakpointHigh: 0.075 },
         { aqiLow: 40, aqiHigh: 21, breakpointLow: 0.075, breakpointHigh: 0.1 },
         { aqiLow: 20, aqiHigh: 0, breakpointLow: 0.1, breakpointHigh: 0.3 },
-    ] as Breakpoint[],
-};
+    ],
+} satisfies Record<string, readonly Breakpoint[]>;
 
 /**
  * Calculate individual AQI for a specific pollutant using standard EPA AQI formula

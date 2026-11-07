@@ -71,10 +71,10 @@ describe("parseMiFloraPeripheralAdvertisement()", () => {
                 Effect.gen(function* () {
                     const properPeripheral = getStubPeripheralWithServiceData("");
 
-                    const peripheral = {
+                    const peripheral: Peripheral = {
                         ...properPeripheral,
                         advertisement: { ...properPeripheral.advertisement, serviceData: [] },
-                    } as unknown as Peripheral;
+                    };
 
                     const result = yield* Effect.flip(parseMiFloraPeripheralAdvertisement(peripheral));
                     expect(result).toStrictEqual(new InvalidMiFloraAdvertisementError({ peripheral }));

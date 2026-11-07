@@ -8,15 +8,71 @@ import {
 } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator/index.js";
 import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer.js";
 import { Effect, Stream } from "effect";
+import { asCelsius, asPM2_5 } from "../../gateways/units.js";
 import { testEffectWithContext } from "../../test/test-context.js";
 
 describe("HomeAssistant MQTT Message producer", () => {
+    const environmentalSensorData: EnhancedRuuviTagEnvironmentalSensorData = {
+        type: "environmental",
+        temperature: asCelsius(21.5),
+        relativeHumidityPercentage: null,
+        pressure: null,
+        accelerationX: null,
+        accelerationY: null,
+        accelerationZ: null,
+        batteryVoltage: null,
+        txPower: null,
+        movementCounter: null,
+        measurementSequence: null,
+        macAddress: null,
+        absoluteHumidity: null,
+        dewPoint: null,
+        heatIndex: null,
+        humidex: null,
+        breezeIndoorClimateIndex: null,
+        breezeIndoorClimateIndexDescription: null,
+    };
+
+    const miFloraSensorData: MiFloraSensorData = {
+        temperature: asCelsius(19),
+        moisture: null,
+        illuminance: null,
+        soilConductivity: null,
+        lowBatteryWarning: false,
+    };
+
+    const airQualitySensorData: EnhancedRuuviAirSensorData = {
+        type: "air-quality",
+        temperature: asCelsius(22.5),
+        pm2_5: asPM2_5(12.3),
+        relativeHumidityPercentage: null,
+        pressure: null,
+        pm1: null,
+        pm4: null,
+        pm10: null,
+        co2: null,
+        voc: null,
+        nox: null,
+        luminosity: null,
+        calibrationInProgress: false,
+        measurementSequence: null,
+        macAddress: null,
+        absoluteHumidity: null,
+        dewPoint: null,
+        heatIndex: null,
+        humidex: null,
+        breezeIndoorClimateIndex: null,
+        breezeIndoorClimateIndexDescription: null,
+        ruuviIAQS: null,
+        ruuviIAQSDescription: null,
+        atmoTubeAQI: null,
+        atmoTubeAQIDescription: null,
+    };
+
     it("should generate device state mqtt message if device sensor message is given", async () => {
         const deviceMessage: DeviceSensorMessage = {
             id: "a",
-            payload: {
-                sensor1: "value",
-            } as unknown as EnhancedRuuviTagEnvironmentalSensorData,
+            payload: environmentalSensorData,
             type: MessageType.SensorData,
             time: DateTime.now(),
             device: {
@@ -39,11 +95,7 @@ describe("HomeAssistant MQTT Message producer", () => {
         const message = await Effect.runPromise(testEffectWithContext(testProgram));
 
         expect(message[0]).toEqual({
-            payload: JSON.stringify({
-                sensor1: "value",
-                time: deviceMessage.time,
-                id: deviceMessage.id,
-            }),
+            payload: JSON.stringify({ ...environmentalSensorData, time: deviceMessage.time, id: deviceMessage.id }),
             retain: false,
             topic: "test/ruuvitag/aa:bb/state",
         });
@@ -52,9 +104,7 @@ describe("HomeAssistant MQTT Message producer", () => {
     it("should vary the state topic based on the device type", async () => {
         const deviceMessage: DeviceSensorMessage = {
             id: "a",
-            payload: {
-                sensor1: "value",
-            } as unknown as MiFloraSensorData,
+            payload: miFloraSensorData,
             type: MessageType.SensorData,
             time: DateTime.now(),
             device: {
@@ -76,11 +126,7 @@ describe("HomeAssistant MQTT Message producer", () => {
 
         const message = await Effect.runPromise(testEffectWithContext(testProgram));
         expect(message[0]).toEqual({
-            payload: JSON.stringify({
-                sensor1: "value",
-                time: deviceMessage.time,
-                id: deviceMessage.id,
-            }),
+            payload: JSON.stringify({ ...miFloraSensorData, time: deviceMessage.time, id: deviceMessage.id }),
             retain: false,
             topic: "test/miflora/aa:bb/state",
         });
@@ -89,11 +135,7 @@ describe("HomeAssistant MQTT Message producer", () => {
     it("should generate device state mqtt message for air quality ruuvitag", async () => {
         const deviceMessage: DeviceSensorMessage = {
             id: "air-quality-msg",
-            payload: {
-                type: "air-quality",
-                temperature: 22.5,
-                pm2_5: 12.3,
-            } as unknown as EnhancedRuuviAirSensorData,
+            payload: airQualitySensorData,
             type: MessageType.SensorData,
             time: DateTime.now(),
             device: {
@@ -116,13 +158,7 @@ describe("HomeAssistant MQTT Message producer", () => {
         const message = await Effect.runPromise(testEffectWithContext(testProgram));
 
         expect(message[0]).toEqual({
-            payload: JSON.stringify({
-                type: "air-quality",
-                temperature: 22.5,
-                pm2_5: 12.3,
-                time: deviceMessage.time,
-                id: deviceMessage.id,
-            }),
+            payload: JSON.stringify({ ...airQualitySensorData, time: deviceMessage.time, id: deviceMessage.id }),
             retain: false,
             topic: "test/ruuvitag/cc:dd/state",
         });

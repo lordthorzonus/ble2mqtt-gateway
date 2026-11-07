@@ -30,13 +30,11 @@ type HumidityLevel = keyof typeof CLIMATE_INDEX_LOOKUP;
 
 type TemperatureLevel = keyof (typeof CLIMATE_INDEX_LOOKUP)[HumidityLevel];
 
-const HUMIDITY_LEVELS: readonly HumidityLevel[] = Object.keys(CLIMATE_INDEX_LOOKUP)
-    .map(Number)
-    .sort((a, b) => a - b) as HumidityLevel[];
+const HUMIDITY_LEVELS = [10, 20, 30, 40, 50, 60, 70, 80, 90] as const satisfies readonly HumidityLevel[];
 
-const TEMPERATURE_LEVELS: readonly TemperatureLevel[] = Object.keys(CLIMATE_INDEX_LOOKUP[10])
-    .map(Number)
-    .sort((a, b) => a - b) as TemperatureLevel[];
+const TEMPERATURE_LEVELS = [
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+] as const satisfies readonly TemperatureLevel[];
 
 const toDescription = Match.type<number>().pipe(
     Match.withReturnType<BreezeIndoorClimateIndexDescription>(),

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Config, GlobalConfiguration } from "./config.js";
 import { gateway } from "./gateway.js";
 import { Logger } from "./infra/logger.js";
@@ -9,7 +9,7 @@ import { Data, Duration, Effect, Layer, Schedule, Stream } from "effect";
 import { v4 as uuid } from "uuid";
 
 const mockScan = vi.fn();
-const mockedUuid = uuid as Mock;
+const mockedUuid = vi.mocked<() => string>(uuid);
 
 vi.mock("uuid");
 
@@ -75,6 +75,7 @@ describe("gateway", () => {
         Layer.mergeAll(
             Layer.succeed(Config, config),
             Layer.succeed(Logger, Logger.of(mockLogger)),
+            // SAFETY: the gateway only calls publish on the MQTT client, which the mock implements.
             Layer.succeed(MqttClient, mockMqttClient as never)
         );
 
@@ -169,9 +170,9 @@ describe("gateway", () => {
 
         mockMqttClient.publish.mockImplementation((_topic, _payload, _options, callback) => {
             const message = {
-                topic: _topic as string,
-                payload: _payload as string,
-                retain: (_options as { retain: boolean }).retain,
+                topic: _topic,
+                payload: _payload,
+                retain: _options.retain,
             } satisfies PublishedMessage;
 
             publishedMessages.push(message);
@@ -397,6 +398,7 @@ describe("gateway", () => {
                 {
                     id: "aa:aa",
                     name: "fridge",
+                    // SAFETY: an unsupported model is the input under test; config parsing would reject it.
                     model: "invalid-model" as never,
                 },
             ],
@@ -432,9 +434,9 @@ describe("gateway", () => {
 
         mockMqttClient.publish.mockImplementation((topic, payload, options, callback) => {
             const message = {
-                topic: topic as string,
-                payload: payload as string,
-                retain: (options as { retain: boolean }).retain,
+                topic,
+                payload,
+                retain: options.retain,
             } satisfies PublishedMessage;
 
             const attempt = (attempts.get(message.payload + message.topic) ?? 0) + 1;

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import { makeOralbDeviceRegistry, makeOralbGateway } from "./oralb-gateway.js";
 import { Settings } from "luxon";
@@ -12,7 +12,10 @@ import { DeviceMessage, DeviceType, MessageType, OralBSensorMessage } from "../.
 
 vi.mock("uuid");
 
-const mockedUuid = uuid as Mock;
+const isOralBSensorMessage = (message: DeviceMessage): message is OralBSensorMessage =>
+    message.type === MessageType.SensorData && message.device.type === DeviceType.OralB;
+
+const mockedUuid = vi.mocked<() => string>(uuid);
 const defaultTimeout = 60000;
 
 const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
@@ -48,7 +51,7 @@ const TestLayer = Layer.provideMerge(
 describe("OralB Gateway", () => {
     const originalNow = Settings.now;
 
-    const peripheral = {
+    const peripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from([
                 0xdc,
@@ -68,7 +71,7 @@ describe("OralB Gateway", () => {
         address: "aa:bb:cc:dd:ee:ff",
         rssi: -70,
         uuid: "aa:bb:cc:dd:ee:ff",
-    } as Peripheral;
+    };
 
     beforeEach(() => {
         Settings.now = () => 0;
@@ -115,12 +118,12 @@ describe("OralB Gateway", () => {
             expect(availabilityMessage?.type).toBe(MessageType.Availability);
             expect(sensorMessage?.type).toBe(MessageType.SensorData);
 
-            const oralbMessage = sensorMessage as OralBSensorMessage;
-            expect(oralbMessage.device.friendlyName).toBe("my_toothbrush");
-            expect(oralbMessage.device.id).toBe("aa:bb:cc:dd:ee:ff");
-            expect(oralbMessage.payload.state).toBe("running");
-            expect(oralbMessage.payload.brushingMode).toBe("sensitive");
-            expect(oralbMessage.payload.isBrushing).toBe(true);
+            const oralbMessage = messagesArray.find(isOralBSensorMessage);
+            expect(oralbMessage?.device.friendlyName).toBe("my_toothbrush");
+            expect(oralbMessage?.device.id).toBe("aa:bb:cc:dd:ee:ff");
+            expect(oralbMessage?.payload.state).toBe("running");
+            expect(oralbMessage?.payload.brushingMode).toBe("sensitive");
+            expect(oralbMessage?.payload.isBrushing).toBe(true);
         });
 
         it("should return empty array for unknown device when allow_unknown is false", async () => {
@@ -223,9 +226,9 @@ describe("OralB Gateway", () => {
             const messages = await Effect.runPromise(program);
             const messagesArray = Array.from(messages);
 
-            const sensorMessage = messagesArray.find((m) => m.type === MessageType.SensorData) as OralBSensorMessage;
+            const sensorMessage = messagesArray.find(isOralBSensorMessage);
             expect(sensorMessage).toBeDefined();
-            expect(sensorMessage.payload.brushingMode).toBe("daily_clean");
+            expect(sensorMessage?.payload.brushingMode).toBe("daily_clean");
         });
 
         const unknownModelPeripheral = {
@@ -248,10 +251,7 @@ describe("OralB Gateway", () => {
             );
 
         const findSensorMessage = (messages: Iterable<DeviceMessage>): OralBSensorMessage | undefined =>
-            Array.from(messages).find(
-                (message): message is OralBSensorMessage =>
-                    message.type === MessageType.SensorData && message.device.type === DeviceType.OralB
-            );
+            Array.from(messages).find(isOralBSensorMessage);
 
         it("uses the configured model override when the model bytes are unknown", async () => {
             const settings: NonNullable<OralBGatewayConfiguration> = {

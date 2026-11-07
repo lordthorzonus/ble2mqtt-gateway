@@ -1,4 +1,4 @@
-import { afterAll, afterEach, describe, expect, it, vi, type Mock } from "vitest";
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { Config } from "./config.js";
 
 vi.mock("fs");
@@ -6,7 +6,7 @@ vi.mock("fs");
 import { Effect } from "effect";
 import { readFileSync } from "fs";
 
-const mockReadFileSync = readFileSync as Mock;
+const mockReadFileSync = vi.mocked(readFileSync);
 
 const exampleConfiguration = `
 mqtt:

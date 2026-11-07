@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DeviceSensorMessage, MessageType, DeviceType } from "../../types.js";
 import { RuuviTagSensorData } from "./ruuvitag-parser/index.js";
 import {
@@ -33,12 +33,12 @@ const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
 
 vi.mock("./ruuvitag-sensor-data-decorator/index.js");
 
-const mockedRuuviTagDecorator = decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues as Mock;
-const mockedRuuviTagAirQualityDecorator = decorateRuuviTagAirQualitySensorDataWithCalculatedValues as Mock;
+const mockedRuuviTagDecorator = vi.mocked(decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues);
+const mockedRuuviTagAirQualityDecorator = vi.mocked(decorateRuuviTagAirQualitySensorDataWithCalculatedValues);
 
 vi.mock("uuid");
 
-const mockedUuid = uuid as Mock;
+const mockedUuid = vi.mocked<() => string>(uuid);
 
 describe("RuuviTag Measurement Transformer", () => {
     const originalNow = Settings.now;
@@ -54,7 +54,7 @@ describe("RuuviTag Measurement Transformer", () => {
         vi.restoreAllMocks();
     });
     describe("transformPeripheralToRuuviTagMeasurement()", () => {
-        const peripheral = {
+        const peripheral: PeripheralWithManufacturerData = {
             advertisement: {
                 manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
                 localName: "a",
@@ -62,8 +62,41 @@ describe("RuuviTag Measurement Transformer", () => {
             },
             address: "a1:b2",
             rssi: 23,
-            id: "id",
             uuid: "123",
+        };
+
+        // The decorators are mocked, so the parsed data only has to be well-typed.
+        const parsedEnvironmentalData: RuuviTagSensorData = {
+            type: "environmental",
+            temperature: asCelsius(24.3),
+            relativeHumidityPercentage: null,
+            pressure: null,
+            accelerationX: null,
+            accelerationY: null,
+            accelerationZ: null,
+            batteryVoltage: null,
+            txPower: null,
+            movementCounter: null,
+            measurementSequence: null,
+            macAddress: null,
+        };
+
+        const parsedAirQualityData: RuuviTagSensorData = {
+            type: "air-quality",
+            temperature: asCelsius(-163.835),
+            relativeHumidityPercentage: null,
+            pressure: null,
+            pm1: null,
+            pm2_5: null,
+            pm4: null,
+            pm10: null,
+            co2: null,
+            voc: null,
+            nox: null,
+            luminosity: null,
+            calibrationInProgress: false,
+            measurementSequence: null,
+            macAddress: null,
         };
 
         const device: DeviceRegistryEntry = {
@@ -128,27 +161,20 @@ describe("RuuviTag Measurement Transformer", () => {
         };
 
         it("should transform the given peripheral advertisement into RuuviTagMeasurement", () => {
-            const dummyParsedData = { type: "environmental", temperature: 24.3 } as unknown as RuuviTagSensorData;
             mockedRuuviTagDecorator.mockReturnValue(sensorData);
             mockedUuid.mockReturnValue(mockId);
 
             const result = Option.getOrThrow(
-                transformRuuviTagSensorDataToDeviceMessage(
-                    peripheral as PeripheralWithManufacturerData,
-                    device,
-                    dummyParsedData
-                )
+                transformRuuviTagSensorDataToDeviceMessage(peripheral, device, parsedEnvironmentalData)
             );
 
             expect(result).toStrictEqual(expectedMessage);
 
-            expect(mockedRuuviTagDecorator).toHaveBeenCalledWith(dummyParsedData);
+            expect(mockedRuuviTagDecorator).toHaveBeenCalledWith(parsedEnvironmentalData);
             expect(mockedUuid).toHaveBeenCalledTimes(1);
         });
 
         it("should use the mac address from the peripheral advertisement if one is not available in sensor data", () => {
-            const dummyParsedData = { type: "environmental", temperature: 24.3 } as unknown as RuuviTagSensorData;
-
             const sensorDataWithoutMacAddress = {
                 ...expectedMessage.payload,
                 macAddress: null,
@@ -158,11 +184,7 @@ describe("RuuviTag Measurement Transformer", () => {
             mockedUuid.mockReturnValue(mockId);
 
             const result = Option.getOrThrow(
-                transformRuuviTagSensorDataToDeviceMessage(
-                    peripheral as PeripheralWithManufacturerData,
-                    device,
-                    dummyParsedData
-                )
+                transformRuuviTagSensorDataToDeviceMessage(peripheral, device, parsedEnvironmentalData)
             );
 
             expect(result).toStrictEqual({
@@ -176,7 +198,7 @@ describe("RuuviTag Measurement Transformer", () => {
         });
 
         it("should transform air quality sensor data from peripheral advertisement", () => {
-            const airQualityPeripheral = {
+            const airQualityPeripheral: PeripheralWithManufacturerData = {
                 advertisement: {
                     manufacturerData: Buffer.from("99040680010000000000000000000000FF00004C884F", "hex"),
                     localName: "RuuviTag Air",
@@ -184,7 +206,6 @@ describe("RuuviTag Measurement Transformer", () => {
                 },
                 address: "4C:88:4F",
                 rssi: -45,
-                id: "air-quality-id",
                 uuid: "air-quality-uuid",
             };
 
@@ -241,20 +262,11 @@ describe("RuuviTag Measurement Transformer", () => {
                 },
             };
 
-            const dummyParsedAirQualityData = {
-                type: "air-quality",
-                temperature: -163.835,
-            } as unknown as RuuviTagSensorData;
-
             mockedRuuviTagAirQualityDecorator.mockReturnValue(airQualitySensorData);
             mockedUuid.mockReturnValue(mockId);
 
             const result = Option.getOrThrow(
-                transformRuuviTagSensorDataToDeviceMessage(
-                    airQualityPeripheral as PeripheralWithManufacturerData,
-                    device,
-                    dummyParsedAirQualityData
-                )
+                transformRuuviTagSensorDataToDeviceMessage(airQualityPeripheral, device, parsedAirQualityData)
             );
 
             expect(result).toStrictEqual(expectedAirQualityMessage);

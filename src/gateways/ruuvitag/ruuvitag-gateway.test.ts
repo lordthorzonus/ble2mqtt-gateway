@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag-gateway.js";
 import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter.js";
@@ -12,7 +12,7 @@ import { getTestConfig } from "../../test/test-context.js";
 
 vi.mock("uuid");
 
-const mockedUuid = uuid as Mock;
+const mockedUuid = vi.mocked<() => string>(uuid);
 const defaultTimeout = 30000;
 
 const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
@@ -49,37 +49,40 @@ const TestLayer = Layer.provideMerge(
 describe("RuuviTag Gateway", () => {
     const originalNow = Settings.now;
 
-    const peripheral = {
+    const peripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
+            serviceData: [],
         },
         address: "a1:b2",
         rssi: 23,
         uuid: "a1:b2",
-    } as Peripheral;
+    };
 
     // Data format 6 peripheral (air quality sensor)
-    const format6Peripheral = {
+    const format6Peripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from("990406170C5668C79E007000C90A02D900CD004C884F", "hex"),
+            serviceData: [],
         },
         address: "a1:b2",
         rssi: 23,
         uuid: "a1:b2",
-    } as Peripheral;
+    };
 
     // Data format E1 peripheral (extended air quality sensor)
-    const formatE1Peripheral = {
+    const formatE1Peripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from(
                 "9904E1170C5668C79E0065007004BD11CA00C9140413E0AC3FFFFFFECDEE11FFFFFFFFFFFFCBB8334C884F",
                 "hex"
             ),
+            serviceData: [],
         },
         address: "a1:b2",
         rssi: 23,
         uuid: "a1:b2",
-    } as Peripheral;
+    };
 
     beforeEach(() => {
         Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();

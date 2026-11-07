@@ -64,7 +64,7 @@ describe("BLE Gateway", () => {
         },
     };
 
-    const ruuviPeripheral = {
+    const ruuviPeripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
             serviceData: [],
@@ -72,9 +72,9 @@ describe("BLE Gateway", () => {
         address: "aa:aa",
         rssi: 23,
         uuid: "aa:aa",
-    } as unknown as Peripheral;
+    };
 
-    const unknownPeripheral = {
+    const unknownPeripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from("11110512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
             serviceData: [],
@@ -82,16 +82,16 @@ describe("BLE Gateway", () => {
         address: "bbb:bbb",
         rssi: 23,
         uuid: "bbb:bbb",
-    } as unknown as Peripheral;
+    };
 
-    const mifloraPeripheral = {
+    const mifloraPeripheral: Peripheral = {
         uuid: "miflora",
         address: "bb:bb",
         rssi: 43,
         advertisement: {
             serviceData: [{ uuid: "fe95", data: Buffer.from("71209800a864aed0a8654c0d08100112", "hex") }],
         },
-    } as unknown as Peripheral;
+    };
 
     const handledMessage = {
         type: MessageType.SensorData,
@@ -263,7 +263,7 @@ describe("BLE Gateway", () => {
     });
 
     it("handles peripherals with empty or short manufacturer data without crashing", async () => {
-        const peripheralWithEmptyData = {
+        const peripheralWithEmptyData: Peripheral = {
             advertisement: {
                 manufacturerData: Buffer.from([]),
                 serviceData: [],
@@ -271,9 +271,9 @@ describe("BLE Gateway", () => {
             address: "cc:cc",
             rssi: 23,
             uuid: "cc:cc",
-        } as unknown as Peripheral;
+        };
 
-        const peripheralWithSingleByte = {
+        const peripheralWithSingleByte: Peripheral = {
             advertisement: {
                 manufacturerData: Buffer.from([0x99]),
                 serviceData: [],
@@ -281,7 +281,7 @@ describe("BLE Gateway", () => {
             address: "dd:dd",
             rssi: 23,
             uuid: "dd:dd",
-        } as unknown as Peripheral;
+        };
 
         mockRuuviUnavailableDevices.mockReturnValue([]);
         mockMiFloraUnavailableDevices.mockReturnValue([]);

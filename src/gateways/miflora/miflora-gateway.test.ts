@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import { getStubPeripheralWithServiceData } from "./miflora-parser/index.test.js";
 import { makeMiFloraGateway, isMiFloraPeripheral, makeMiFloraDeviceRegistry } from "./miflora-gateway.js";
@@ -12,7 +12,7 @@ import { getTestConfig } from "../../test/test-context.js";
 
 vi.mock("uuid");
 
-const mockedUuid = uuid as Mock;
+const mockedUuid = vi.mocked<() => string>(uuid);
 const defaultTimeout = 30000;
 
 const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
@@ -185,14 +185,21 @@ describe("MiFlora Gateway", () => {
 
     describe("isMiFloraPeripheral()", () => {
         it.each([
-            [true, { advertisement: { localName: "Flower care" } }],
-            [true, { advertisement: { localName: "Flower Care" } }],
-            [true, { advertisement: { localName: "Flower mate" } }],
+            [true, { address: "", advertisement: { localName: "Flower care" } }],
+            [true, { address: "", advertisement: { localName: "Flower Care" } }],
+            [true, { address: "", advertisement: { localName: "Flower mate" } }],
             [true, { address: "c4:7c:8d:6e:06:9c", advertisement: { localName: "" } }],
             [false, { address: "c6:2c:8d:6e:06:9c", advertisement: { localName: "" } }],
             [false, { address: "", advertisement: { localName: "Bro mate" } }],
-        ])("should return %s for peripheral %j", (expectedValue, peripheral) => {
-            expect(isMiFloraPeripheral(peripheral as Peripheral)).toEqual(expectedValue);
+        ])("should return %s for peripheral %j", (expectedValue, { address, advertisement }) => {
+            const peripheral: Peripheral = {
+                uuid: "",
+                address,
+                rssi: 0,
+                advertisement: { ...advertisement, serviceData: [] },
+            };
+
+            expect(isMiFloraPeripheral(peripheral)).toEqual(expectedValue);
         });
     });
 });

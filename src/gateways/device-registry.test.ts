@@ -241,11 +241,14 @@ describe("Device Registry", () => {
 
             expect(deviceRegistry.get(id)).toBeNull();
 
-            const peripheral = {
+            const peripheral: Peripheral = {
                 uuid: id,
+                address: "",
+                rssi: 0,
+                advertisement: { serviceData: [] },
             };
 
-            deviceRegistry.registerUnknownDevice(peripheral as Peripheral, DeviceType.Ruuvitag, "environmental");
+            deviceRegistry.registerUnknownDevice(peripheral, DeviceType.Ruuvitag, "environmental");
 
             expect(deviceRegistry.get(id)?.device.id).toEqual(id);
             expect(deviceRegistry.get(id)?.device.type).toEqual(DeviceType.Ruuvitag);
