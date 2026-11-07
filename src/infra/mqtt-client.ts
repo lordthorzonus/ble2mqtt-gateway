@@ -1,7 +1,7 @@
 import * as mqtt from "mqtt";
 
 import { MqttMessage } from "../types.js";
-import { Data, Duration, Effect, Schedule } from "effect";
+import { Context, Data, Duration, Effect, Layer, Schedule } from "effect";
 import { Logger } from "./logger.js";
 import { Config } from "../config.js";
 
@@ -58,10 +58,11 @@ const mqttClient = Effect.gen(function* () {
     return client;
 });
 
-export class MqttClient extends Effect.Service<MqttClient>()("MqttClient", {
-    scoped: mqttClient,
-    dependencies: [Config.Default, Logger.Default],
-}) {}
+export class MqttClient extends Context.Service<MqttClient, mqtt.MqttClient>()("MqttClient") {
+    static readonly layer = Layer.effect(this, mqttClient).pipe(
+        Layer.provide(Layer.mergeAll(Config.layer, Logger.layer))
+    );
+}
 
 export class MqttClientError extends Data.TaggedError("MqttClientError")<{
     message: string;
@@ -73,9 +74,7 @@ export class MqttClientError extends Data.TaggedError("MqttClientError")<{
  * Retained messages (availability and discovery) are retried briefly. State messages are not retried,
  * because a retried state message is stale and the next advertisement replaces it anyway.
  */
-const RETAINED_PUBLISH_RETRY_POLICY = Schedule.exponential(Duration.millis(500)).pipe(
-    Schedule.intersect(Schedule.recurs(3))
-);
+const RETAINED_PUBLISH_RETRY_POLICY = Schedule.max([Schedule.exponential(Duration.millis(500)), Schedule.recurs(3)]);
 
 const publishOnce = (message: MqttMessage): Effect.Effect<void, MqttClientError, MqttClient | Logger> =>
     Effect.gen(function* () {
@@ -83,7 +82,7 @@ const publishOnce = (message: MqttMessage): Effect.Effect<void, MqttClientError,
         const logger = yield* Logger;
 
         logger.debug("Publishing MQTT Message", { message });
-        return yield* Effect.async<undefined, MqttClientError>((resume) => {
+        return yield* Effect.callback<undefined, MqttClientError>((resume) => {
             client.publish(
                 message.topic,
                 message.payload,

@@ -168,10 +168,10 @@ describe("BLE Gateway", () => {
     });
 
     const TestLayer = Layer.mergeAll(
-        Layer.succeed(Logger, Logger.make(mockLogger)),
+        Layer.succeed(Logger, Logger.of(mockLogger)),
         Layer.succeed(
             Config,
-            Config.make({
+            Config.of({
                 gateways: validGatewayConfiguration,
                 homeassistant: {
                     discovery_topic: "test",
@@ -319,26 +319,25 @@ describe("BLE Gateway", () => {
         expect(messages).toEqual(
             expect.arrayContaining([expect.objectContaining(handledMessage), expect.objectContaining(handledMessage)])
         );
-        expect(messages[2]).toEqual({
-            ...ruuviTag1UnavailableMessage,
+        // Gateways run concurrently, so only the order within one gateway is deterministic.
+        const unavailableMessagesOf = (deviceType: DeviceType) =>
+            messages.filter(
+                (message) => message.type === MessageType.Availability && message.device.type === deviceType
+            );
+        const withGeneratedFields = (message: typeof ruuviTag1UnavailableMessage) => ({
+            ...message,
             id: expect.any(String),
             time: expect.any(DateTime),
         });
-        expect(messages[3]).toEqual({
-            ...ruuviTag2UnavailableMessage,
-            id: expect.any(String),
-            time: expect.any(DateTime),
-        });
-        expect(messages[4]).toEqual({
-            ...miFlora1UnavailableMessage,
-            id: expect.any(String),
-            time: expect.any(DateTime),
-        });
-        expect(messages[5]).toEqual({
-            ...miFlora2UnavailableMessage,
-            id: expect.any(String),
-            time: expect.any(DateTime),
-        });
+
+        expect(unavailableMessagesOf(DeviceType.Ruuvitag)).toEqual([
+            withGeneratedFields(ruuviTag1UnavailableMessage),
+            withGeneratedFields(ruuviTag2UnavailableMessage),
+        ]);
+        expect(unavailableMessagesOf(DeviceType.MiFlora)).toEqual([
+            withGeneratedFields(miFlora1UnavailableMessage),
+            withGeneratedFields(miFlora2UnavailableMessage),
+        ]);
 
         expect(mockRuuviRegisterDeviceStatusPublished).toHaveBeenNthCalledWith(
             1,

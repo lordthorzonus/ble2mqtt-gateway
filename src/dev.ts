@@ -103,7 +103,7 @@ const mqttMode = Effect.gen(function* () {
     );
 });
 
-const DevLive = Layer.mergeAll(Config.Default, Logger.Default);
+const DevLive = Layer.mergeAll(Config.layer, Logger.layer);
 
 const devProgram = Effect.gen(function* () {
     const logger = yield* Logger;

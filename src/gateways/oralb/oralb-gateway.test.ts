@@ -35,7 +35,7 @@ if (!oralbSettings) {
 }
 
 const TestLayer = Layer.provideMerge(
-    Logger.DefaultWithoutDependencies,
+    Logger.layerWithoutDependencies,
     Layer.succeed(
         Config,
         getTestConfig({
@@ -199,7 +199,7 @@ describe("OralB Gateway", () => {
             });
 
             const testLayer = Layer.provideMerge(
-                Logger.DefaultWithoutDependencies,
+                Logger.layerWithoutDependencies,
                 Layer.succeed(
                     Config,
                     getTestConfig({

@@ -86,7 +86,7 @@ const resolveGatewayForPeripheral = (
 }> =>
     Option.gen(function* () {
         const gatewayId = yield* resolveGatewayId(peripheral);
-        const gateway = yield* Option.fromNullable(configuredGateways.get(gatewayId));
+        const gateway = yield* Option.fromNullishOr(configuredGateways.get(gatewayId));
 
         return {
             gateway,
@@ -159,7 +159,7 @@ export const makeBleGateway = (): Effect.Effect<BleGateway, never, Config | Logg
             deviceMessages: (peripherals) =>
                 peripherals.pipe(
                     Stream.mapEffect(mapPeripheral),
-                    Stream.flattenIterables,
+                    Stream.flattenIterable,
                     Stream.merge(availabilityMessages)
                 ),
         };

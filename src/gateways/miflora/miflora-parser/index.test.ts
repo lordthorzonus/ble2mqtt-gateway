@@ -8,7 +8,8 @@ import {
     InvalidMiFloraDataLengthError,
 } from "./index.js";
 import { Peripheral } from "../../../infra/ble-scanner.js";
-import { Cause, Effect, Exit, FastCheck as fc, Option } from "effect";
+import { Cause, Effect, Exit, Option } from "effect";
+import fc from "fast-check";
 import { testEffectWithContext } from "../../../test/test-context.js";
 
 export const getStubPeripheralWithServiceData = (serviceData: string, id = "a"): Peripheral => {
@@ -120,7 +121,7 @@ describe("parseMiFloraPeripheralAdvertisement()", () => {
 
     describe("properties", () => {
         const isDefect = (exit: Exit.Exit<unknown, unknown>): boolean =>
-            Exit.isFailure(exit) && Cause.isDie(exit.cause);
+            Exit.isFailure(exit) && Cause.hasDies(exit.cause);
 
         const parseServiceData = (data: Uint8Array) =>
             Effect.runSyncExit(
@@ -158,7 +159,7 @@ describe("parseMiFloraPeripheralAdvertisement()", () => {
                             const exit = parseServiceData(data);
                             const isLengthError =
                                 Exit.isFailure(exit) &&
-                                Cause.failureOption(exit.cause).pipe(
+                                Cause.findErrorOption(exit.cause).pipe(
                                     Option.exists((error) => error instanceof InvalidMiFloraDataLengthError)
                                 );
 

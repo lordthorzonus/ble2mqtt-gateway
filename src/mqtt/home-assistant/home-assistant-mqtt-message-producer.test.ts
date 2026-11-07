@@ -7,7 +7,7 @@ import {
     EnhancedRuuviAirSensorData,
 } from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator/index.js";
 import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer.js";
-import { Chunk, Effect, Stream } from "effect";
+import { Effect, Stream } from "effect";
 import { testEffectWithContext } from "../../test/test-context.js";
 
 describe("HomeAssistant MQTT Message producer", () => {
@@ -37,7 +37,7 @@ describe("HomeAssistant MQTT Message producer", () => {
 
         const message = await Effect.runPromise(testEffectWithContext(testProgram));
 
-        expect(Chunk.toArray(message)[0]).toEqual({
+        expect(message[0]).toEqual({
             payload: JSON.stringify({
                 sensor1: "value",
                 time: deviceMessage.time,
@@ -73,7 +73,7 @@ describe("HomeAssistant MQTT Message producer", () => {
         });
 
         const message = await Effect.runPromise(testEffectWithContext(testProgram));
-        expect(Chunk.toArray(message)[0]).toEqual({
+        expect(message[0]).toEqual({
             payload: JSON.stringify({
                 sensor1: "value",
                 time: deviceMessage.time,
@@ -112,7 +112,7 @@ describe("HomeAssistant MQTT Message producer", () => {
 
         const message = await Effect.runPromise(testEffectWithContext(testProgram));
 
-        expect(Chunk.toArray(message)[0]).toEqual({
+        expect(message[0]).toEqual({
             payload: JSON.stringify({
                 type: "air-quality",
                 temperature: 22.5,
@@ -244,7 +244,7 @@ describe("HomeAssistant MQTT Message producer", () => {
             });
 
             const messages = await Effect.runPromise(testEffectWithContext(testProgram));
-            expect(Chunk.toArray(messages)).toMatchSnapshot();
+            expect(messages).toMatchSnapshot();
         }
     );
 });

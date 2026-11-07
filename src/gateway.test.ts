@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import { Config } from "./config.js";
+import { Config, GlobalConfiguration } from "./config.js";
 import { gateway } from "./gateway.js";
 import { Logger } from "./infra/logger.js";
 import { MqttClient } from "./infra/mqtt-client.js";
@@ -24,7 +24,7 @@ vi.mock("./infra/ble-scanner.js", () => ({
 describe("gateway", () => {
     const originalNow = Settings.now;
     const createConfig = () =>
-        Config.make({
+        Config.of({
             mqtt: {
                 host: "localhost",
                 port: 1883,
@@ -70,10 +70,10 @@ describe("gateway", () => {
             },
         });
 
-    const makeTestLayer = (config: Config) =>
+    const makeTestLayer = (config: GlobalConfiguration) =>
         Layer.mergeAll(
             Layer.succeed(Config, config),
-            Layer.succeed(Logger, Logger.make(mockLogger)),
+            Layer.succeed(Logger, Logger.of(mockLogger)),
             Layer.succeed(MqttClient, mockMqttClient as never)
         );
 
@@ -520,7 +520,9 @@ describe("gateway", () => {
         config.gateways.ruuvitag = { ...ruuvitagConfig, timeout: 60_000 };
         const peripheralWithDistinctMac = { ...ruuviPeripheral, address: "c4:00:00:00:00:aa" };
         mockScan.mockReturnValue(
-            Stream.repeatValue(peripheralWithDistinctMac).pipe(Stream.schedule(Schedule.spaced(Duration.seconds(20))))
+            Stream.forever(Stream.make(peripheralWithDistinctMac)).pipe(
+                Stream.schedule(Schedule.spaced(Duration.seconds(20)))
+            )
         );
 
         // All 4 attempts of the first online message fail, so it is dropped. The heartbeat is the 5th attempt.

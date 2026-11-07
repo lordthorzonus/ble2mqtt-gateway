@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`Config > Config > should return the proper configuration given in the env variable 1`] = `
-Config {
+{
   "concurrency": {
     "mqtt_message_production": "unbounded",
     "mqtt_publishing": "unbounded",

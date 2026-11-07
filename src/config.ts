@@ -2,7 +2,7 @@ import { OralBModels } from "./gateways/oralb/oralb-sensor-data.js";
 import { load } from "js-yaml";
 import fs from "fs";
 import { z, ZodError } from "zod";
-import { Data, Effect } from "effect";
+import { Context, Data, Effect, Layer } from "effect";
 
 const mqttSchema = z.object({
     host: z.string(),
@@ -142,6 +142,6 @@ const getConfiguration: Effect.Effect<z.infer<typeof configSchema>, Configuratio
     return yield* Effect.succeed(parsedConfig.data);
 });
 
-export class Config extends Effect.Service<Config>()("Config", {
-    effect: getConfiguration,
-}) {}
+export class Config extends Context.Service<Config, GlobalConfiguration>()("Config") {
+    static readonly layer = Layer.effect(this, getConfiguration);
+}

@@ -34,7 +34,7 @@ if (!mifloraSettings) {
 }
 
 const TestLayer = Layer.provideMerge(
-    Logger.DefaultWithoutDependencies,
+    Logger.layerWithoutDependencies,
     Layer.succeed(
         Config,
         getTestConfig({

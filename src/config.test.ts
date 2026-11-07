@@ -58,7 +58,7 @@ describe("Config", () => {
                 expect(mockReadFileSync).toHaveBeenCalledWith("test", "utf-8");
             });
 
-            return Effect.runPromise(Effect.provide(configProgram, Config.Default));
+            return Effect.runPromise(Effect.provide(configProgram, Config.layer));
         });
     });
 });

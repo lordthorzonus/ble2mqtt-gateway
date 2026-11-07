@@ -9,10 +9,9 @@ export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")
     id: string;
 }> {}
 
-export class DeviceRegistryService extends Context.Tag("DeviceRegistryService")<
-    DeviceRegistryService,
-    DeviceRegistry
->() {}
+export class DeviceRegistryService extends Context.Service<DeviceRegistryService, DeviceRegistry>()(
+    "DeviceRegistryService"
+) {}
 
 /** A peripheral whose advertisement carries manufacturer-specific data. */
 export interface PeripheralWithManufacturerData extends Peripheral {
@@ -146,7 +145,7 @@ export const streamUnavailableDevices: Stream.Stream<DeviceAvailabilityMessage, 
  * publish retries ran out or lost by the broker.
  */
 export const streamAvailabilityHeartbeat = (
-    interval: Duration.DurationInput
+    interval: Duration.Input
 ): Stream.Stream<DeviceAvailabilityMessage, never, DeviceRegistryService> =>
     pipe(
         DeviceRegistryService,

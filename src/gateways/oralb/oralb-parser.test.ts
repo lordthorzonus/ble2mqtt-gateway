@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { InvalidOralBDataLengthError, parseOralBAdvertisement, toOralBSensorData } from "./oralb-parser.js";
 import { ResolvedOralBModel } from "./oralb-sensor-data.js";
-import { Cause, Effect, Exit, FastCheck as fc } from "effect";
+import { Cause, Effect, Exit } from "effect";
+import fc from "fast-check";
 import { asSeconds, asSectorNumber } from "../units.js";
 
 const parse = (manufacturerData: Buffer, model?: ResolvedOralBModel) =>
@@ -230,14 +231,9 @@ describe("oralb-parser", () => {
                 0x01,
             ]);
 
-            const result = Effect.runSyncExit(parse(manufacturerData));
+            const error = Effect.runSync(Effect.flip(parse(manufacturerData)));
 
-            expect(result._tag).toBe("Failure");
-            expect(result).toHaveProperty("cause");
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const cause = (result as any).cause;
-            expect(cause._tag).toBe("Fail");
-            expect(cause.error._tag).toBe("NotValidOralBManufacturerIdError");
+            expect(error._tag).toBe("NotValidOralBManufacturerIdError");
         });
 
         it.each([[[]], [[0xdc]]])(
@@ -263,14 +259,9 @@ describe("oralb-parser", () => {
                 0x00, // only 6 data bytes
             ]);
 
-            const result = Effect.runSyncExit(parse(manufacturerData));
+            const error = Effect.runSync(Effect.flip(parse(manufacturerData)));
 
-            expect(result._tag).toBe("Failure");
-            expect(result).toHaveProperty("cause");
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const cause = (result as any).cause;
-            expect(cause._tag).toBe("Fail");
-            expect(cause.error._tag).toBe("InvalidOralBDataLengthError");
+            expect(error._tag).toBe("InvalidOralBDataLengthError");
         });
     });
 
@@ -333,7 +324,7 @@ describe("oralb-parser", () => {
 
     describe("properties", () => {
         const isDefect = (exit: Exit.Exit<unknown, unknown>): boolean =>
-            Exit.isFailure(exit) && Cause.isDie(exit.cause);
+            Exit.isFailure(exit) && Cause.hasDies(exit.cause);
 
         const oralbAdvertisement = (withSectorFields: boolean) =>
             fc

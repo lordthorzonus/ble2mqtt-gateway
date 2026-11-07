@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Cause, Effect, Exit, FastCheck as fc, Option } from "effect";
+import { Cause, Effect, Exit, Option } from "effect";
+import fc from "fast-check";
 import { InvalidRuuviDataLengthError, parse, RuuvitagSensorProtocolDataFormat } from "./index.js";
 
 const RUUVI_MANUFACTURER_ID = [0x99, 0x04];
@@ -15,7 +16,7 @@ const MINIMUM_LENGTHS: [RuuvitagSensorProtocolDataFormat, number][] = [
 const lengthsAround = (headerLength: number, minimumLength: number): [Uint8Array][] =>
     Array.from({ length: minimumLength + 5 - headerLength }, (_, index) => [new Uint8Array(index)]);
 
-const isDefect = (exit: Exit.Exit<unknown, unknown>): boolean => Exit.isFailure(exit) && Cause.isDie(exit.cause);
+const isDefect = (exit: Exit.Exit<unknown, unknown>): boolean => Exit.isFailure(exit) && Cause.hasDies(exit.cause);
 
 describe("RuuviTag parser properties", () => {
     it("never fails with a defect for arbitrary manufacturer data", () => {
@@ -57,7 +58,7 @@ describe("RuuviTag parser properties", () => {
                         const exit = Effect.runSyncExit(parse(data));
                         const isLengthError =
                             Exit.isFailure(exit) &&
-                            Cause.failureOption(exit.cause).pipe(
+                            Cause.findErrorOption(exit.cause).pipe(
                                 Option.exists((error) => error instanceof InvalidRuuviDataLengthError)
                             );
 

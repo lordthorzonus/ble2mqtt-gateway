@@ -15,6 +15,9 @@ const { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStop
             on: (eventName: string, callback: (event: unknown) => unknown) => {
                 mockNobleEventEmitter.on(eventName, callback);
             },
+            removeListener: (eventName: string, callback: (event: unknown) => unknown) => {
+                mockNobleEventEmitter.removeListener(eventName, callback);
+            },
         };
 
         return { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStopScanning, mockNoble };

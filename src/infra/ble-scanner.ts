@@ -1,6 +1,6 @@
 import noble from "@stoprocent/noble";
 import { Logger } from "./logger.js";
-import { Effect, Stream, Data, Chunk } from "effect";
+import { Effect, Stream, Data, Queue } from "effect";
 
 export class BleScannerError extends Data.TaggedError("BleScannerError")<{
     message: string;
@@ -45,26 +45,33 @@ const startScanning = Effect.gen(function* () {
 export const scan = (): Stream.Stream<Peripheral, BleScannerError, Logger> =>
     Effect.gen(function* () {
         const logger = yield* Logger;
-        return Stream.acquireRelease(startScanning, () =>
+
+        return Stream.callback<Peripheral, BleScannerError, Logger>((queue) =>
             Effect.gen(function* () {
-                yield* Effect.promise(() => noble.stopScanningAsync());
-                logger.info("BLE scanner stopped");
+                yield* Effect.acquireRelease(startScanning, () =>
+                    Effect.gen(function* () {
+                        yield* Effect.promise(() => noble.stopScanningAsync());
+                        logger.info("BLE scanner stopped");
+                    })
+                );
+
+                yield* Effect.acquireRelease(
+                    Effect.sync(() => {
+                        const onDiscover = (peripheral: Peripheral) => {
+                            Queue.offerUnsafe(queue, peripheral);
+                        };
+
+                        noble.on("discover", onDiscover);
+                        return onDiscover;
+                    }),
+                    (onDiscover) =>
+                        Effect.sync(() => {
+                            logger.info("Cleaning up BLE scanner event listener");
+                            noble.removeListener("discover", onDiscover);
+                        })
+                );
             })
         ).pipe(
-            Stream.flatMap(() =>
-                Stream.async<Peripheral, BleScannerError>((emit) => {
-                    const onDiscover = (peripheral: Peripheral) => {
-                        void emit(Effect.succeed(Chunk.of(peripheral)));
-                    };
-
-                    noble.on("discover", onDiscover);
-
-                    return Effect.sync(() => {
-                        logger.info("Cleaning up BLE scanner event listener");
-                        noble.removeListener("discover", onDiscover);
-                    });
-                })
-            ),
             Stream.tap((peripheral) => Effect.sync(() => logger.debug("Received BLE advertisement %s", peripheral)))
         );
     }).pipe(Stream.unwrap);

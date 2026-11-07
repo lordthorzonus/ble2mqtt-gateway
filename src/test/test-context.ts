@@ -55,13 +55,13 @@ const mockConfig: GlobalConfiguration = {
     },
 };
 
-export const getTestConfig = (partialConfig: Partial<GlobalConfiguration>): Config => {
-    return Config.make({ ...mockConfig, ...partialConfig });
+export const getTestConfig = (partialConfig: Partial<GlobalConfiguration>): GlobalConfiguration => {
+    return Config.of({ ...mockConfig, ...partialConfig });
 };
 
 export const TestContext = Context.empty().pipe(
-    Context.add(Config, Config.make(mockConfig)),
-    Context.add(Logger, Logger.make(mockLogger))
+    Context.add(Config, Config.of(mockConfig)),
+    Context.add(Logger, Logger.of(mockLogger))
 );
 
 export const testEffectWithContext = <A, E, R extends Config | Logger>(

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { Data, Effect, Option } from "effect";
+import { Data, Effect, Option, Result } from "effect";
 import { DeviceRegistry } from "./device-registry.js";
 import { DeviceRegistryService, handleBleAdvertisement } from "./gateway-helpers.js";
 import { Peripheral } from "../infra/ble-scanner.js";
@@ -28,7 +28,7 @@ const handle = (registry: DeviceRegistry, parseAdvertisement: () => Effect.Effec
         parseAdvertisement,
         resolveDeviceModel: () => "environmental",
         handleDeviceSensorData: () => Effect.succeed(Option.none()),
-    }).pipe(Effect.provideService(DeviceRegistryService, registry), Effect.either, Effect.runSync);
+    }).pipe(Effect.provideService(DeviceRegistryService, registry), Effect.result, Effect.runSync);
 
 describe("handleBleAdvertisement()", () => {
     it("parses the advertisement once and passes the result to model resolution and sensor handling", () => {
@@ -55,7 +55,7 @@ describe("handleBleAdvertisement()", () => {
         expect(registry.get("aa:aa")?.lastPublishedAvailability).toBe("offline");
 
         const result = handle(registry, () => Effect.succeed("parsed"));
-        expect(result._tag === "Right" ? Array.from(result.right) : []).toEqual([
+        expect(Result.isSuccess(result) ? Array.from(result.success) : []).toEqual([
             expect.objectContaining({ type: MessageType.Availability, payload: { state: "online" } }),
         ]);
         expect(registry.get("aa:aa")?.lastPublishedAvailability).toBe("online");
