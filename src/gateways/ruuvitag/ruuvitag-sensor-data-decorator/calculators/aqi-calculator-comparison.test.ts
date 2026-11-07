@@ -1,6 +1,7 @@
-import { calculateRuuviIAQS } from "./ruuvi-iaqs-calculator";
-import { calculateAtmoTubeIAQI } from "./atmotube-aqi-calculator";
-import { asCO2Ppm, asNOxIndex, asPM2_5, asVOCIndex } from "../../../units";
+import { describe, expect, it } from "vitest";
+import { calculateRuuviIAQS } from "./ruuvi-iaqs-calculator.js";
+import { calculateAtmoTubeIAQI } from "./atmotube-aqi-calculator.js";
+import { asCO2Ppm, asNOxIndex, asPM2_5, asVOCIndex } from "../../../units.js";
 
 function runComparison(sensorData: {
     pm2_5: number | null;

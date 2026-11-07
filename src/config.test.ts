@@ -1,11 +1,12 @@
-import { Config } from "./config";
+import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
+import { Config } from "./config.js";
 
-jest.mock("fs");
+vi.mock("fs");
 
 import { Effect } from "effect";
 import { readFileSync } from "fs";
 
-const mockReadFileSync = readFileSync as jest.Mock;
+const mockReadFileSync = vi.mocked(readFileSync);
 
 const exampleConfiguration = `
 mqtt:
@@ -37,12 +38,12 @@ homeassistant:
 
 describe("Config", () => {
     afterEach(() => {
-        jest.resetAllMocks();
-        jest.resetModules();
+        vi.resetAllMocks();
+        vi.resetModules();
     });
 
     afterAll(() => {
-        jest.restoreAllMocks();
+        vi.restoreAllMocks();
     });
 
     describe("Config", () => {
@@ -57,7 +58,7 @@ describe("Config", () => {
                 expect(mockReadFileSync).toHaveBeenCalledWith("test", "utf-8");
             });
 
-            return Effect.runPromise(Effect.provide(configProgram, Config.Default));
+            return Effect.runPromise(Effect.provide(configProgram, Config.layer));
         });
     });
 });

@@ -1,19 +1,38 @@
 {
-    "extends": ["config:js-app", ":automergeAll", "group:allNonMajor", ":maintainLockFilesWeekly"],
-    "regexManagers": [
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:js-app", ":automergeAll", "group:allNonMajor", ":maintainLockFilesWeekly", "helpers:pinGitHubActionDigests"],
+    "customManagers": [
         {
-            "fileMatch": ["Dockerfile"],
+            "customType": "regex",
+            "managerFilePatterns": ["/(^|/)Dockerfile$/"],
             "matchStringsStrategy": "combination",
             "matchStrings": ["NODE_VERSION=\\s*\\\"*(?<currentValue>.*)\\\""],
             "datasourceTemplate": "docker",
             "depNameTemplate": "node"
+        }
+    ],
+    "packageRules": [
+        {
+            "description": "Node 24 and newer have no 32-bit ARM build, and the Raspberry Pis still need linux/arm/v7.",
+            "matchDepNames": ["node", "@types/node"],
+            "allowedVersions": "<23"
         },
         {
-            "fileMatch": ["Dockerfile"],
-            "matchStringsStrategy": "combination",
-            "matchStrings": ["NPM_VERSION=\\s*\\\"*(?<currentValue>.*)\\\""],
-            "datasourceTemplate": "npm",
-            "depNameTemplate": "npm"
+            "description": "Effect packages share one version and must be updated together.",
+            "matchPackageNames": ["effect", "@effect/platform-node"],
+            "groupName": "Effect"
+        },
+        {
+            "description": "@effect/tsgo patches specific oxlint, oxlint-tsgolint and TypeScript 7 versions, and @oxlint/plugins and eslint-plugin-oxlint must match the oxlint version.",
+            "matchDepNames": [
+                "oxlint",
+                "oxlint-tsgolint",
+                "@oxlint/plugins",
+                "eslint-plugin-oxlint",
+                "@effect/tsgo",
+                "@typescript/native"
+            ],
+            "groupName": "oxlint and Effect tsgo"
         }
     ]
 }

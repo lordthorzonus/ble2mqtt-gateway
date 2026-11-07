@@ -1,16 +1,18 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Effect, Layer } from "effect";
-import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag-gateway";
-import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter";
+import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag-gateway.js";
+import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter.js";
 import { Settings } from "luxon";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "../../infra/ble-scanner";
-import { Logger } from "../../infra/logger";
-import { Config, GlobalConfiguration, RuuviTagGatewayConfiguration } from "../../config";
-import { DeviceRegistryService } from "../gateway-helpers";
-import { getTestConfig } from "../../test/test-context";
+import { Peripheral } from "../../infra/ble-scanner.js";
+import { Logger } from "../../infra/logger.js";
+import { Config, GlobalConfiguration, RuuviTagGatewayConfiguration } from "../../config.js";
+import { DeviceRegistryService } from "../gateway-helpers.js";
+import { getTestConfig } from "../../test/test-context.js";
 
-jest.mock("uuid");
-const mockedUuid = uuid as jest.Mock;
+vi.mock("uuid");
+
+const mockedUuid = vi.mocked<() => string>(uuid);
 const defaultTimeout = 30000;
 
 const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
@@ -35,7 +37,7 @@ if (!ruuviTagSettings) {
 }
 
 const TestLayer = Layer.provideMerge(
-    Logger.DefaultWithoutDependencies,
+    Logger.layerWithoutDependencies,
     Layer.succeed(
         Config,
         getTestConfig({
@@ -46,37 +48,41 @@ const TestLayer = Layer.provideMerge(
 
 describe("RuuviTag Gateway", () => {
     const originalNow = Settings.now;
-    const peripheral = {
+
+    const peripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from("99040512FC5394C37C0004FFFC040CAC364200CDCBB8334C884F", "hex"),
+            serviceData: [],
         },
         address: "a1:b2",
         rssi: 23,
         uuid: "a1:b2",
-    } as Peripheral;
+    };
 
     // Data format 6 peripheral (air quality sensor)
-    const format6Peripheral = {
+    const format6Peripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from("990406170C5668C79E007000C90A02D900CD004C884F", "hex"),
+            serviceData: [],
         },
         address: "a1:b2",
         rssi: 23,
         uuid: "a1:b2",
-    } as Peripheral;
+    };
 
     // Data format E1 peripheral (extended air quality sensor)
-    const formatE1Peripheral = {
+    const formatE1Peripheral: Peripheral = {
         advertisement: {
             manufacturerData: Buffer.from(
                 "9904E1170C5668C79E0065007004BD11CA00C9140413E0AC3FFFFFFECDEE11FFFFFFFFFFFFCBB8334C884F",
                 "hex"
             ),
+            serviceData: [],
         },
         address: "a1:b2",
         rssi: 23,
         uuid: "a1:b2",
-    } as Peripheral;
+    };
 
     beforeEach(() => {
         Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
@@ -86,7 +92,7 @@ describe("RuuviTag Gateway", () => {
 
     afterEach(() => {
         Settings.now = originalNow;
-        jest.resetAllMocks();
+        vi.resetAllMocks();
     });
 
     const testWithFreshDeviceRegistry = <A, E, R extends Config | Logger | DeviceRegistryService>(
@@ -102,12 +108,7 @@ describe("RuuviTag Gateway", () => {
             Layer.succeed(DeviceRegistryService, deviceRegistry)
         );
 
-        return Effect.provide(
-            Effect.gen(function* () {
-                return yield* program;
-            }),
-            TestLayerWithDeviceRegistry
-        );
+        return Effect.provide(program, TestLayerWithDeviceRegistry);
     };
 
     describe("ruuvitagGateway()", () => {
@@ -115,6 +116,7 @@ describe("RuuviTag Gateway", () => {
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(ruuviTagSettings);
                 const messages = yield* gateway(peripheral);
+
                 return Array.from(messages);
             });
 
@@ -133,11 +135,14 @@ describe("RuuviTag Gateway", () => {
                     },
                 ],
             };
+
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(airQualitySettings);
                 const messages = yield* gateway(format6Peripheral);
+
                 return Array.from(messages);
             });
+
             const messages = await Effect.runPromise(testWithFreshDeviceRegistry(airQualitySettings, program));
             expect(messages).toMatchSnapshot();
         });
@@ -145,10 +150,12 @@ describe("RuuviTag Gateway", () => {
         it("should complete without emitting messages if unknown ruuvitag advertisement is received", async () => {
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(ruuviTagSettings);
+
                 const messages = yield* gateway({
                     ...peripheral,
                     uuid: "no-such-ruuvitag",
-                } as Peripheral);
+                });
+
                 return Array.from(messages);
             });
 
@@ -180,7 +187,7 @@ describe("RuuviTag Gateway", () => {
             const unknownPeripheral = {
                 ...peripheral,
                 uuid: "unknown",
-            } as Peripheral;
+            };
 
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway({ ...ruuviTagSettings, allow_unknown: true });
@@ -189,6 +196,7 @@ describe("RuuviTag Gateway", () => {
 
                 // Second call to get sensor data
                 const secondMessages = yield* gateway(unknownPeripheral);
+
                 return [...Array.from(firstMessages), ...Array.from(secondMessages)];
             });
 
@@ -220,6 +228,7 @@ describe("RuuviTag Gateway", () => {
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(airQualitySettings, cache);
                 const messages = yield* gateway(formatE1Peripheral);
+
                 return Array.from(messages);
             });
 
@@ -235,6 +244,7 @@ describe("RuuviTag Gateway", () => {
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(airQualitySettings, cache);
                 const messages = yield* gateway(format6Peripheral);
+
                 return Array.from(messages);
             });
 
@@ -263,6 +273,7 @@ describe("RuuviTag Gateway", () => {
                 expect(Array.from(e1Messages)).toHaveLength(2);
 
                 const format6Messages = yield* gateway(format6Peripheral);
+
                 return Array.from(format6Messages);
             });
 
@@ -281,6 +292,7 @@ describe("RuuviTag Gateway", () => {
                 Settings.now = () => new Date("2019-10-10T00:06:00.000Z").valueOf();
 
                 const format6Messages = yield* gateway(format6Peripheral);
+
                 return Array.from(format6Messages);
             });
 
@@ -310,13 +322,13 @@ describe("RuuviTag Gateway", () => {
                 ...formatE1Peripheral,
                 address: "c3:d4",
                 uuid: "c3:d4",
-            } as Peripheral;
+            };
 
             const device2Format6 = {
                 ...format6Peripheral,
                 address: "c3:d4",
                 uuid: "c3:d4",
-            } as Peripheral;
+            };
 
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(multiDeviceSettings, cache);
@@ -331,6 +343,7 @@ describe("RuuviTag Gateway", () => {
                 expect(Array.from(device1Format6Messages)).toHaveLength(0);
 
                 const device2E1Messages = yield* gateway(device2FormatE1);
+
                 return Array.from(device2E1Messages);
             });
 
@@ -351,13 +364,13 @@ describe("RuuviTag Gateway", () => {
 
     describe("getUnavailableDevices()", () => {
         beforeEach(() => {
-            jest.useFakeTimers();
+            vi.useFakeTimers();
             mockedUuid.mockReturnValue("mock-uuid");
             Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
         });
 
         afterEach(() => {
-            jest.useRealTimers();
+            vi.useRealTimers();
             Settings.now = originalNow;
         });
 

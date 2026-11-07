@@ -1,17 +1,22 @@
-jest.mock("./calculators/absolute-humidity-calculator");
-jest.mock("./calculators/dew-point-calculator");
-jest.mock("./calculators/heat-index-calculator");
-jest.mock("./calculators/humidex-calculator");
+import { describe, expect, it, vi } from "vitest";
 
-import { RuuviTagSensorData, RuuviAirSensorData } from "../ruuvitag-parser";
+vi.mock("./calculators/absolute-humidity-calculator.js");
+
+vi.mock("./calculators/dew-point-calculator.js");
+
+vi.mock("./calculators/heat-index-calculator.js");
+
+vi.mock("./calculators/humidex-calculator.js");
+
+import { RuuviTagSensorData, RuuviAirSensorData } from "../ruuvitag-parser/index.js";
 import {
     decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues,
     decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
-} from "./index";
-import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calculator";
-import { calculateDewPoint } from "./calculators/dew-point-calculator";
-import { calculateHeatIndex } from "./calculators/heat-index-calculator";
-import { calculateHumidex } from "./calculators/humidex-calculator";
+} from "./index.js";
+import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calculator.js";
+import { calculateDewPoint } from "./calculators/dew-point-calculator.js";
+import { calculateHeatIndex } from "./calculators/heat-index-calculator.js";
+import { calculateHumidex } from "./calculators/humidex-calculator.js";
 import {
     asCelsius,
     asCO2Ppm,
@@ -24,12 +29,12 @@ import {
     asPM4,
     asRelativeHumidity,
     asVOCIndex,
-} from "../../units";
+} from "../../units.js";
 
-const calculateAbsoluteHumidityMock = calculateAbsoluteHumidity as jest.Mock;
-const calculateDewPointMock = calculateDewPoint as jest.Mock;
-const calculateHeatIndexMock = calculateHeatIndex as jest.Mock;
-const calculateHumidexMock = calculateHumidex as jest.Mock;
+const calculateAbsoluteHumidityMock = vi.mocked(calculateAbsoluteHumidity);
+const calculateDewPointMock = vi.mocked(calculateDewPoint);
+const calculateHeatIndexMock = vi.mocked(calculateHeatIndex);
+const calculateHumidexMock = vi.mocked(calculateHumidex);
 
 describe("RuuviTag sensor data decorator", () => {
     describe("Environmental sensor data", () => {
@@ -48,7 +53,8 @@ describe("RuuviTag sensor data decorator", () => {
                 relativeHumidityPercentage: asRelativeHumidity(80),
                 temperature: asCelsius(20),
             };
-            const dewPoint = 1;
+
+            const dewPoint = asCelsius(1);
             const absoluteHumidity = 2;
             const humidex = 30;
             const heatIndex = 27;
@@ -103,7 +109,8 @@ describe("RuuviTag sensor data decorator", () => {
                 luminosity: asLux(13026.67),
                 calibrationInProgress: false,
             };
-            const dewPoint = 15.2;
+
+            const dewPoint = asCelsius(15.2);
             const absoluteHumidity = 14.8;
             const humidex = 32.1;
             const heatIndex = 30.5;

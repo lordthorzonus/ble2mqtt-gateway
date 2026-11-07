@@ -1,13 +1,15 @@
 import {
     EnhancedRuuviAirSensorData,
     EnhancedRuuviTagEnvironmentalSensorData,
-} from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
+} from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator/index.js";
 import { DateTime } from "luxon";
-import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer";
+import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer.js";
+import { OralBSensorData, ResolvedOralBModel } from "./gateways/oralb/oralb-sensor-data.js";
 
 export enum DeviceType {
     Ruuvitag = "ruuvitag",
     MiFlora = "miflora",
+    OralB = "oralb",
 }
 
 export enum MessageType {
@@ -41,9 +43,13 @@ export interface SensorMessageForType<TDeviceType extends DeviceType, TModel ext
 export type RuuvitagSensorMessage =
     | SensorMessageForType<DeviceType.Ruuvitag, "environmental", EnhancedRuuviTagEnvironmentalSensorData>
     | SensorMessageForType<DeviceType.Ruuvitag, "air-quality", EnhancedRuuviAirSensorData>;
+
 export type MifloraSensorMessage = SensorMessageForType<DeviceType.MiFlora, "miflora", MiFloraSensorData>;
 
-export type DeviceSensorMessage = MifloraSensorMessage | RuuvitagSensorMessage;
+/** Sensor message for an Oral-B toothbrush; `model` is the model resolved for that advertisement. */
+export type OralBSensorMessage = SensorMessageForType<DeviceType.OralB, ResolvedOralBModel, OralBSensorData>;
+
+export type DeviceSensorMessage = MifloraSensorMessage | RuuvitagSensorMessage | OralBSensorMessage;
 
 export type RuuviModel = "environmental" | "air-quality";
 
@@ -85,12 +91,15 @@ export enum HomeAssistantDeviceClass {
     PM10 = "pm10",
     CarbonDioxide = "carbon_dioxide",
     AQI = "aqi",
+    Duration = "duration",
+    Running = "running",
 }
 
 export enum HomeAssistantMQTTComponent {
     Sensor = "sensor",
     BinarySensor = "binary_sensor",
 }
+
 export enum HomeAssistantEntityCategory {
     Diagnostic = "diagnostic",
 }

@@ -1,8 +1,9 @@
-import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units";
+import { describe, expect, it } from "vitest";
+import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units.js";
 import {
     calculateBreezeIndoorClimateIndex,
     BreezeIndoorClimateIndexDescription,
-} from "./breeze-indoor-climate-index-calculator";
+} from "./breeze-indoor-climate-index-calculator.js";
 
 describe("Breeze Indoor Climate Index calculator", () => {
     /**

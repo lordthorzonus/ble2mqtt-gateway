@@ -1,4 +1,4 @@
-import { Celsius, RelativeHumidity } from "../../../units";
+import { Celsius, RelativeHumidity } from "../../../units.js";
 
 /**
  * Calculates the vapour pressure of the water where water vapour

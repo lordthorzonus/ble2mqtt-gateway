@@ -1,5 +1,8 @@
-import { RuuviAirSensorData } from "../index";
-import { DataFormatE1ParsingStrategy } from "./data-format-e1-parsing-strategy";
+import { describe, expect, it } from "vitest";
+import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils.js";
+import { Effect } from "effect";
+import { RuuviAirSensorData } from "../index.js";
+import { DataFormatE1ParsingStrategy } from "./data-format-e1-parsing-strategy.js";
 import {
     asCelsius,
     asPascal,
@@ -12,7 +15,7 @@ import {
     asVOCIndex,
     asNOxIndex,
     asLux,
-} from "../../../units";
+} from "../../../units.js";
 
 describe("Data Format E1 Parsing Strategy", () => {
     const testCases: [string, RuuviAirSensorData][] = [
@@ -102,7 +105,15 @@ describe("Data Format E1 Parsing Strategy", () => {
         "should parse the raw data %s to a valid RuuviTagAirQualitySensorData",
         (rawStringData, expectedRuuviTagSensorData) => {
             const rawData = Buffer.from(rawStringData, "hex");
-            expect(DataFormatE1ParsingStrategy(rawData)).toEqual(expectedRuuviTagSensorData);
+            expect(Effect.runSync(DataFormatE1ParsingStrategy(rawData))).toEqual(expectedRuuviTagSensorData);
         }
     );
+
+    it("fails with InvalidRuuviDataLengthError when the data is shorter than the data format reads", () => {
+        const rawData = Buffer.from(`9904E1${"00".repeat(38)}`, "hex");
+
+        expect(Effect.runSync(Effect.flip(DataFormatE1ParsingStrategy(rawData)))).toStrictEqual(
+            new InvalidRuuviDataLengthError({ dataFormat: 0xe1, length: rawData.length, minimumLength: 42 })
+        );
+    });
 });

@@ -1,16 +1,24 @@
-import { Logger, LoggerInterface } from "../infra/logger";
+import { vi } from "vitest";
+import { Logger, LoggerInterface } from "../infra/logger.js";
 import { Context, Effect } from "effect";
-import { Config, GlobalConfiguration } from "../config";
+import { Config, GlobalConfiguration } from "../config.js";
 
-export const mockLogger: LoggerInterface = {
-    info: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-} as unknown as LoggerInterface;
+const loggerMethods: Partial<LoggerInterface> = {
+    info: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+};
 
+// SAFETY: the code under test only calls info, debug, error and warn on the winston logger.
+export const mockLogger = loggerMethods as LoggerInterface;
+
+/** The part of the MQTT client that `publish` in `infra/mqtt-client.ts` calls. */
 export const mockMqttClient = {
-    publish: jest.fn(),
+    publish:
+        vi.fn<
+            (topic: string, payload: string, options: { retain: boolean }, callback: (error?: Error) => void) => void
+        >(),
 };
 
 const mockConfig: GlobalConfiguration = {
@@ -28,7 +36,6 @@ const mockConfig: GlobalConfiguration = {
     gateway_name: "test",
     gateway_version: "1.0.0",
     concurrency: {
-        ble_gateway_processing: "unbounded",
         mqtt_message_production: "unbounded",
         mqtt_publishing: "unbounded",
     },
@@ -55,13 +62,13 @@ const mockConfig: GlobalConfiguration = {
     },
 };
 
-export const getTestConfig = (partialConfig: Partial<GlobalConfiguration>): Config => {
-    return Config.make({ ...mockConfig, ...partialConfig });
+export const getTestConfig = (partialConfig: Partial<GlobalConfiguration>): GlobalConfiguration => {
+    return Config.of({ ...mockConfig, ...partialConfig });
 };
 
 export const TestContext = Context.empty().pipe(
-    Context.add(Config, Config.make(mockConfig)),
-    Context.add(Logger, Logger.make(mockLogger))
+    Context.add(Config, Config.of(mockConfig)),
+    Context.add(Logger, Logger.of(mockLogger))
 );
 
 export const testEffectWithContext = <A, E, R extends Config | Logger>(

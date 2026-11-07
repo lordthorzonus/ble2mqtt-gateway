@@ -1,6 +1,6 @@
-import { DeviceRegistryEntry } from "./device-registry";
-import { Peripheral } from "../infra/ble-scanner";
-import { DeviceAvailabilityMessage, MessageType } from "../types";
+import { DeviceRegistryEntry } from "./device-registry.js";
+import { Peripheral } from "../infra/ble-scanner.js";
+import { DeviceAvailabilityMessage, MessageType } from "../types.js";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 
@@ -10,11 +10,12 @@ export const generateAvailabilityMessage = (
     peripheral?: Peripheral
 ): DeviceAvailabilityMessage => {
     const { id, friendlyName } = deviceRegistryEntry.device;
+
     return {
         id: uuid(),
         type: MessageType.Availability,
         device: {
-            macAddress: peripheral?.address ?? id,
+            macAddress: peripheral?.address ?? deviceRegistryEntry.macAddress ?? id,
             id: id,
             friendlyName: friendlyName,
             type: deviceRegistryEntry.device.type,

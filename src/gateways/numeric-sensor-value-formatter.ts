@@ -3,5 +3,6 @@ export const formatNumericSensorValue = <T extends number>(value: T | null, deci
         return null;
     }
 
+    // SAFETY: T only brands a number with its unit, and rounding does not change the unit.
     return parseFloat(value.toFixed(decimalPrecision)) as T;
 };

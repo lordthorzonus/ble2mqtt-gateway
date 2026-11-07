@@ -1,10 +1,10 @@
-import { Peripheral } from "../../infra/ble-scanner";
-import { DeviceRegistryEntry } from "../device-registry";
-import { MessageType, DeviceType, MifloraSensorMessage } from "../../types";
+import { Peripheral } from "../../infra/ble-scanner.js";
+import { DeviceRegistryEntry } from "../device-registry.js";
+import { MessageType, DeviceType, MifloraSensorMessage } from "../../types.js";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
-import { MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
-import { formatNumericSensorValue } from "../numeric-sensor-value-formatter";
+import { MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer.js";
+import { formatNumericSensorValue } from "../numeric-sensor-value-formatter.js";
 import { pipe } from "effect";
 import {
     asCelsius,
@@ -15,7 +15,7 @@ import {
     Lux,
     SoilConductivity,
     SoilMoisture,
-} from "../units";
+} from "../units.js";
 
 export interface MiFloraSensorData {
     temperature: Celsius | null;

@@ -1,7 +1,8 @@
+import { OralBModels } from "./gateways/oralb/oralb-sensor-data.js";
 import { load } from "js-yaml";
 import fs from "fs";
 import { z, ZodError } from "zod";
-import { Data, Effect } from "effect";
+import { Context, Data, Effect, Layer } from "effect";
 
 const mqttSchema = z.object({
     host: z.string(),
@@ -42,6 +43,21 @@ const miFloraSchema = z.object({
         .min(0),
 });
 
+const oralbSchema = z.object({
+    allow_unknown: z.boolean().default(false),
+    timeout: z.number().int().default(60000),
+    devices: z
+        .array(
+            z.object({
+                name: z.string(),
+                id: z.string(),
+                timeout: z.number().int().optional(),
+                model: z.enum(OralBModels).optional(),
+            })
+        )
+        .min(0),
+});
+
 const concurrencySchema = z
     .union([z.literal("unbounded"), z.number().int().positive()])
     .default("unbounded")
@@ -58,12 +74,10 @@ const configSchema = z.object({
     unavailable_devices_check_interval_ms: z.number().int().default(10000),
     concurrency: z
         .object({
-            ble_gateway_processing: concurrencySchema,
             mqtt_message_production: concurrencySchema,
             mqtt_publishing: concurrencySchema,
         })
         .default({
-            ble_gateway_processing: "unbounded",
             mqtt_message_production: "unbounded",
             mqtt_publishing: "unbounded",
         }),
@@ -71,6 +85,7 @@ const configSchema = z.object({
         base_topic: z.string().default("ble2mqtt"),
         ruuvitag: ruuvitagSchema.optional(),
         miflora: miFloraSchema.optional(),
+        oralb: oralbSchema.optional(),
     }),
     homeassistant: z
         .object({
@@ -83,6 +98,7 @@ const configSchema = z.object({
 
 const produceErrorMessage = (error: ZodError) => {
     const errorMessage = "Found following errors in configuration: \n";
+
     return error.issues.reduce((acc, issue) => {
         const errorPath = issue.path.join(".");
 
@@ -96,11 +112,16 @@ export class ConfigurationError extends Data.TaggedError("ConfigurationError")<{
 }> {}
 
 export type RuuviTagGatewayConfiguration = z.infer<typeof ruuvitagSchema>;
+
 export type MiFloraGatewayConfiguration = z.infer<typeof miFloraSchema>;
+
+export type OralBGatewayConfiguration = z.infer<typeof oralbSchema>;
+
 export type GlobalConfiguration = z.infer<typeof configSchema>;
 
 const getConfiguration: Effect.Effect<z.infer<typeof configSchema>, ConfigurationError> = Effect.gen(function* () {
-    const configurationFileLocation = process.env.CONFIG_FILE_LOCATION ?? `${__dirname}/../config/configuration.yaml`;
+    const configurationFileLocation =
+        process.env.CONFIG_FILE_LOCATION ?? `${import.meta.dirname}/../config/configuration.yaml`;
 
     const configurationFileContent = yield* Effect.try({
         try: () => fs.readFileSync(configurationFileLocation, "utf-8"),
@@ -124,6 +145,6 @@ const getConfiguration: Effect.Effect<z.infer<typeof configSchema>, Configuratio
     return yield* Effect.succeed(parsedConfig.data);
 });
 
-export class Config extends Effect.Service<Config>()("Config", {
-    effect: getConfiguration,
-}) {}
+export class Config extends Context.Service<Config, GlobalConfiguration>()("Config") {
+    static readonly layer = Layer.effect(this, getConfiguration);
+}

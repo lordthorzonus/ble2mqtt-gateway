@@ -4,11 +4,11 @@ import {
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDevice,
-} from "../../../types";
+} from "../../../types.js";
 import {
     EnhancedRuuviAirSensorData,
     EnhancedRuuviTagEnvironmentalSensorData,
-} from "../../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
+} from "../../../gateways/ruuvitag/ruuvitag-sensor-data-decorator/index.js";
 
 const ruuviTagDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = {
     manufacturer: "Ruuvi Innovations Oy",
@@ -114,7 +114,6 @@ const macAddressSensorConfiguration: HomeAssistantSensorConfiguration = {
     deviceClass: HomeAssistantDeviceClass.None,
     entityCategory: HomeAssistantEntityCategory.Diagnostic,
     name: "Mac Address",
-    unitOfMeasurement: undefined,
     uniqueId: "mac_address",
     device: ruuviTagDeviceConfiguration,
     suggestedDecimalPrecision: null,

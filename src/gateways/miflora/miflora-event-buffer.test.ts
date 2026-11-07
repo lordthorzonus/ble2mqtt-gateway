@@ -1,12 +1,13 @@
-import { MiFloraEventBuffer, MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer";
-import { MifloraMeasurementEventType } from "./miflora-parser";
-import { MiFloraMeasurement } from "./miflora-parser/parsing-strategies";
+import { beforeEach, describe, expect, it, test, vi } from "vitest";
+import { MiFloraEventBuffer, MiFloraSensorMeasurementBuffer } from "./miflora-event-buffer.js";
+import { MifloraMeasurementEventType } from "./miflora-parser/index.js";
+import { MiFloraMeasurement } from "./miflora-parser/parsing-strategies.js";
 import { DateTime, Settings } from "luxon";
 
-jest.mock("../../infra/logger", () => ({
+vi.mock("../../infra/logger.js", () => ({
     __esModule: true,
     logger: {
-        warn: jest.fn(),
+        warn: vi.fn(),
     },
 }));
 
@@ -39,18 +40,22 @@ describe("MiFlora Event Buffer", () => {
         measurementType: MifloraMeasurementEventType.Moisture,
         data: 1,
     };
+
     const illuminanceEvent: MiFloraMeasurement<MifloraMeasurementEventType.Illuminance> = {
         measurementType: MifloraMeasurementEventType.Illuminance,
         data: 200,
     };
+
     const soilConductivityEvent: MiFloraMeasurement<MifloraMeasurementEventType.SoilConductivity> = {
         measurementType: MifloraMeasurementEventType.SoilConductivity,
         data: 300,
     };
+
     const temperatureEvent: MiFloraMeasurement<MifloraMeasurementEventType.Temperature> = {
         measurementType: MifloraMeasurementEventType.Temperature,
         data: 10,
     };
+
     const lowBatteryEvent: MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent> = {
         measurementType: MifloraMeasurementEventType.LowBatteryEvent,
         data: 1,

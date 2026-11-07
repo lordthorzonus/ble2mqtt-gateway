@@ -1,4 +1,4 @@
-import { Celsius } from "../../../units";
+import { Celsius } from "../../../units.js";
 
 /**
  * Calculates the humidex (humidity index).
@@ -17,6 +17,7 @@ export const calculateHumidex = (
 
     // Rounded constant based on molecular weight of water, latent heat of evaporation, and the universal gas constant.
     const constant = 5417.753;
+
     const humidex =
         temperatureInCelsius +
         (5 / 9) * (6.11 * Math.exp(constant * (1 / 273.16 - 1 / (273.15 + dewPointInCelsius))) - 10);

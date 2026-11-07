@@ -1,14 +1,17 @@
 {
     "name": "ble2mqtt-gateway",
     "description": "BLE to MQTT Gateway",
+    "type": "module",
     "main": "dist/index.js",
     "scripts": {
-        "test": "jest",
-        "dev": "ts-node --files src/dev.ts",
+        "test": "vitest run",
+        "dev": "tsx src/dev.ts",
         "build": "tsc -p tsconfig.json",
+        "typecheck": "tsc -p tsconfig.json --noEmit",
         "start": "node dist/index.js",
-        "start:dev": "ts-node --files src/index.ts",
-        "lint": "eslint src/"
+        "start:dev": "tsx src/index.ts",
+        "lint": "effect-tsgo oxlint --type-aware --deny-warnings src/ && oxfmt --check src/",
+        "format": "oxfmt src/"
     },
     "keywords": [
         "ruuvitag",
@@ -24,60 +27,36 @@
     "author": "Juuso Leinonen",
     "license": "MIT",
     "dependencies": {
-        "@stoprocent/noble": "2.3.10",
-        "@effect/platform-node": "0.104.0",
-        "dotenv": "18.0.0",
-        "effect": "3.19.13",
-        "js-yaml": "5.0.0",
-        "lodash": "4.17.21",
+        "@effect/platform-node": "4.1.2",
+        "@stoprocent/noble": "2.8.0",
+        "dotenv": "18.0.9",
+        "effect": "4.1.2",
+        "js-yaml": "5.5.0",
+        "lodash": "4.18.1",
         "lodash.snakecase": "4.1.1",
         "luxon": "3.7.2",
-        "mqtt": "5.14.1",
-        "uuid": "11.1.0",
+        "mqtt": "5.16.1",
+        "uuid": "14.0.3",
         "winston": "3.19.0",
-        "zod": "4.2.1"
+        "zod": "4.6.7"
     },
     "devDependencies": {
-        "@effect/language-service": "0.62.4",
-        "@eslint/js": "9.39.2",
-        "@types/jest": "30.0.0",
+        "@effect/tsgo": "0.67.5",
+        "@oxlint/plugins": "1.92.0",
         "@types/js-yaml": "4.0.9",
-        "@types/lodash": "4.17.21",
+        "@types/lodash": "4.17.27",
         "@types/lodash.snakecase": "4.1.9",
-        "@types/luxon": "3.7.1",
+        "@types/luxon": "3.7.6",
         "@types/noble": "0.0.44",
-        "@types/node": "22.19.3",
-        "@types/ws": "8.18.1",
-        "eslint": "9.39.2",
-        "eslint-config-prettier": "10.1.8",
-        "eslint-plugin-jest": "29.9.0",
-        "eslint-plugin-prettier": "5.5.4",
-        "jest": "30.2.0",
-        "prettier": "3.7.4",
-        "ts-jest": "29.4.6",
-        "ts-node": "10.9.2",
-        "typescript": "5.9.3",
-        "typescript-eslint": "8.50.0"
-    },
-    "jest": {
-        "moduleFileExtensions": [
-            "ts",
-            "js"
-        ],
-        "transform": {
-            "^.+\\.(ts|tsx)$": "ts-jest"
-        },
-        "testMatch": [
-            "<rootDir>/src/**/*.test.(ts|js)"
-        ],
-        "coverageReporters": [
-            "text",
-            "html"
-        ],
-        "collectCoverageFrom": [
-            "src/**/*.{js,ts}",
-            "!**/*.{test|d}.{js,ts}"
-        ],
-        "testEnvironment": "node"
+        "@types/node": "22.20.5",
+        "@types/ws": "8.18.2",
+        "@vitest/coverage-v8": "5.1.0",
+        "fast-check": "4.10.2",
+        "oxfmt": "0.77.0",
+        "oxlint": "1.92.0",
+        "oxlint-tsgolint": "7.0.2006",
+        "tsx": "4.23.15",
+        "typescript": "7.0.2",
+        "vitest": "5.1.0"
     }
 }

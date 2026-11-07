@@ -1,11 +1,16 @@
-import { getManufacturerId, makeBleGateway } from "./gateways/ble-gateway";
-import { scan } from "./infra/ble-scanner";
-import { Logger } from "./infra/logger";
-import { DeviceType } from "./types";
-import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
+import { getManufacturerId, makeBleGateway } from "./gateways/ble-gateway.js";
+import { scan } from "./infra/ble-scanner.js";
+import { Logger } from "./infra/logger.js";
+import { DeviceType } from "./types.js";
+import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer.js";
 import { Stream, Effect, Match, Layer } from "effect";
-import { Config } from "./config";
+import { Config } from "./config.js";
 import { NodeRuntime } from "@effect/platform-node";
+
+const DEVICE_TYPES: readonly string[] = Object.values(DeviceType);
+
+const isDeviceType = (value: string | undefined): value is DeviceType =>
+    value !== undefined && DEVICE_TYPES.includes(value);
 
 const bleMode = Effect.gen(function* () {
     const logger = yield* Logger;
@@ -22,7 +27,7 @@ const bleMode = Effect.gen(function* () {
         })
     );
 
-    return yield* scan().pipe(
+    return yield* scan.pipe(
         Stream.tap((peripheral) =>
             Effect.sync(() => {
                 const manufacturerId = getManufacturerId(peripheral);
@@ -41,7 +46,7 @@ const bleMode = Effect.gen(function* () {
 const gatewayMode = Effect.gen(function* () {
     const logger = yield* Logger;
 
-    const filterDeviceType: DeviceType | undefined = process.argv[3] as DeviceType | undefined;
+    const filterDeviceType = isDeviceType(process.argv[3]) ? process.argv[3] : undefined;
 
     if (filterDeviceType) {
         logger.info("Filtering device type %s", filterDeviceType);
@@ -53,11 +58,13 @@ const gatewayMode = Effect.gen(function* () {
         })
     );
 
-    const bleGateway = yield* makeBleGateway();
+    const bleGateway = yield* makeBleGateway;
 
-    return yield* scan().pipe(
-        bleGateway,
-        Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType),
+    const eventStream = bleGateway
+        .deviceMessages(scan)
+        .pipe(Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType));
+
+    return yield* eventStream.pipe(
         Stream.tap((message) =>
             Effect.sync(() => {
                 logger.info("Received Device message %s", JSON.stringify(message));
@@ -76,25 +83,27 @@ const mqttMode = Effect.gen(function* () {
         })
     );
 
-    const bleGateway = yield* makeBleGateway();
-    const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer();
+    const bleGateway = yield* makeBleGateway;
+    const homeAssistantMqttMessageProducer = yield* makeHomeAssistantMqttMessageProducer;
 
-    const filterDeviceType: DeviceType | undefined = process.argv[3] as DeviceType | undefined;
+    const filterDeviceType = isDeviceType(process.argv[3]) ? process.argv[3] : undefined;
 
     if (filterDeviceType) {
         logger.info("Filtering device type %s", filterDeviceType);
     }
 
-    return yield* scan().pipe(
-        bleGateway,
-        Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType),
+    const eventStream = bleGateway
+        .deviceMessages(scan)
+        .pipe(Stream.filter((message) => !filterDeviceType || message.device.type === filterDeviceType));
+
+    return yield* eventStream.pipe(
         Stream.flatMap((message) => homeAssistantMqttMessageProducer(message), { concurrency: "unbounded" }),
         Stream.tap((message) => Effect.sync(() => logger.info("Received MQTT message %s", JSON.stringify(message)))),
         Stream.runDrain
     );
 });
 
-const DevLive = Layer.mergeAll(Config.Default, Logger.Default);
+const DevLive = Layer.mergeAll(Config.layer, Logger.layer);
 
 const devProgram = Effect.gen(function* () {
     const logger = yield* Logger;
@@ -119,4 +128,6 @@ const devProgram = Effect.gen(function* () {
 });
 
 const configuredDevProgram = Effect.provide(Effect.scoped(devProgram), DevLive);
+
+// oxlint-disable-next-line effecttsgo/unstable-api-usage -- runMain is Effect's recommended entry point because it handles signals and exit codes, and no stable API replaces it.
 NodeRuntime.runMain(configuredDevProgram);

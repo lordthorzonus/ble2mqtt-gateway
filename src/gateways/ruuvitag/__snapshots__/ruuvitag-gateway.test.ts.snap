@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`RuuviTag Gateway getUnavailableDevices() should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
+exports[`RuuviTag Gateway > getUnavailableDevices() > should produce unavailability messages for ruuvitags that haven't been observed inside timeout 1`] = `
 [
   {
     "availability": "offline",
@@ -13,12 +13,13 @@ exports[`RuuviTag Gateway getUnavailableDevices() should produce unavailability 
     },
     "lastPublishedAvailability": "online",
     "lastSeen": "2019-10-10T00:00:00.000Z",
+    "macAddress": "a1:b2",
     "timeout": 30000,
   },
 ]
 `;
 
-exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags normally if unknown ruuvitags are allowed 1`] = `
+exports[`RuuviTag Gateway > ruuvitagGateway() > should handle unknown ruuvitags normally if unknown ruuvitags are allowed 1`] = `
 [
   {
     "device": {
@@ -108,7 +109,7 @@ exports[`RuuviTag Gateway ruuvitagGateway() should handle unknown ruuvitags norm
 ]
 `;
 
-exports[`RuuviTag Gateway ruuvitagGateway() should produce a availability and a payload message for a found ruuvitag advertisement 1`] = `
+exports[`RuuviTag Gateway > ruuvitagGateway() > should produce a availability and a payload message for a found ruuvitag advertisement 1`] = `
 [
   {
     "device": {
@@ -164,7 +165,7 @@ exports[`RuuviTag Gateway ruuvitagGateway() should produce a availability and a 
 ]
 `;
 
-exports[`RuuviTag Gateway ruuvitagGateway() should support air quality ruuvitags 1`] = `
+exports[`RuuviTag Gateway > ruuvitagGateway() > should support air quality ruuvitags 1`] = `
 [
   {
     "device": {

@@ -1,31 +1,41 @@
-import { EventEmitter } from "events";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Peripheral } from "./ble-scanner.js";
 
-const mockNobleEventEmitter = new EventEmitter();
-const mockWaitForPoweredOn = jest.fn();
-const mockStartScanning = jest.fn();
-const mockStopScanning = jest.fn();
+// Vitest moves vi.mock factories above the imports, so vi.hoisted has to create the mock state too.
+const { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStopScanning, mockNoble } =
+    await vi.hoisted(async () => {
+        const { EventEmitter } = await import("node:events");
+        const mockNobleEventEmitter = new EventEmitter();
+        const mockWaitForPoweredOn = vi.fn();
+        const mockStartScanning = vi.fn();
+        const mockStopScanning = vi.fn();
 
-const mockNoble = {
-    waitForPoweredOnAsync: () => mockWaitForPoweredOn(),
-    startScanningAsync: (...args: unknown[]) => mockStartScanning(...args),
-    stopScanningAsync: () => mockStopScanning(),
-    on: (eventName: string, callback: (event: unknown) => unknown) => {
-        mockNobleEventEmitter.on(eventName, callback);
-    },
-};
+        const mockNoble = {
+            waitForPoweredOnAsync: () => mockWaitForPoweredOn(),
+            startScanningAsync: (...args: unknown[]) => mockStartScanning(...args),
+            stopScanningAsync: () => mockStopScanning(),
+            on: (eventName: string, callback: (peripheral: Peripheral) => void) => {
+                mockNobleEventEmitter.on(eventName, callback);
+            },
+            removeListener: (eventName: string, callback: (peripheral: Peripheral) => void) => {
+                mockNobleEventEmitter.removeListener(eventName, callback);
+            },
+        };
 
-jest.mock("@stoprocent/noble", () => ({
-    __esModule: true,
+        return { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStopScanning, mockNoble };
+    });
+
+vi.mock("@stoprocent/noble", () => ({
     default: mockNoble,
 }));
 
 import { Effect, Stream } from "effect";
-import { scan } from "./ble-scanner";
-import { TestContext } from "../test/test-context";
+import { scan } from "./ble-scanner.js";
+import { TestContext } from "../test/test-context.js";
 
 describe("BLE Scanner", () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockWaitForPoweredOn.mockResolvedValue(undefined);
         mockStartScanning.mockResolvedValue(undefined);
         mockStopScanning.mockResolvedValue(undefined);
@@ -42,7 +52,7 @@ describe("BLE Scanner", () => {
     };
 
     it("should wait for noble to power on and start scanning", async () => {
-        const stream = Stream.runCollect(Stream.take(scan(), 1));
+        const stream = Stream.runCollect(Stream.take(scan, 1));
 
         setTimeout(() => {
             mockNobleEventEmitter.emit("discover", peripheral);
@@ -55,7 +65,7 @@ describe("BLE Scanner", () => {
     });
 
     it("should stream ble advertisements found", async () => {
-        const stream = scan();
+        const stream = scan;
 
         setTimeout(() => {
             mockNobleEventEmitter.emit("discover", peripheral);
@@ -69,7 +79,7 @@ describe("BLE Scanner", () => {
     });
 
     it("should call stopScanning when stream is finalized", async () => {
-        const stream = scan();
+        const stream = scan;
 
         setTimeout(() => {
             mockNobleEventEmitter.emit("discover", peripheral);

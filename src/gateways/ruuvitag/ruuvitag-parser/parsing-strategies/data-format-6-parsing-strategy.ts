@@ -1,5 +1,7 @@
-import { asLux, asPM2_5, Lux } from "../../../units";
-import { RuuviAirParsingStrategy } from "../index";
+import { asLux, asPM2_5, Lux } from "../../../units.js";
+import { RuuviAirParsingStrategy, RuuviAirSensorData } from "../index.js";
+import { Effect } from "effect";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format.js";
 import {
     parseTemperature,
     parseRelativeHumidity,
@@ -9,7 +11,8 @@ import {
     parseVOC,
     parseNOx,
     parseCalibrationInProgress,
-} from "./common-parsing-strategy-utils";
+    requireMinimumLength,
+} from "./common-parsing-strategy-utils.js";
 
 enum DataFormatV6Offset {
     Temperature = 3,
@@ -119,6 +122,7 @@ const parseMacAddress = (rawData: Buffer, offset: number): string | null => {
     }
 
     const macAddressArray = macAddress.match(/.{1,2}/g);
+
     return macAddressArray ? macAddressArray.join(":").toUpperCase() : null;
 };
 
@@ -148,7 +152,7 @@ const parseMacAddress = (rawData: Buffer, offset: number): string | null => {
  *
  * @see https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-6
  */
-export const DataFormat6ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTagData) => {
+const parseDataFormat6 = (rawRuuviTagData: Buffer): RuuviAirSensorData => {
     const pm2_5 = parseParticulateMatter(rawRuuviTagData, DataFormatV6Offset.PM25);
 
     return {
@@ -169,3 +173,11 @@ export const DataFormat6ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTagD
         calibrationInProgress: parseCalibrationInProgress(rawRuuviTagData, DataFormatV6Offset.Flags),
     };
 };
+
+const MINIMUM_LENGTH = DataFormatV6Offset.MacAddress + 3;
+
+export const DataFormat6ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTagData) =>
+    Effect.map(
+        requireMinimumLength(rawRuuviTagData, RuuvitagSensorProtocolDataFormat.DataFormat6, MINIMUM_LENGTH),
+        parseDataFormat6
+    );

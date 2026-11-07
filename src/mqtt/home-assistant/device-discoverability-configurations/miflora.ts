@@ -4,8 +4,8 @@ import {
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDevice,
-} from "../../../types";
-import { MiFloraSensorData } from "../../../gateways/miflora/miflora-measurement-transformer";
+} from "../../../types.js";
+import { MiFloraSensorData } from "../../../gateways/miflora/miflora-measurement-transformer.js";
 
 const miFloraDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = {
     manufacturer: "Xiaomi Inc.",

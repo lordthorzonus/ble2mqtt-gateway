@@ -1,16 +1,18 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Effect, Layer } from "effect";
-import { getStubPeripheralWithServiceData } from "./miflora-parser/index.test";
-import { makeMiFloraGateway, isMiFloraPeripheral, makeMiFloraDeviceRegistry } from "./miflora-gateway";
+import { getStubPeripheralWithServiceData } from "./miflora-parser/index.test.js";
+import { makeMiFloraGateway, isMiFloraPeripheral, makeMiFloraDeviceRegistry } from "./miflora-gateway.js";
 import { Settings } from "luxon";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "../../infra/ble-scanner";
-import { Logger } from "../../infra/logger";
-import { Config, GlobalConfiguration } from "../../config";
-import { DeviceRegistryService } from "../gateway-helpers";
-import { getTestConfig } from "../../test/test-context";
+import { Peripheral } from "../../infra/ble-scanner.js";
+import { Logger } from "../../infra/logger.js";
+import { Config, GlobalConfiguration } from "../../config.js";
+import { DeviceRegistryService } from "../gateway-helpers.js";
+import { getTestConfig } from "../../test/test-context.js";
 
-jest.mock("uuid");
-const mockedUuid = uuid as jest.Mock;
+vi.mock("uuid");
+
+const mockedUuid = vi.mocked<() => string>(uuid);
 const defaultTimeout = 30000;
 
 const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
@@ -33,7 +35,7 @@ if (!mifloraSettings) {
 }
 
 const TestLayer = Layer.provideMerge(
-    Logger.DefaultWithoutDependencies,
+    Logger.layerWithoutDependencies,
     Layer.succeed(
         Config,
         getTestConfig({
@@ -45,14 +47,17 @@ const TestLayer = Layer.provideMerge(
 describe("MiFlora Gateway", () => {
     const originalNow = Settings.now;
     const moisturePeripheralAdvertisement = getStubPeripheralWithServiceData("71209800a864aed0a8654c0d08100112", "a");
+
     const soilConductivityPeripheralAdvertisement = getStubPeripheralWithServiceData(
         "71209800b1cf076e8d7cc40d091002c600",
         "a"
     );
+
     const temperaturePeripheralAdvertisement = getStubPeripheralWithServiceData(
         "71209800239c066e8d7cc40d0410020401",
         "a"
     );
+
     const illuminancePeripheralAdvertisement = getStubPeripheralWithServiceData(
         "71209800c3cf076e8d7cc40d071003370000",
         "a"
@@ -66,7 +71,7 @@ describe("MiFlora Gateway", () => {
 
     afterEach(() => {
         Settings.now = originalNow;
-        jest.resetAllMocks();
+        vi.resetAllMocks();
     });
 
     describe("handleBleAdvertisement()", () => {
@@ -81,6 +86,7 @@ describe("MiFlora Gateway", () => {
                 const program = Effect.gen(function* () {
                     const gateway = makeMiFloraGateway(mifloraSettings);
                     const messages = yield* gateway(advertisement);
+
                     return Array.from(messages);
                 });
 
@@ -112,10 +118,12 @@ describe("MiFlora Gateway", () => {
 
             const program = Effect.gen(function* () {
                 const gateway = makeMiFloraGateway(mifloraSettings);
+
                 const messages = yield* gateway({
                     ...moisturePeripheralAdvertisement,
                     uuid: "no-such-miflora",
-                } as Peripheral);
+                });
+
                 return Array.from(messages);
             });
 
@@ -160,6 +168,7 @@ describe("MiFlora Gateway", () => {
                     })
                 );
             });
+
             const TestLayerWithDeviceRegistry = Layer.merge(
                 TestLayer,
                 Layer.succeed(
@@ -176,14 +185,21 @@ describe("MiFlora Gateway", () => {
 
     describe("isMiFloraPeripheral()", () => {
         it.each([
-            [true, { advertisement: { localName: "Flower care" } }],
-            [true, { advertisement: { localName: "Flower Care" } }],
-            [true, { advertisement: { localName: "Flower mate" } }],
+            [true, { address: "", advertisement: { localName: "Flower care" } }],
+            [true, { address: "", advertisement: { localName: "Flower Care" } }],
+            [true, { address: "", advertisement: { localName: "Flower mate" } }],
             [true, { address: "c4:7c:8d:6e:06:9c", advertisement: { localName: "" } }],
             [false, { address: "c6:2c:8d:6e:06:9c", advertisement: { localName: "" } }],
             [false, { address: "", advertisement: { localName: "Bro mate" } }],
-        ])("should return %s for peripheral %j", (expectedValue, peripheral) => {
-            expect(isMiFloraPeripheral(peripheral as Peripheral)).toEqual(expectedValue);
+        ])("should return %s for peripheral %j", (expectedValue, { address, advertisement }) => {
+            const peripheral: Peripheral = {
+                uuid: "",
+                address,
+                rssi: 0,
+                advertisement: { ...advertisement, serviceData: [] },
+            };
+
+            expect(isMiFloraPeripheral(peripheral)).toEqual(expectedValue);
         });
     });
 });

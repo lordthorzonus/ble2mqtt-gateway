@@ -1,16 +1,13 @@
-import { GatewayError } from "../ble-gateway";
-import { Peripheral } from "../../infra/ble-scanner";
-import { DeviceMessage, DeviceType } from "../../types";
-import { MiFloraGatewayConfiguration } from "../../config";
-import { DeviceRegistryService, handleBleAdvertisement } from "../gateway-helpers";
-import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry";
-import { MiFloraEventBuffer } from "./miflora-event-buffer";
-import { parseMiFloraPeripheralAdvertisement } from "./miflora-parser";
-import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer";
-import { Effect, Option } from "effect";
-import { Logger } from "../../infra/logger";
-
-export const mifloraGatewayId = 0x95fe;
+import { GatewayError } from "../ble-gateway.js";
+import { Peripheral } from "../../infra/ble-scanner.js";
+import { DeviceMessage, DeviceType } from "../../types.js";
+import { MiFloraGatewayConfiguration } from "../../config.js";
+import { DeviceRegistryService, handleBleAdvertisement } from "../gateway-helpers.js";
+import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry.js";
+import { MiFloraEventBuffer } from "./miflora-event-buffer.js";
+import { parseMiFloraPeripheralAdvertisement, SupportedMiFloraMeasurements } from "./miflora-parser/index.js";
+import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer.js";
+import { Effect } from "effect";
 
 export const isMiFloraPeripheral = (peripheral: Peripheral): boolean => {
     const knownMiFloraDeviceNames = ["flower care", "flower mate"];
@@ -46,37 +43,38 @@ export const makeMiFloraDeviceRegistry = (
     return new DeviceRegistry(deviceSettings, miFloraSettings.timeout, defaultDecimalPrecision);
 };
 
-const handleMifloraBleAdvertisement =
-    (miFloraEventBuffer: MiFloraEventBuffer) => (peripheral: Peripheral, deviceRegistryEntry: DeviceRegistryEntry) =>
-        Effect.gen(function* () {
-            const id = peripheral.uuid;
-            const miFloraMeasurementEvent = yield* parseMiFloraPeripheralAdvertisement(peripheral);
+const handleMifloraMeasurement =
+    (miFloraEventBuffer: MiFloraEventBuffer) =>
+    (
+        peripheral: Peripheral,
+        deviceRegistryEntry: DeviceRegistryEntry,
+        miFloraMeasurementEvent: SupportedMiFloraMeasurements
+    ) => {
+        const id = peripheral.uuid;
+        const buffer = miFloraEventBuffer.bufferMeasurementEvent(id, miFloraMeasurementEvent);
 
-            const buffer = miFloraEventBuffer.bufferMeasurementEvent(id, miFloraMeasurementEvent);
+        if (miFloraEventBuffer.isBufferReady(buffer)) {
+            miFloraEventBuffer.clearBuffer(id);
 
-            if (miFloraEventBuffer.isBufferReady(buffer)) {
-                miFloraEventBuffer.clearBuffer(id);
-                return Option.some(
-                    transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer)
-                );
-            }
+            return Effect.succeedSome(
+                transformMiFloraMeasurementsToDeviceMessage(peripheral, deviceRegistryEntry, buffer)
+            );
+        }
 
-            return Option.none();
-        });
+        return Effect.succeedNone;
+    };
 
 export const makeMiFloraGateway = (miFloraSettings: MiFloraGatewayConfiguration) => {
     const sensorEventBuffer = new MiFloraEventBuffer(miFloraSettings.devices);
 
-    return (
-        peripheral: Peripheral
-    ): Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService | Logger> => {
-        return handleBleAdvertisement(
-            peripheral,
-            DeviceType.MiFlora,
-            false,
-            () => Effect.succeed("miflora"),
-            handleMifloraBleAdvertisement(sensorEventBuffer)
-        ).pipe(
+    return (peripheral: Peripheral): Effect.Effect<Iterable<DeviceMessage>, GatewayError, DeviceRegistryService> => {
+        return handleBleAdvertisement(peripheral, {
+            deviceType: DeviceType.MiFlora,
+            unknownDevices: "ignore",
+            parseAdvertisement: parseMiFloraPeripheralAdvertisement,
+            resolveDeviceModel: () => "miflora",
+            handleDeviceSensorData: handleMifloraMeasurement(sensorEventBuffer),
+        }).pipe(
             Effect.catchTags({
                 InvalidMiFloraAdvertisementError: (error) =>
                     new GatewayError({
@@ -92,6 +90,11 @@ export const makeMiFloraGateway = (miFloraSettings: MiFloraGatewayConfiguration)
                     new GatewayError({
                         peripheral,
                         message: `Unsupported MiFlora event: ${error.eventType}`,
+                    }),
+                InvalidMiFloraDataLengthError: (error) =>
+                    new GatewayError({
+                        peripheral,
+                        message: `Invalid MiFlora data length for event ${error.eventType}: ${error.length}, expected at least ${error.minimumLength}`,
                     }),
             })
         );

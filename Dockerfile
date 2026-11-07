@@ -1,8 +1,6 @@
-ARG NODE_VERSION=22.21.1-alpine
-ARG NPM_VERSION=10.9.1
+ARG NODE_VERSION=22.23.4-alpine
 
 FROM node:${NODE_VERSION} as base
-RUN npm i -g npm@${NPM_VERSION} --audit false
 RUN apk add --no-cache --update \
     tzdata \
     bluez \
@@ -20,8 +18,8 @@ RUN apk add --no-cache --update \
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 
-COPY package*.json ./
-COPY tsconfig.json eslint.config.mjs  .prettierrc ./
+COPY package*.json .npmrc ./
+COPY tsconfig.json ./
 RUN npm ci --audit false
 
 COPY --chown=node:node  . ./

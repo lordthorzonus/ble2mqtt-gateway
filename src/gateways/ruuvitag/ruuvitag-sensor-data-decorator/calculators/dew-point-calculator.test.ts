@@ -1,5 +1,6 @@
-import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units";
-import { calculateDewPoint } from "./dew-point-calculator";
+import { describe, expect, it } from "vitest";
+import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units.js";
+import { calculateDewPoint } from "./dew-point-calculator.js";
 
 describe("Dew point calculator", () => {
     /**
@@ -20,7 +21,7 @@ describe("Dew point calculator", () => {
     ];
 
     it.each(testCases)(
-        "should calculate the dew point according to the specification. Temperature: %s, RH: %s % should produce: %s",
+        "should calculate the dew point according to the specification. Temperature: %s, RH: %s %% should produce: %s",
         (temperature, relativeHumidity, expectedDewPoint) => {
             expect(calculateDewPoint(temperature, relativeHumidity)).toEqual(expectedDewPoint);
         }

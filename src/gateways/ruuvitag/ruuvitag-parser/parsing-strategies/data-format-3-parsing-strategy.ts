@@ -1,5 +1,8 @@
-import { asCelsius, asPascal, asRelativeHumidity, Celsius, Pascal, RelativeHumidity } from "../../../units";
-import { RuuviTagParsingStrategy } from "../index";
+import { asCelsius, asPascal, asRelativeHumidity, Celsius, Pascal, RelativeHumidity } from "../../../units.js";
+import { RuuviTagParsingStrategy, RuuviTagEnvironmentalSensorData } from "../index.js";
+import { Effect } from "effect";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format.js";
+import { requireMinimumLength } from "./common-parsing-strategy-utils.js";
 
 enum DataFormatV3Offset {
     Humidity = 3,
@@ -20,6 +23,7 @@ enum DataFormatV3Offset {
  */
 const parseAcceleration = (rawData: Buffer, dataOffset: DataFormatV3Offset): number => {
     const acceleration = rawData.readInt16BE(dataOffset);
+
     return acceleration / 1000;
 };
 
@@ -75,6 +79,7 @@ const parseBatteryVoltage = (rawData: Buffer): number => {
  */
 const parsePressure = (rawData: Buffer): Pascal => {
     const minimumSupportedPascalMeasurement = 50000;
+
     return asPascal(rawData.readUInt16BE(DataFormatV3Offset.Pressure) + minimumSupportedPascalMeasurement);
 };
 
@@ -82,7 +87,7 @@ const parsePressure = (rawData: Buffer): Pascal => {
  * Parses the raw manufacturer specific data field according to the Data Format 3 Specification (RAWv1)
  * @see https://github.com/ruuvi/ruuvi-sensor-protocols/blob/master/dataformat_03.md
  */
-export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) => {
+const parseDataFormat3 = (rawRuuviTagData: Buffer): RuuviTagEnvironmentalSensorData => {
     return {
         type: "environmental",
         accelerationX: parseAcceleration(rawRuuviTagData, DataFormatV3Offset.AccelerationX),
@@ -98,3 +103,11 @@ export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagD
         macAddress: null,
     };
 };
+
+const MINIMUM_LENGTH = DataFormatV3Offset.BatteryVoltage + 2;
+
+export const DataFormat3ParsingStrategy: RuuviTagParsingStrategy = (rawRuuviTagData) =>
+    Effect.map(
+        requireMinimumLength(rawRuuviTagData, RuuvitagSensorProtocolDataFormat.DataFormat3, MINIMUM_LENGTH),
+        parseDataFormat3
+    );

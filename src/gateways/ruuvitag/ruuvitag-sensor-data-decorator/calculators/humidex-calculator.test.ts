@@ -1,5 +1,6 @@
-import { asCelsius, Celsius } from "../../../units";
-import { calculateHumidex } from "./humidex-calculator";
+import { describe, expect, it } from "vitest";
+import { asCelsius, Celsius } from "../../../units.js";
+import { calculateHumidex } from "./humidex-calculator.js";
 
 describe("Humidex calculator", () => {
     /**
@@ -18,7 +19,7 @@ describe("Humidex calculator", () => {
     ];
 
     it.each(testCases)(
-        "should calculate the humidex according to the specification. Temperature: %s, Dew point: %s % should produce: %s",
+        "should calculate the humidex according to the specification. Temperature: %s, Dew point: %s %% should produce: %s",
         (temperature, dewPoint, expectedHumidex) => {
             expect(calculateHumidex(temperature, dewPoint)).toEqual(expectedHumidex);
         }

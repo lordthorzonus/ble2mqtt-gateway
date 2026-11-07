@@ -1,5 +1,6 @@
-import { calculateAtmoTubeIAQI, AtmoTubeAQIDescription } from "./atmotube-aqi-calculator";
-import { asCO2Ppm, asNOxIndex, asPM1, asPM10, asPM2_5, asVOCIndex } from "../../../units";
+import { describe, expect, it } from "vitest";
+import { calculateAtmoTubeIAQI } from "./atmotube-aqi-calculator.js";
+import { asCO2Ppm, asNOxIndex, asPM1, asPM10, asPM2_5, asVOCIndex } from "../../../units.js";
 
 describe("AtmoTube IAQI Calculator", () => {
     describe("Individual pollutant AQI calculation", () => {
@@ -611,52 +612,52 @@ describe("AtmoTube IAQI Calculator", () => {
             {
                 description: "good AQI (100)",
                 sensorData: { pm2_5: asPM2_5(0), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "good" as AtmoTubeAQIDescription,
+                expectedDescription: "good",
             },
             {
                 description: "good AQI (82)",
                 sensorData: { pm2_5: asPM2_5(19), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "good" as AtmoTubeAQIDescription,
+                expectedDescription: "good",
             },
             {
                 description: "moderate AQI (80)",
                 sensorData: { pm2_5: asPM2_5(21), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "moderate" as AtmoTubeAQIDescription,
+                expectedDescription: "moderate",
             },
             {
                 description: "moderate AQI (61)",
                 sensorData: { pm2_5: asPM2_5(49), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "moderate" as AtmoTubeAQIDescription,
+                expectedDescription: "moderate",
             },
             {
                 description: "polluted AQI (60)",
                 sensorData: { pm2_5: asPM2_5(51), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "polluted" as AtmoTubeAQIDescription,
+                expectedDescription: "polluted",
             },
             {
                 description: "polluted AQI (41)",
                 sensorData: { pm2_5: asPM2_5(89), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "polluted" as AtmoTubeAQIDescription,
+                expectedDescription: "polluted",
             },
             {
                 description: "very polluted AQI (40)",
                 sensorData: { pm2_5: asPM2_5(91), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "very-polluted" as AtmoTubeAQIDescription,
+                expectedDescription: "very-polluted",
             },
             {
                 description: "very polluted AQI (21)",
                 sensorData: { pm2_5: asPM2_5(139), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "very-polluted" as AtmoTubeAQIDescription,
+                expectedDescription: "very-polluted",
             },
             {
                 description: "severely polluted AQI (20)",
                 sensorData: { pm2_5: asPM2_5(141), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "severely-polluted" as AtmoTubeAQIDescription,
+                expectedDescription: "severely-polluted",
             },
             {
                 description: "severely polluted AQI (0)",
                 sensorData: { pm2_5: asPM2_5(200), co2: null, voc: null, nox: null, pm10: null, pm1: null },
-                expectedDescription: "severely-polluted" as AtmoTubeAQIDescription,
+                expectedDescription: "severely-polluted",
             },
         ])("should return correct description for $description", ({ sensorData, expectedDescription }) => {
             const result = calculateAtmoTubeIAQI(sensorData);

@@ -1,5 +1,7 @@
-import { asLux, asPM1, asPM10, asPM2_5, asPM4, Lux } from "../../../units";
-import { RuuviAirParsingStrategy } from "../index";
+import { asLux, asPM1, asPM10, asPM2_5, asPM4, Lux } from "../../../units.js";
+import { RuuviAirParsingStrategy, RuuviAirSensorData } from "../index.js";
+import { Effect } from "effect";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format.js";
 import {
     parseTemperature,
     parseRelativeHumidity,
@@ -11,7 +13,8 @@ import {
     parseCalibrationInProgress,
     parseMacAddress48Bit,
     isInvalidMeasurementForUnsigned24BitInteger,
-} from "./common-parsing-strategy-utils";
+    requireMinimumLength,
+} from "./common-parsing-strategy-utils.js";
 
 enum DataFormatE1Offset {
     Temperature = 3,
@@ -106,7 +109,7 @@ const parseMeasurementSequence = (rawData: Buffer, offset: number): number | nul
  *
  * @see https://docs.ruuvi.com/communication/bluetooth-advertisements/data-format-e1
  */
-export const DataFormatE1ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTagData) => {
+const parseDataFormatE1 = (rawRuuviTagData: Buffer): RuuviAirSensorData => {
     const pm1 = parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM10);
     const pm2_5 = parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM25);
     const pm4 = parseParticulateMatter(rawRuuviTagData, DataFormatE1Offset.PM40);
@@ -130,3 +133,11 @@ export const DataFormatE1ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTag
         calibrationInProgress: parseCalibrationInProgress(rawRuuviTagData, DataFormatE1Offset.Flags),
     };
 };
+
+const MINIMUM_LENGTH = DataFormatE1Offset.MacAddress + 6;
+
+export const DataFormatE1ParsingStrategy: RuuviAirParsingStrategy = (rawRuuviTagData) =>
+    Effect.map(
+        requireMinimumLength(rawRuuviTagData, RuuvitagSensorProtocolDataFormat.DataFormatE1, MINIMUM_LENGTH),
+        parseDataFormatE1
+    );

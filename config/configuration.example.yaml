@@ -11,7 +11,6 @@ mqtt:
 # Use "unbounded" for maximum throughput (recommended for most setups)
 # Or specify a positive number to limit concurrent operations (e.g., 20, 50, 100)
 concurrency:
-    ble_gateway_processing: unbounded # BLE peripheral processing
     mqtt_message_production: unbounded # Home Assistant message transformation
     mqtt_publishing: unbounded # MQTT publishing operations
 gateways:
@@ -34,5 +33,12 @@ gateways:
             - name: My super plant
               id: c47c8d6e07cf
               timeout: 40000
+    oralb:
+        allow_unknown: false
+        timeout: 60000
+        devices:
+            - name: Bathroom Toothbrush
+              id: aa:bb:cc:dd:ee:ff
+              # model: io_series_6_7  # Optional: override auto-detected model
 homeassistant:
     discovery_topic: homeassistant

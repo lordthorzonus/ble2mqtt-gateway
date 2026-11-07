@@ -1,3 +1,4 @@
+import { Data, Effect } from "effect";
 import {
     asCelsius,
     asCO2Ppm,
@@ -11,7 +12,26 @@ import {
     Pascal,
     RelativeHumidity,
     VOCIndex,
-} from "../../../units";
+} from "../../../units.js";
+
+/**
+ * The manufacturer data is shorter than the header or than the layout of its data format.
+ * `dataFormat` is null when the header itself is truncated.
+ */
+export class InvalidRuuviDataLengthError extends Data.TaggedError("InvalidRuuviDataLengthError")<{
+    dataFormat: number | null;
+    length: number;
+    minimumLength: number;
+}> {}
+
+export const requireMinimumLength = (
+    rawData: Buffer,
+    dataFormat: number,
+    minimumLength: number
+): Effect.Effect<Buffer, InvalidRuuviDataLengthError> =>
+    rawData.length < minimumLength
+        ? new InvalidRuuviDataLengthError({ dataFormat, length: rawData.length, minimumLength })
+        : Effect.succeed(rawData);
 
 export const isInvalidMeasurementForSigned16BitInteger = (value: number): boolean => {
     return value === 0x8000 || value === -0x8000;
@@ -188,6 +208,7 @@ export const parseNOx = (rawData: Buffer, noxOffset: number, flagsOffset: number
  */
 export const parseCalibrationInProgress = (rawData: Buffer, flagsOffset: number): boolean => {
     const flags = rawData.readUInt8(flagsOffset);
+
     return (flags & 0b00000001) === 1;
 };
 
@@ -209,5 +230,6 @@ export const parseMacAddress48Bit = (rawData: Buffer, offset: number): string | 
     }
 
     const macAddressArray = macAddress.match(/.{1,2}/g);
+
     return macAddressArray ? macAddressArray.join(":").toUpperCase() : null;
 };

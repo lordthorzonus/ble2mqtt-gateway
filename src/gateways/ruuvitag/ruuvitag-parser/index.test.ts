@@ -1,23 +1,46 @@
+import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
-import Mock = jest.Mock;
 
-jest.mock("./parsing-strategies/data-format-3-parsing-strategy");
-jest.mock("./parsing-strategies/data-format-5-parsing-strategy");
-jest.mock("./parsing-strategies/data-format-6-parsing-strategy");
+vi.mock("./parsing-strategies/data-format-3-parsing-strategy.js");
+
+vi.mock("./parsing-strategies/data-format-5-parsing-strategy.js");
+
+vi.mock("./parsing-strategies/data-format-6-parsing-strategy.js");
 
 import {
     parse,
-    RuuviTagParsingStrategy,
+    RuuviTagSensorData,
     UnsupportedDataFormatError,
     NotValidRuuviManufacturerIdError,
-    RuuviAirParsingStrategy,
-} from "./index";
-import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
-import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
-import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy";
+    InvalidRuuviDataLengthError,
+    parseRuuviDataFormat,
+} from "./index.js";
+import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy.js";
+import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy.js";
+import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy.js";
 
 describe("RuuviTagParser", () => {
-    const ruuviTagDataParsingStrategyMap: [string, RuuviTagParsingStrategy | RuuviAirParsingStrategy][] = [
+    // Both strategy types are assignable to this signature, so one fixture works as the result of either.
+    type AnyParsingStrategy = (
+        rawRuuviTagData: Buffer
+    ) => Effect.Effect<RuuviTagSensorData, InvalidRuuviDataLengthError>;
+
+    const parsedSentinel: RuuviTagSensorData = {
+        type: "environmental",
+        macAddress: null,
+        measurementSequence: null,
+        movementCounter: null,
+        txPower: null,
+        accelerationX: null,
+        accelerationY: null,
+        accelerationZ: null,
+        batteryVoltage: null,
+        pressure: null,
+        relativeHumidityPercentage: null,
+        temperature: null,
+    };
+
+    const ruuviTagDataParsingStrategyMap: [string, AnyParsingStrategy][] = [
         ["990403291A1ECE1EFC18F94202CA0B53", DataFormat3ParsingStrategy],
         ["9904058001000000008001800180010000000000CBB8334C884F", DataFormat5ParsingStrategy],
         ["99040680010000000000000000000000FF00004C884F", DataFormat6ParsingStrategy],
@@ -29,11 +52,11 @@ describe("RuuviTagParser", () => {
             return Effect.runPromise(
                 Effect.gen(function* () {
                     const ruuviTagData = Buffer.from(rawStringData, "hex");
-                    const mockedParse = expectedParsingStrategy as Mock;
+                    const mockedParse = vi.mocked(expectedParsingStrategy);
 
-                    mockedParse.mockReturnValue("a");
+                    mockedParse.mockReturnValue(Effect.succeed(parsedSentinel));
                     const result = yield* parse(ruuviTagData);
-                    expect(result).toBe("a");
+                    expect(result).toBe(parsedSentinel);
                     expect(mockedParse).toHaveBeenCalledWith(ruuviTagData);
                 })
             );
@@ -61,4 +84,23 @@ describe("RuuviTagParser", () => {
             })
         );
     });
+
+    it.each(["", "99", "9904"])(
+        "fails with InvalidRuuviDataLengthError for a truncated header: '%s'",
+        (rawStringData) =>
+            Effect.runPromise(
+                Effect.gen(function* () {
+                    const ruuviTagData = Buffer.from(rawStringData, "hex");
+
+                    const expectedError = new InvalidRuuviDataLengthError({
+                        dataFormat: null,
+                        length: ruuviTagData.length,
+                        minimumLength: 3,
+                    });
+
+                    expect(yield* Effect.flip(parse(ruuviTagData))).toStrictEqual(expectedError);
+                    expect(yield* Effect.flip(parseRuuviDataFormat(ruuviTagData))).toStrictEqual(expectedError);
+                })
+            )
+    );
 });

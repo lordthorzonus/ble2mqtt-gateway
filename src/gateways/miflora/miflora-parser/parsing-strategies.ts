@@ -1,4 +1,14 @@
-import { MifloraMeasurementEventType } from "./index";
+import { Data, Effect } from "effect";
+
+/** MiFlora event type read from the Xiaomi service data, plus the synthetic low-battery and invalid events. */
+export enum MifloraMeasurementEventType {
+    Temperature = 4100,
+    Illuminance = 4103,
+    Moisture = 4104,
+    SoilConductivity = 4105,
+    LowBatteryEvent = 9998,
+    InvalidEvent = 9999,
+}
 
 enum MiFloraDataOffset {
     Temperature = 15,
@@ -12,46 +22,79 @@ export interface MiFloraMeasurement<T extends MifloraMeasurementEventType> {
     data: number;
 }
 
-export const parseTemperatureEvent = (data: Buffer): MiFloraMeasurement<MifloraMeasurementEventType.Temperature> => {
-    return {
-        measurementType: MifloraMeasurementEventType.Temperature,
-        data: data.readUInt16LE(MiFloraDataOffset.Temperature) / 10,
-    };
-};
+export class InvalidMiFloraDataLengthError extends Data.TaggedError("InvalidMiFloraDataLengthError")<{
+    eventType: MifloraMeasurementEventType;
+    length: number;
+    minimumLength: number;
+}> {}
 
-export const parseSoilConductivityEvent = (
-    data: Buffer
-): MiFloraMeasurement<MifloraMeasurementEventType.SoilConductivity> => {
-    return {
-        measurementType: MifloraMeasurementEventType.SoilConductivity,
-        data: data.readUInt16LE(MiFloraDataOffset.SoilConductivity),
-    };
-};
+const requireMinimumLength = (
+    data: Buffer,
+    eventType: MifloraMeasurementEventType,
+    minimumLength: number
+): Effect.Effect<Buffer, InvalidMiFloraDataLengthError> =>
+    data.length < minimumLength
+        ? new InvalidMiFloraDataLengthError({ eventType, length: data.length, minimumLength })
+        : Effect.succeed(data);
 
-export const parseMoistureEvent = (data: Buffer): MiFloraMeasurement<MifloraMeasurementEventType.Moisture> => {
-    return {
-        measurementType: MifloraMeasurementEventType.Moisture,
-        data: data.readInt8(MiFloraDataOffset.Moisture),
-    };
-};
+interface MeasurementField {
+    byteLength: number;
+    read: (data: Buffer, offset: number) => number;
+}
 
-export const parseIlluminanceEvent = (data: Buffer): MiFloraMeasurement<MifloraMeasurementEventType.Illuminance> => {
-    return {
-        measurementType: MifloraMeasurementEventType.Illuminance,
-        data: data.readUintLE(MiFloraDataOffset.Illuminance, 3),
-    };
-};
+const UINT16_LE: MeasurementField = { byteLength: 2, read: (data, offset) => data.readUInt16LE(offset) };
+const INT8: MeasurementField = { byteLength: 1, read: (data, offset) => data.readInt8(offset) };
+const UINT24_LE: MeasurementField = { byteLength: 3, read: (data, offset) => data.readUintLE(offset, 3) };
 
-export const parseLowBatteryEvent = (): MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent> => {
-    return {
+/**
+ * Builds a parser for one measurement event. The minimum length comes from the offset and the field size,
+ * so the parser fails with InvalidMiFloraDataLengthError instead of reading out of range.
+ */
+const makeMiFloraMeasurementParser =
+    <T extends MifloraMeasurementEventType>(eventType: T, offset: number, field: MeasurementField, scale = 1) =>
+    (data: Buffer): Effect.Effect<MiFloraMeasurement<T>, InvalidMiFloraDataLengthError> =>
+        Effect.map(requireMinimumLength(data, eventType, offset + field.byteLength), (validData) => ({
+            measurementType: eventType,
+            data: field.read(validData, offset) / scale,
+        }));
+
+export const parseTemperatureEvent = makeMiFloraMeasurementParser(
+    MifloraMeasurementEventType.Temperature,
+    MiFloraDataOffset.Temperature,
+    UINT16_LE,
+    10
+);
+
+export const parseSoilConductivityEvent = makeMiFloraMeasurementParser(
+    MifloraMeasurementEventType.SoilConductivity,
+    MiFloraDataOffset.SoilConductivity,
+    UINT16_LE
+);
+
+export const parseMoistureEvent = makeMiFloraMeasurementParser(
+    MifloraMeasurementEventType.Moisture,
+    MiFloraDataOffset.Moisture,
+    INT8
+);
+
+export const parseIlluminanceEvent = makeMiFloraMeasurementParser(
+    MifloraMeasurementEventType.Illuminance,
+    MiFloraDataOffset.Illuminance,
+    UINT24_LE
+);
+
+export const parseLowBatteryEvent = (
+    _data: Buffer
+): Effect.Effect<MiFloraMeasurement<MifloraMeasurementEventType.LowBatteryEvent>> =>
+    Effect.succeed({
         measurementType: MifloraMeasurementEventType.LowBatteryEvent,
         data: 1,
-    };
-};
+    });
 
-export const parseInvalidEvent = (): MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent> => {
-    return {
+export const parseInvalidEvent = (
+    _data: Buffer
+): Effect.Effect<MiFloraMeasurement<MifloraMeasurementEventType.InvalidEvent>> =>
+    Effect.succeed({
         measurementType: MifloraMeasurementEventType.InvalidEvent,
         data: 0,
-    };
-};
+    });

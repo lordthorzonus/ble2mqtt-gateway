@@ -1,36 +1,12 @@
-import { DeviceRegistry } from "../device-registry";
-import { Peripheral } from "../../infra/ble-scanner";
-import { DeviceType } from "../../types";
-import {
-    resolveDeviceModel,
-    transformPeripheralAdvertisementToSensorDataDeviceMessage,
-} from "./ruuvitag-measurement-transformer";
-import { RuuviTagGatewayConfiguration } from "../../config";
-import { handleBleAdvertisement } from "../gateway-helpers";
-import { Data, Effect } from "effect";
-import { GatewayError, MapMessage } from "../ble-gateway";
-import { parseRuuviDataFormat, RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser";
-import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter";
-
-export interface PeripheralWithManufacturerData extends Peripheral {
-    advertisement: Omit<Peripheral["advertisement"], "manufacturerData"> & {
-        manufacturerData: Buffer;
-    };
-}
-
-export class PeripheralWithoutManufacturerDataError extends Data.TaggedError("PeripheralWithoutManufacturerDataError")<{
-    peripheral: Peripheral;
-}> {}
-
-const validatePeripheral = (
-    peripheral: Peripheral
-): Effect.Effect<PeripheralWithManufacturerData, PeripheralWithoutManufacturerDataError> => {
-    if (peripheral.advertisement.manufacturerData === undefined) {
-        return new PeripheralWithoutManufacturerDataError({ peripheral });
-    }
-
-    return Effect.succeed(peripheral as PeripheralWithManufacturerData);
-};
+import { DeviceRegistry } from "../device-registry.js";
+import { DeviceType } from "../../types.js";
+import { transformRuuviTagSensorDataToDeviceMessage } from "./ruuvitag-measurement-transformer.js";
+import { RuuviTagGatewayConfiguration } from "../../config.js";
+import { handleBleAdvertisement, requireManufacturerData } from "../gateway-helpers.js";
+import { Effect } from "effect";
+import { GatewayError, MapMessage } from "../ble-gateway.js";
+import { parse, parseRuuviDataFormat, RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser/index.js";
+import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter.js";
 
 export const makeRuuvitagDeviceRegistry = (
     ruuviTagSettings: NonNullable<RuuviTagGatewayConfiguration>,
@@ -47,6 +23,7 @@ export const makeRuuvitagDeviceRegistry = (
         },
         timeout: tag.timeout,
     }));
+
     const defaultDecimalPrecision = ruuviTagSettings.decimal_precision ?? globalDefaults.defaultDecimalPrecision;
 
     return new DeviceRegistry(deviceSettings, ruuviTagSettings.timeout, defaultDecimalPrecision);
@@ -59,7 +36,7 @@ export const makeRuuvitagGateway =
     ): MapMessage =>
     (peripheral) =>
         Effect.gen(function* () {
-            const validPeripheral = yield* validatePeripheral(peripheral);
+            const validPeripheral = yield* requireManufacturerData(peripheral);
             const dataFormat = yield* parseRuuviDataFormat(validPeripheral.advertisement.manufacturerData);
 
             const deviceId = validPeripheral.uuid;
@@ -72,13 +49,16 @@ export const makeRuuvitagGateway =
                 return yield* Effect.succeed([]);
             }
 
-            return yield* handleBleAdvertisement(
-                validPeripheral,
-                DeviceType.Ruuvitag,
-                ruuviTagSettings.allow_unknown,
-                resolveDeviceModel,
-                transformPeripheralAdvertisementToSensorDataDeviceMessage
-            );
+            return yield* handleBleAdvertisement(validPeripheral, {
+                deviceType: DeviceType.Ruuvitag,
+                unknownDevices: ruuviTagSettings.allow_unknown ? "allow" : "ignore",
+                parseAdvertisement: (peripheralWithData) => parse(peripheralWithData.advertisement.manufacturerData),
+                resolveDeviceModel: (_peripheral, sensorData) => sensorData.type,
+                handleDeviceSensorData: (peripheralWithData, deviceRegistryEntry, sensorData) =>
+                    Effect.succeed(
+                        transformRuuviTagSensorDataToDeviceMessage(peripheralWithData, deviceRegistryEntry, sensorData)
+                    ),
+            });
         }).pipe(
             Effect.catchTags({
                 PeripheralWithoutManufacturerDataError: (error) =>
@@ -100,6 +80,11 @@ export const makeRuuvitagGateway =
                     new GatewayError({
                         peripheral,
                         message: `Unsupported Ruuvi data format: ${error.dataFormat}`,
+                    }),
+                InvalidRuuviDataLengthError: (error) =>
+                    new GatewayError({
+                        peripheral,
+                        message: `Invalid Ruuvi data length for ${error.dataFormat === null ? "header" : `data format ${error.dataFormat}`}: ${error.length}, expected at least ${error.minimumLength}`,
                     }),
             })
         );

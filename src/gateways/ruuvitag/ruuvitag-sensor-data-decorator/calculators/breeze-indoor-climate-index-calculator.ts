@@ -1,4 +1,4 @@
-import { Celsius, RelativeHumidity } from "../../../units";
+import { Celsius, RelativeHumidity } from "../../../units.js";
 import { Match } from "effect";
 
 export type BreezeIndoorClimateIndexDescription = "excellent" | "fine" | "moderate" | "poor" | "very-poor" | "severe";
@@ -27,15 +27,14 @@ const CLIMATE_INDEX_LOOKUP = {
 } as const;
 
 type HumidityLevel = keyof typeof CLIMATE_INDEX_LOOKUP;
+
 type TemperatureLevel = keyof (typeof CLIMATE_INDEX_LOOKUP)[HumidityLevel];
 
-const HUMIDITY_LEVELS: readonly HumidityLevel[] = Object.keys(CLIMATE_INDEX_LOOKUP)
-    .map(Number)
-    .sort((a, b) => a - b) as HumidityLevel[];
+const HUMIDITY_LEVELS = [10, 20, 30, 40, 50, 60, 70, 80, 90] as const satisfies readonly HumidityLevel[];
 
-const TEMPERATURE_LEVELS: readonly TemperatureLevel[] = Object.keys(CLIMATE_INDEX_LOOKUP[10])
-    .map(Number)
-    .sort((a, b) => a - b) as TemperatureLevel[];
+const TEMPERATURE_LEVELS = [
+    15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+] as const satisfies readonly TemperatureLevel[];
 
 const toDescription = Match.type<number>().pipe(
     Match.withReturnType<BreezeIndoorClimateIndexDescription>(),
@@ -67,8 +66,10 @@ const clamp = (value: number, min: number, max: number): number => Math.min(Math
 const findBracketIndex = (value: number, levels: readonly number[]): number => {
     const index = levels.findIndex((level, i) => {
         const nextLevel = levels[i + 1];
+
         return i < levels.length - 1 && nextLevel !== undefined && value >= level && value <= nextLevel;
     });
+
     return index === -1 ? 0 : index;
 };
 
@@ -116,6 +117,7 @@ const interpolateIndex = (temperature: number, humidity: number): number | null 
 
     const indexAtLowerHumidity =
         indexAtLowerHumidityLowerTemp * (1 - tempWeight) + indexAtLowerHumidityUpperTemp * tempWeight;
+
     const indexAtUpperHumidity =
         indexAtUpperHumidityLowerTemp * (1 - tempWeight) + indexAtUpperHumidityUpperTemp * tempWeight;
 

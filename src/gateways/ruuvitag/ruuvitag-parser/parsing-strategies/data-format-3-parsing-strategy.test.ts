@@ -1,6 +1,9 @@
-import { RuuviTagEnvironmentalSensorData } from "../index";
-import { DataFormat3ParsingStrategy } from "./data-format-3-parsing-strategy";
-import { asCelsius, asPascal, asRelativeHumidity } from "../../../units";
+import { describe, expect, it } from "vitest";
+import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils.js";
+import { Effect } from "effect";
+import { RuuviTagEnvironmentalSensorData } from "../index.js";
+import { DataFormat3ParsingStrategy } from "./data-format-3-parsing-strategy.js";
+import { asCelsius, asPascal, asRelativeHumidity } from "../../../units.js";
 
 describe("Data Format 3 Parsing Strategy", () => {
     const testCases: [string, RuuviTagEnvironmentalSensorData][] = [
@@ -61,7 +64,15 @@ describe("Data Format 3 Parsing Strategy", () => {
         "should parse the raw data %s to a valid RuuviTagSensorData",
         (rawStringData, expectedRuuviTagSensorData) => {
             const rawData = Buffer.from(rawStringData, "hex");
-            expect(DataFormat3ParsingStrategy(rawData)).toEqual(expectedRuuviTagSensorData);
+            expect(Effect.runSync(DataFormat3ParsingStrategy(rawData))).toEqual(expectedRuuviTagSensorData);
         }
     );
+
+    it("fails with InvalidRuuviDataLengthError when the data is shorter than the data format reads", () => {
+        const rawData = Buffer.from("990403291A1ECE1EFC18F94202CA0B", "hex");
+
+        expect(Effect.runSync(Effect.flip(DataFormat3ParsingStrategy(rawData)))).toStrictEqual(
+            new InvalidRuuviDataLengthError({ dataFormat: 0x03, length: rawData.length, minimumLength: 16 })
+        );
+    });
 });
