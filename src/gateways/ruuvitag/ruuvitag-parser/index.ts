@@ -73,9 +73,7 @@ export class UnsupportedDataFormatError extends Data.TaggedError("UnsupportedDat
 }> {}
 
 export type RuuviParsingError =
-    | NotValidRuuviManufacturerIdError
-    | UnsupportedDataFormatError
-    | InvalidRuuviDataLengthError;
+    NotValidRuuviManufacturerIdError | UnsupportedDataFormatError | InvalidRuuviDataLengthError;
 
 const resolveParsingStrategy = Match.type<number>().pipe(
     Match.when(RuuvitagSensorProtocolDataFormat.DataFormat3, () => Effect.succeed(DataFormat3ParsingStrategy)),
@@ -86,7 +84,7 @@ const resolveParsingStrategy = Match.type<number>().pipe(
 );
 
 const assertValidDataFormat = (dataFormat: number): dataFormat is RuuvitagSensorProtocolDataFormat =>
-    Object.values(RuuvitagSensorProtocolDataFormat).includes(dataFormat);
+    Object.values<number | string>(RuuvitagSensorProtocolDataFormat).includes(dataFormat);
 
 /**
  * Validates the manufacturer id and returns the raw data format byte.

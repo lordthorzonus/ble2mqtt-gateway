@@ -148,7 +148,7 @@ describe("RuuviTag Gateway", () => {
                 const messages = yield* gateway({
                     ...peripheral,
                     uuid: "no-such-ruuvitag",
-                } as Peripheral);
+                });
                 return Array.from(messages);
             });
 
@@ -180,7 +180,7 @@ describe("RuuviTag Gateway", () => {
             const unknownPeripheral = {
                 ...peripheral,
                 uuid: "unknown",
-            } as Peripheral;
+            };
 
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway({ ...ruuviTagSettings, allow_unknown: true });
@@ -310,13 +310,13 @@ describe("RuuviTag Gateway", () => {
                 ...formatE1Peripheral,
                 address: "c3:d4",
                 uuid: "c3:d4",
-            } as Peripheral;
+            };
 
             const device2Format6 = {
                 ...format6Peripheral,
                 address: "c3:d4",
                 uuid: "c3:d4",
-            } as Peripheral;
+            };
 
             const program = Effect.gen(function* () {
                 const gateway = makeRuuvitagGateway(multiDeviceSettings, cache);

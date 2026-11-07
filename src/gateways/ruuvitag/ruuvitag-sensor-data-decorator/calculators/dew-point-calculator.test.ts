@@ -20,7 +20,7 @@ describe("Dew point calculator", () => {
     ];
 
     it.each(testCases)(
-        "should calculate the dew point according to the specification. Temperature: %s, RH: %s % should produce: %s",
+        "should calculate the dew point according to the specification. Temperature: %s, RH: %s %% should produce: %s",
         (temperature, relativeHumidity, expectedDewPoint) => {
             expect(calculateDewPoint(temperature, relativeHumidity)).toEqual(expectedDewPoint);
         }

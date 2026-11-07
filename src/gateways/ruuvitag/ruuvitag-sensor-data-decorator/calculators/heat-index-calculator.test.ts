@@ -18,7 +18,7 @@ describe("Heat Index (HI) calculator", () => {
     ];
 
     it.each(heatIndexTestCases)(
-        "should calculate the heat index according to the specification. Temperature: %s, RH: %s % should produce: %s",
+        "should calculate the heat index according to the specification. Temperature: %s, RH: %s %% should produce: %s",
         (temperature, relativeHumidity, expectedHeatIndex) => {
             expect(calculateHeatIndex(temperature, relativeHumidity)).toEqual(expectedHeatIndex);
         }

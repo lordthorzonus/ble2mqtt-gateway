@@ -25,9 +25,7 @@ export class UnsupportedMiFloraEventError extends Data.TaggedError("UnsupportedM
 }> {}
 
 export type MiFloraParsingError =
-    | InvalidMiFloraAdvertisementError
-    | UnsupportedMiFloraEventError
-    | InvalidMiFloraDataLengthError;
+    InvalidMiFloraAdvertisementError | UnsupportedMiFloraEventError | InvalidMiFloraDataLengthError;
 
 const getMiFloraServiceData = (peripheral: Peripheral): Effect.Effect<Buffer, InvalidMiFloraAdvertisementError> => {
     const xiaomiService = peripheral.advertisement.serviceData.find((service) => service.uuid === XiaomiServiceId);

@@ -4,7 +4,7 @@ import { DeviceRegistryService, handleBleAdvertisement } from "./gateway-helpers
 import { Peripheral } from "../infra/ble-scanner";
 import { DeviceType, MessageType } from "../types";
 
-class TestParsingError extends Data.TaggedError("TestParsingError")<Record<never, never>> {}
+class TestParsingError extends Data.TaggedError("TestParsingError") {}
 
 const peripheral: Peripheral = {
     uuid: "aa:aa",

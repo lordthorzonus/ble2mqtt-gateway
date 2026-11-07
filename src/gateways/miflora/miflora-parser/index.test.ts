@@ -18,7 +18,7 @@ export const getStubPeripheralWithServiceData = (serviceData: string, id = "a"):
         advertisement: {
             serviceData: [{ uuid: "fe95", data: Buffer.from(serviceData, "hex") }],
         },
-    } as unknown as Peripheral;
+    };
 };
 
 describe("parseMiFloraPeripheralAdvertisement()", () => {

@@ -18,7 +18,7 @@ describe("Absolute humidity point calculator", () => {
     ];
 
     it.each(testCases)(
-        "should calculate the absolute humidity according to the specification. Temperature: %s, RH: %s % should produce: %s",
+        "should calculate the absolute humidity according to the specification. Temperature: %s, RH: %s %% should produce: %s",
         (temperature, relativeHumidity, expectedDewPoint) => {
             expect(calculateAbsoluteHumidity(temperature, relativeHumidity)).toEqual(expectedDewPoint);
         }

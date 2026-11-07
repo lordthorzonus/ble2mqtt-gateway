@@ -18,7 +18,7 @@ describe("Humidex calculator", () => {
     ];
 
     it.each(testCases)(
-        "should calculate the humidex according to the specification. Temperature: %s, Dew point: %s % should produce: %s",
+        "should calculate the humidex according to the specification. Temperature: %s, Dew point: %s %% should produce: %s",
         (temperature, dewPoint, expectedHumidex) => {
             expect(calculateHumidex(temperature, dewPoint)).toEqual(expectedHumidex);
         }

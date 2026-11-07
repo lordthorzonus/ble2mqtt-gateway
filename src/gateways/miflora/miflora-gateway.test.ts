@@ -115,7 +115,7 @@ describe("MiFlora Gateway", () => {
                 const messages = yield* gateway({
                     ...moisturePeripheralAdvertisement,
                     uuid: "no-such-miflora",
-                } as Peripheral);
+                });
                 return Array.from(messages);
             });
 
