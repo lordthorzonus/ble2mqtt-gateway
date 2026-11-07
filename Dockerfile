@@ -18,7 +18,7 @@ RUN apk add --no-cache --update \
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 
-COPY package*.json ./
+COPY package*.json .npmrc ./
 COPY tsconfig.json eslint.config.mjs  .prettierrc ./
 RUN npm ci --audit false
 
