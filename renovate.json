@@ -1,6 +1,6 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:js-app", ":automergeAll", "group:allNonMajor", ":maintainLockFilesWeekly"],
+    "extends": ["config:js-app", ":automergeAll", "group:allNonMajor", ":maintainLockFilesWeekly", "helpers:pinGitHubActionDigests"],
     "customManagers": [
         {
             "customType": "regex",
