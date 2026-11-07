@@ -1,8 +1,9 @@
+import { describe, expect, it, vi } from "vitest";
 import { Data, Effect, Option } from "effect";
-import { DeviceRegistry } from "./device-registry";
-import { DeviceRegistryService, handleBleAdvertisement } from "./gateway-helpers";
-import { Peripheral } from "../infra/ble-scanner";
-import { DeviceType, MessageType } from "../types";
+import { DeviceRegistry } from "./device-registry.js";
+import { DeviceRegistryService, handleBleAdvertisement } from "./gateway-helpers.js";
+import { Peripheral } from "../infra/ble-scanner.js";
+import { DeviceType, MessageType } from "../types.js";
 
 class TestParsingError extends Data.TaggedError("TestParsingError") {}
 
@@ -31,9 +32,9 @@ const handle = (registry: DeviceRegistry, parseAdvertisement: () => Effect.Effec
 
 describe("handleBleAdvertisement()", () => {
     it("parses the advertisement once and passes the result to model resolution and sensor handling", () => {
-        const parseAdvertisement = jest.fn(() => Effect.succeed("parsed"));
-        const resolveDeviceModel = jest.fn(() => "environmental");
-        const handleDeviceSensorData = jest.fn(() => Effect.succeed(Option.none()));
+        const parseAdvertisement = vi.fn(() => Effect.succeed("parsed"));
+        const resolveDeviceModel = vi.fn(() => "environmental");
+        const handleDeviceSensorData = vi.fn(() => Effect.succeed(Option.none()));
 
         handleBleAdvertisement(peripheral, {
             deviceType: DeviceType.Ruuvitag,
@@ -61,7 +62,7 @@ describe("handleBleAdvertisement()", () => {
     });
 
     it("ignores unconfigured devices without parsing when unknown devices are not allowed", () => {
-        const parseAdvertisement = jest.fn(() => Effect.succeed("parsed"));
+        const parseAdvertisement = vi.fn(() => Effect.succeed("parsed"));
 
         handleBleAdvertisement(
             { ...peripheral, uuid: "bb:bb" },

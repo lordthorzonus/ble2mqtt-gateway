@@ -1,9 +1,9 @@
-import { DeviceAvailabilityMessage, DeviceMessage, DeviceSensorMessage, DeviceType } from "../types";
-import { generateAvailabilityMessage } from "./message-generators";
-import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry";
+import { DeviceAvailabilityMessage, DeviceMessage, DeviceSensorMessage, DeviceType } from "../types.js";
+import { generateAvailabilityMessage } from "./message-generators.js";
+import { DeviceRegistry, DeviceRegistryEntry } from "./device-registry.js";
 import { Data, Duration, Effect, Stream, Context, Option, pipe, Schedule } from "effect";
-import { Config } from "../config";
-import { Peripheral } from "../infra/ble-scanner";
+import { Config } from "../config.js";
+import { Peripheral } from "../infra/ble-scanner.js";
 
 export class DeviceNotFoundError extends Data.TaggedError("DeviceNotFoundError")<{
     id: string;

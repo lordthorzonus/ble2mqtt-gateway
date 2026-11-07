@@ -1,7 +1,7 @@
-import { asLux, asPM2_5, Lux } from "../../../units";
-import { RuuviAirParsingStrategy, RuuviAirSensorData } from "../index";
+import { asLux, asPM2_5, Lux } from "../../../units.js";
+import { RuuviAirParsingStrategy, RuuviAirSensorData } from "../index.js";
 import { Effect } from "effect";
-import { RuuvitagSensorProtocolDataFormat } from "../data-format";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format.js";
 import {
     parseTemperature,
     parseRelativeHumidity,
@@ -12,7 +12,7 @@ import {
     parseNOx,
     parseCalibrationInProgress,
     requireMinimumLength,
-} from "./common-parsing-strategy-utils";
+} from "./common-parsing-strategy-utils.js";
 
 enum DataFormatV6Offset {
     Temperature = 3,

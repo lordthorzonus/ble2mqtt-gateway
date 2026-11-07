@@ -1,16 +1,17 @@
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { Effect, Layer } from "effect";
-import { getStubPeripheralWithServiceData } from "./miflora-parser/index.test";
-import { makeMiFloraGateway, isMiFloraPeripheral, makeMiFloraDeviceRegistry } from "./miflora-gateway";
+import { getStubPeripheralWithServiceData } from "./miflora-parser/index.test.js";
+import { makeMiFloraGateway, isMiFloraPeripheral, makeMiFloraDeviceRegistry } from "./miflora-gateway.js";
 import { Settings } from "luxon";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "../../infra/ble-scanner";
-import { Logger } from "../../infra/logger";
-import { Config, GlobalConfiguration } from "../../config";
-import { DeviceRegistryService } from "../gateway-helpers";
-import { getTestConfig } from "../../test/test-context";
+import { Peripheral } from "../../infra/ble-scanner.js";
+import { Logger } from "../../infra/logger.js";
+import { Config, GlobalConfiguration } from "../../config.js";
+import { DeviceRegistryService } from "../gateway-helpers.js";
+import { getTestConfig } from "../../test/test-context.js";
 
-jest.mock("uuid");
-const mockedUuid = uuid as jest.Mock;
+vi.mock("uuid");
+const mockedUuid = uuid as Mock;
 const defaultTimeout = 30000;
 
 const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
@@ -66,7 +67,7 @@ describe("MiFlora Gateway", () => {
 
     afterEach(() => {
         Settings.now = originalNow;
-        jest.resetAllMocks();
+        vi.resetAllMocks();
     });
 
     describe("handleBleAdvertisement()", () => {

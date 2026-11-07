@@ -1,5 +1,6 @@
-import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units";
-import { calculateAbsoluteHumidity } from "./absolute-humidity-calculator";
+import { describe, expect, it } from "vitest";
+import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units.js";
+import { calculateAbsoluteHumidity } from "./absolute-humidity-calculator.js";
 
 describe("Absolute humidity point calculator", () => {
     /**

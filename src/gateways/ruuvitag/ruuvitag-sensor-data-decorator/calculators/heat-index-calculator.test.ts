@@ -1,5 +1,6 @@
-import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units";
-import { calculateHeatIndex } from "./heat-index-calculator";
+import { describe, expect, it } from "vitest";
+import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units.js";
+import { calculateHeatIndex } from "./heat-index-calculator.js";
 
 describe("Heat Index (HI) calculator", () => {
     /**

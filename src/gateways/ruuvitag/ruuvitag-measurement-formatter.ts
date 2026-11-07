@@ -1,5 +1,8 @@
-import { EnhancedRuuviAirSensorData, EnhancedRuuviTagEnvironmentalSensorData } from "./ruuvitag-sensor-data-decorator";
-import { formatNumericSensorValue } from "../numeric-sensor-value-formatter";
+import {
+    EnhancedRuuviAirSensorData,
+    EnhancedRuuviTagEnvironmentalSensorData,
+} from "./ruuvitag-sensor-data-decorator/index.js";
+import { formatNumericSensorValue } from "../numeric-sensor-value-formatter.js";
 
 export const formatAirQualitySensorValues = (
     sensorValues: EnhancedRuuviAirSensorData,

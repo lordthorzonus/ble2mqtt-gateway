@@ -1,5 +1,6 @@
-import { asCelsius, Celsius } from "../../../units";
-import { calculateHumidex } from "./humidex-calculator";
+import { describe, expect, it } from "vitest";
+import { asCelsius, Celsius } from "../../../units.js";
+import { calculateHumidex } from "./humidex-calculator.js";
 
 describe("Humidex calculator", () => {
     /**

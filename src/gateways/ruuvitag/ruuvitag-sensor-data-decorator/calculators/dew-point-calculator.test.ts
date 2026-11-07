@@ -1,5 +1,6 @@
-import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units";
-import { calculateDewPoint } from "./dew-point-calculator";
+import { describe, expect, it } from "vitest";
+import { asCelsius, asRelativeHumidity, Celsius, RelativeHumidity } from "../../../units.js";
+import { calculateDewPoint } from "./dew-point-calculator.js";
 
 describe("Dew point calculator", () => {
     /**

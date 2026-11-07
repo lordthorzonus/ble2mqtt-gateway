@@ -1,4 +1,4 @@
-import { Celsius, RelativeHumidity, asCelsius } from "../../../units";
+import { Celsius, RelativeHumidity, asCelsius } from "../../../units.js";
 
 /**
  * Calculates the dew point using the Magnus formula.

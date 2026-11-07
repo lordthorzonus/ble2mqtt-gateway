@@ -1,5 +1,9 @@
-import { EnhancedRuuviTagEnvironmentalSensorData, EnhancedRuuviAirSensorData } from "./ruuvitag-sensor-data-decorator";
-import { formatEnvironmentalSensorValues, formatAirQualitySensorValues } from "./ruuvitag-measurement-formatter";
+import { describe, expect, it } from "vitest";
+import {
+    EnhancedRuuviTagEnvironmentalSensorData,
+    EnhancedRuuviAirSensorData,
+} from "./ruuvitag-sensor-data-decorator/index.js";
+import { formatEnvironmentalSensorValues, formatAirQualitySensorValues } from "./ruuvitag-measurement-formatter.js";
 import {
     asCelsius,
     asCO2Ppm,
@@ -12,7 +16,7 @@ import {
     asPM4,
     asRelativeHumidity,
     asVOCIndex,
-} from "../units";
+} from "../units.js";
 
 describe("RuuviTag measurement formatter", () => {
     describe("Environmental sensor data formatting", () => {

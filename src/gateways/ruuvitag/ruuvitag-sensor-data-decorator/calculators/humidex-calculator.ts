@@ -1,4 +1,4 @@
-import { Celsius } from "../../../units";
+import { Celsius } from "../../../units.js";
 
 /**
  * Calculates the humidex (humidity index).

@@ -1,13 +1,16 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "ES2020",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "target": "ES2023",
+        "lib": ["ES2023"],
+        "types": ["node"],
         "strict": true,
-        "moduleResolution": "node",
         "sourceMap": true,
+        "rootDir": "src",
         "outDir": "dist",
-        "esModuleInterop": true,
         "noUncheckedIndexedAccess": true,
+        "skipLibCheck": true,
         "plugins": [
             {
                 "name": "@effect/language-service"

@@ -1,10 +1,10 @@
-import { getManufacturerId, makeBleGateway } from "./gateways/ble-gateway";
-import { scan } from "./infra/ble-scanner";
-import { Logger } from "./infra/logger";
-import { DeviceType } from "./types";
-import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
+import { getManufacturerId, makeBleGateway } from "./gateways/ble-gateway.js";
+import { scan } from "./infra/ble-scanner.js";
+import { Logger } from "./infra/logger.js";
+import { DeviceType } from "./types.js";
+import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer.js";
 import { Stream, Effect, Match, Layer } from "effect";
-import { Config } from "./config";
+import { Config } from "./config.js";
 import { NodeRuntime } from "@effect/platform-node";
 
 const DEVICE_TYPES: readonly string[] = Object.values(DeviceType);

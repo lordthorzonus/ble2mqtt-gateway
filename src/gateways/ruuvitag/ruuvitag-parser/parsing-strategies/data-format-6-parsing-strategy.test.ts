@@ -1,7 +1,8 @@
-import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils";
+import { describe, expect, it } from "vitest";
+import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils.js";
 import { Effect } from "effect";
-import { RuuviAirSensorData } from "../index";
-import { DataFormat6ParsingStrategy } from "./data-format-6-parsing-strategy";
+import { RuuviAirSensorData } from "../index.js";
+import { DataFormat6ParsingStrategy } from "./data-format-6-parsing-strategy.js";
 import {
     asCelsius,
     asPascal,
@@ -11,7 +12,7 @@ import {
     asVOCIndex,
     asNOxIndex,
     asLux,
-} from "../../../units";
+} from "../../../units.js";
 
 describe("Data Format 6 Parsing Strategy", () => {
     const testCases: [string, RuuviAirSensorData][] = [

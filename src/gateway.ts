@@ -1,11 +1,11 @@
-import { Config, GlobalConfiguration } from "./config";
-import { makeBleGateway } from "./gateways/ble-gateway";
-import { MqttClient, publish } from "./infra/mqtt-client";
-import { Logger, LoggerInterface } from "./infra/logger";
+import { Config, GlobalConfiguration } from "./config.js";
+import { makeBleGateway } from "./gateways/ble-gateway.js";
+import { MqttClient, publish } from "./infra/mqtt-client.js";
+import { Logger, LoggerInterface } from "./infra/logger.js";
 import { Chunk, Duration, Effect, GroupBy, pipe, Schedule, Stream } from "effect";
-import { scan } from "./infra/ble-scanner";
-import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer";
-import { DeviceMessage, MqttMessage } from "./types";
+import { scan } from "./infra/ble-scanner.js";
+import { makeHomeAssistantMqttMessageProducer } from "./mqtt/home-assistant/home-assistant-mqtt-message-producer.js";
+import { DeviceMessage, MqttMessage } from "./types.js";
 
 const SCANNER_RETRY_POLICY = Schedule.exponential(Duration.seconds(1)).pipe(
     Schedule.union(Schedule.spaced(Duration.seconds(30)))

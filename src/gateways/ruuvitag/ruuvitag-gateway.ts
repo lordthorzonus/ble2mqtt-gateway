@@ -1,12 +1,12 @@
-import { DeviceRegistry } from "../device-registry";
-import { DeviceType } from "../../types";
-import { transformRuuviTagSensorDataToDeviceMessage } from "./ruuvitag-measurement-transformer";
-import { RuuviTagGatewayConfiguration } from "../../config";
-import { handleBleAdvertisement, requireManufacturerData } from "../gateway-helpers";
+import { DeviceRegistry } from "../device-registry.js";
+import { DeviceType } from "../../types.js";
+import { transformRuuviTagSensorDataToDeviceMessage } from "./ruuvitag-measurement-transformer.js";
+import { RuuviTagGatewayConfiguration } from "../../config.js";
+import { handleBleAdvertisement, requireManufacturerData } from "../gateway-helpers.js";
 import { Effect } from "effect";
-import { GatewayError, MapMessage } from "../ble-gateway";
-import { parse, parseRuuviDataFormat, RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser";
-import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter";
+import { GatewayError, MapMessage } from "../ble-gateway.js";
+import { parse, parseRuuviDataFormat, RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser/index.js";
+import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter.js";
 
 export const makeRuuvitagDeviceRegistry = (
     ruuviTagSettings: NonNullable<RuuviTagGatewayConfiguration>,

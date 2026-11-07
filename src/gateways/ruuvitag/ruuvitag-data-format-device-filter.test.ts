@@ -1,5 +1,6 @@
-import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter";
-import { RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter.js";
+import { RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser/index.js";
 import { Settings } from "luxon";
 
 describe("RuuvitagDataFormatDeviceFilter", () => {

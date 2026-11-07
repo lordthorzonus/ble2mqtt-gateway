@@ -1,7 +1,8 @@
-import { InvalidOralBDataLengthError, parseOralBAdvertisement, toOralBSensorData } from "./oralb-parser";
-import { ResolvedOralBModel } from "./oralb-sensor-data";
+import { describe, expect, it } from "vitest";
+import { InvalidOralBDataLengthError, parseOralBAdvertisement, toOralBSensorData } from "./oralb-parser.js";
+import { ResolvedOralBModel } from "./oralb-sensor-data.js";
 import { Cause, Effect, Exit, FastCheck as fc } from "effect";
-import { asSeconds, asSectorNumber } from "../units";
+import { asSeconds, asSectorNumber } from "../units.js";
 
 const parse = (manufacturerData: Buffer, model?: ResolvedOralBModel) =>
     Effect.map(parseOralBAdvertisement(manufacturerData), ({ rawData, detectedModel }) =>

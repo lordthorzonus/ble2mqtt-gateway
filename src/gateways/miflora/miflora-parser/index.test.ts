@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import {
     MifloraMeasurementEventType,
     parseMiFloraPeripheralAdvertisement,
@@ -5,10 +6,10 @@ import {
     InvalidMiFloraAdvertisementError,
     UnsupportedMiFloraEventError,
     InvalidMiFloraDataLengthError,
-} from "./index";
-import { Peripheral } from "../../../infra/ble-scanner";
+} from "./index.js";
+import { Peripheral } from "../../../infra/ble-scanner.js";
 import { Cause, Effect, Exit, FastCheck as fc, Option } from "effect";
-import { testEffectWithContext } from "../../../test/test-context";
+import { testEffectWithContext } from "../../../test/test-context.js";
 
 export const getStubPeripheralWithServiceData = (serviceData: string, id = "a"): Peripheral => {
     return {

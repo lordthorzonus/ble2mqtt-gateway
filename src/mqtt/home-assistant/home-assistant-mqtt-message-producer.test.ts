@@ -1,13 +1,14 @@
-import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType, DeviceType } from "../../types";
+import { describe, expect, it } from "vitest";
+import { DeviceAvailabilityMessage, DeviceSensorMessage, MessageType, DeviceType } from "../../types.js";
 import { DateTime } from "luxon";
-import { makeHomeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer";
+import { makeHomeAssistantMqttMessageProducer } from "./home-assistant-mqtt-message-producer.js";
 import {
     EnhancedRuuviTagEnvironmentalSensorData,
     EnhancedRuuviAirSensorData,
-} from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
-import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer";
+} from "../../gateways/ruuvitag/ruuvitag-sensor-data-decorator/index.js";
+import { MiFloraSensorData } from "../../gateways/miflora/miflora-measurement-transformer.js";
 import { Chunk, Effect, Stream } from "effect";
-import { testEffectWithContext } from "../../test/test-context";
+import { testEffectWithContext } from "../../test/test-context.js";
 
 describe("HomeAssistant MQTT Message producer", () => {
     it("should generate device state mqtt message if device sensor message is given", async () => {

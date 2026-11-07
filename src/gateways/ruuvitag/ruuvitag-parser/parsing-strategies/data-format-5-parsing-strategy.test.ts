@@ -1,8 +1,9 @@
-import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils";
+import { describe, expect, it } from "vitest";
+import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils.js";
 import { Effect } from "effect";
-import { asCelsius, asPascal, asRelativeHumidity } from "../../../units";
-import { RuuviTagEnvironmentalSensorData } from "../index";
-import { DataFormat5ParsingStrategy } from "./data-format-5-parsing-strategy";
+import { asCelsius, asPascal, asRelativeHumidity } from "../../../units.js";
+import { RuuviTagEnvironmentalSensorData } from "../index.js";
+import { DataFormat5ParsingStrategy } from "./data-format-5-parsing-strategy.js";
 
 describe("Data Format 5 Parsing Strategy", () => {
     const macAddress = "CB:B8:33:4C:88:4F";

@@ -1,11 +1,12 @@
-import { Config } from "./config";
+import { afterAll, afterEach, describe, expect, it, vi, type Mock } from "vitest";
+import { Config } from "./config.js";
 
-jest.mock("fs");
+vi.mock("fs");
 
 import { Effect } from "effect";
 import { readFileSync } from "fs";
 
-const mockReadFileSync = readFileSync as jest.Mock;
+const mockReadFileSync = readFileSync as Mock;
 
 const exampleConfiguration = `
 mqtt:
@@ -37,12 +38,12 @@ homeassistant:
 
 describe("Config", () => {
     afterEach(() => {
-        jest.resetAllMocks();
-        jest.resetModules();
+        vi.resetAllMocks();
+        vi.resetModules();
     });
 
     afterAll(() => {
-        jest.restoreAllMocks();
+        vi.restoreAllMocks();
     });
 
     describe("Config", () => {

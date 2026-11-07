@@ -7,17 +7,17 @@ import {
     HomeAssistantSensorConfiguration,
     MessageType,
     MqttMessage,
-} from "../../types";
+} from "../../types.js";
 import {
     ruuviTagAirQualitySensorConfiguration,
     ruuviTagEnvironmentalSensorConfiguration,
-} from "./device-discoverability-configurations/ruuvitag";
-import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../mqtt-topic-factory";
-import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora";
-import { oralbSensorConfiguration } from "./device-discoverability-configurations/oralb";
-import { capitalize, snakeCase } from "lodash";
+} from "./device-discoverability-configurations/ruuvitag.js";
+import { getDeviceAvailabilityTopic, getDeviceStateTopic } from "../mqtt-topic-factory.js";
+import { miFloraSensorConfiguration } from "./device-discoverability-configurations/miflora.js";
+import { oralbSensorConfiguration } from "./device-discoverability-configurations/oralb.js";
+import lodash from "lodash";
 import { Data, Effect, Match, Stream } from "effect";
-import { Config, ConfigurationError, GlobalConfiguration } from "../../config";
+import { Config, ConfigurationError, GlobalConfiguration } from "../../config.js";
 
 export class SensorConfigurationMissingError extends Data.TaggedError("SensorConfigurationMissingError")<{
     message: DeviceAvailabilityMessage;
@@ -36,10 +36,10 @@ const getHASensorConfiguration = Match.type<DeviceAvailabilityMessage>().pipe(
 );
 
 const getObjectID = (deviceMessage: DeviceMessage, configEntry: HomeAssistantSensorConfiguration) =>
-    `${snakeCase(deviceMessage.device.friendlyName)}_${configEntry.uniqueId}`;
+    `${lodash.snakeCase(deviceMessage.device.friendlyName)}_${configEntry.uniqueId}`;
 
 const getDeviceName = (deviceMessage: DeviceMessage) =>
-    `${capitalize(deviceMessage.device.type)} ${deviceMessage.device.friendlyName}`;
+    `${lodash.capitalize(deviceMessage.device.type)} ${deviceMessage.device.friendlyName}`;
 
 const getEntityName = (configEntry: HomeAssistantSensorConfiguration) => configEntry.name;
 

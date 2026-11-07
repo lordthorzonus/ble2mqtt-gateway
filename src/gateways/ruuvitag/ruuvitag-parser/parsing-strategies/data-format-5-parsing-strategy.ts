@@ -1,6 +1,6 @@
-import { RuuviTagParsingStrategy, RuuviTagEnvironmentalSensorData } from "../index";
+import { RuuviTagParsingStrategy, RuuviTagEnvironmentalSensorData } from "../index.js";
 import { Effect } from "effect";
-import { RuuvitagSensorProtocolDataFormat } from "../data-format";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format.js";
 import {
     parseTemperature,
     parseRelativeHumidity,
@@ -9,7 +9,7 @@ import {
     isInvalidMeasurementForSigned16BitInteger,
     isInvalidMeasurementForUnsigned16BitInteger,
     requireMinimumLength,
-} from "./common-parsing-strategy-utils";
+} from "./common-parsing-strategy-utils.js";
 
 enum DataFormatV5Offset {
     Temperature = 3,

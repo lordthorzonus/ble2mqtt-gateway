@@ -1,11 +1,11 @@
-import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry";
-import { DeviceType, MessageType, OralBSensorMessage } from "../../types";
-import { OralBGatewayConfiguration } from "../../config";
-import { handleBleAdvertisement, PeripheralWithManufacturerData, requireManufacturerData } from "../gateway-helpers";
+import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry.js";
+import { DeviceType, MessageType, OralBSensorMessage } from "../../types.js";
+import { OralBGatewayConfiguration } from "../../config.js";
+import { handleBleAdvertisement, PeripheralWithManufacturerData, requireManufacturerData } from "../gateway-helpers.js";
 import { Effect, Option } from "effect";
-import { GatewayError, MapMessage } from "../ble-gateway";
-import { OralBAdvertisement, parseOralBAdvertisement, toOralBSensorData } from "./oralb-parser";
-import { OralBModel, ResolvedOralBModel, UNKNOWN_ORALB_MODEL } from "./oralb-sensor-data";
+import { GatewayError, MapMessage } from "../ble-gateway.js";
+import { OralBAdvertisement, parseOralBAdvertisement, toOralBSensorData } from "./oralb-parser.js";
+import { OralBModel, ResolvedOralBModel, UNKNOWN_ORALB_MODEL } from "./oralb-sensor-data.js";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 

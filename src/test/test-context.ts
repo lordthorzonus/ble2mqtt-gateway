@@ -1,16 +1,17 @@
-import { Logger, LoggerInterface } from "../infra/logger";
+import { vi } from "vitest";
+import { Logger, LoggerInterface } from "../infra/logger.js";
 import { Context, Effect } from "effect";
-import { Config, GlobalConfiguration } from "../config";
+import { Config, GlobalConfiguration } from "../config.js";
 
 export const mockLogger: LoggerInterface = {
-    info: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
 } as unknown as LoggerInterface;
 
 export const mockMqttClient = {
-    publish: jest.fn(),
+    publish: vi.fn(),
 };
 
 const mockConfig: GlobalConfiguration = {

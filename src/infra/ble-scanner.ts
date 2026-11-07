@@ -1,5 +1,5 @@
 import noble from "@stoprocent/noble";
-import { Logger } from "./logger";
+import { Logger } from "./logger.js";
 import { Effect, Stream, Data, Chunk } from "effect";
 
 export class BleScannerError extends Data.TaggedError("BleScannerError")<{

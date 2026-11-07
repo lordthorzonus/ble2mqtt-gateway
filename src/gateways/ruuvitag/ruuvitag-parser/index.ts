@@ -1,13 +1,25 @@
-import { Celsius, CO2Ppm, Lux, NOxIndex, Pascal, PM1, PM10, PM2_5, PM4, RelativeHumidity, VOCIndex } from "../../units";
-import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
-import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
-import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy";
-import { DataFormatE1ParsingStrategy } from "./parsing-strategies/data-format-e1-parsing-strategy";
+import {
+    Celsius,
+    CO2Ppm,
+    Lux,
+    NOxIndex,
+    Pascal,
+    PM1,
+    PM10,
+    PM2_5,
+    PM4,
+    RelativeHumidity,
+    VOCIndex,
+} from "../../units.js";
+import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy.js";
+import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy.js";
+import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy.js";
+import { DataFormatE1ParsingStrategy } from "./parsing-strategies/data-format-e1-parsing-strategy.js";
 import { Data, Effect, Match } from "effect";
-import { RuuvitagSensorProtocolDataFormat } from "./data-format";
+import { RuuvitagSensorProtocolDataFormat } from "./data-format.js";
 
 export { RuuvitagSensorProtocolDataFormat };
-import { InvalidRuuviDataLengthError } from "./parsing-strategies/common-parsing-strategy-utils";
+import { InvalidRuuviDataLengthError } from "./parsing-strategies/common-parsing-strategy-utils.js";
 
 export { InvalidRuuviDataLengthError };
 

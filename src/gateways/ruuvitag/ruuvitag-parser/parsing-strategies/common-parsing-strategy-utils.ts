@@ -12,7 +12,7 @@ import {
     Pascal,
     RelativeHumidity,
     VOCIndex,
-} from "../../../units";
+} from "../../../units.js";
 
 /**
  * The manufacturer data is shorter than the header or than the layout of its data format.

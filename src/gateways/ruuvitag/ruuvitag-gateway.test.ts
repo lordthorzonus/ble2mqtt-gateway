@@ -1,16 +1,17 @@
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { Effect, Layer } from "effect";
-import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag-gateway";
-import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter";
+import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag-gateway.js";
+import { RuuvitagDataFormatDeviceFilter } from "./ruuvitag-data-format-device-filter.js";
 import { Settings } from "luxon";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "../../infra/ble-scanner";
-import { Logger } from "../../infra/logger";
-import { Config, GlobalConfiguration, RuuviTagGatewayConfiguration } from "../../config";
-import { DeviceRegistryService } from "../gateway-helpers";
-import { getTestConfig } from "../../test/test-context";
+import { Peripheral } from "../../infra/ble-scanner.js";
+import { Logger } from "../../infra/logger.js";
+import { Config, GlobalConfiguration, RuuviTagGatewayConfiguration } from "../../config.js";
+import { DeviceRegistryService } from "../gateway-helpers.js";
+import { getTestConfig } from "../../test/test-context.js";
 
-jest.mock("uuid");
-const mockedUuid = uuid as jest.Mock;
+vi.mock("uuid");
+const mockedUuid = uuid as Mock;
 const defaultTimeout = 30000;
 
 const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
@@ -86,7 +87,7 @@ describe("RuuviTag Gateway", () => {
 
     afterEach(() => {
         Settings.now = originalNow;
-        jest.resetAllMocks();
+        vi.resetAllMocks();
     });
 
     const testWithFreshDeviceRegistry = <A, E, R extends Config | Logger | DeviceRegistryService>(
@@ -351,13 +352,13 @@ describe("RuuviTag Gateway", () => {
 
     describe("getUnavailableDevices()", () => {
         beforeEach(() => {
-            jest.useFakeTimers();
+            vi.useFakeTimers();
             mockedUuid.mockReturnValue("mock-uuid");
             Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
         });
 
         afterEach(() => {
-            jest.useRealTimers();
+            vi.useRealTimers();
             Settings.now = originalNow;
         });
 

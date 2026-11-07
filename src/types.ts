@@ -1,10 +1,10 @@
 import {
     EnhancedRuuviAirSensorData,
     EnhancedRuuviTagEnvironmentalSensorData,
-} from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator";
+} from "./gateways/ruuvitag/ruuvitag-sensor-data-decorator/index.js";
 import { DateTime } from "luxon";
-import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer";
-import { OralBSensorData, ResolvedOralBModel } from "./gateways/oralb/oralb-sensor-data";
+import { MiFloraSensorData } from "./gateways/miflora/miflora-measurement-transformer.js";
+import { OralBSensorData, ResolvedOralBModel } from "./gateways/oralb/oralb-sensor-data.js";
 
 export enum DeviceType {
     Ruuvitag = "ruuvitag",

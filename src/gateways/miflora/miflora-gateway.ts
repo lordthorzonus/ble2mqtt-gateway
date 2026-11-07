@@ -1,12 +1,12 @@
-import { GatewayError } from "../ble-gateway";
-import { Peripheral } from "../../infra/ble-scanner";
-import { DeviceMessage, DeviceType } from "../../types";
-import { MiFloraGatewayConfiguration } from "../../config";
-import { DeviceRegistryService, handleBleAdvertisement } from "../gateway-helpers";
-import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry";
-import { MiFloraEventBuffer } from "./miflora-event-buffer";
-import { parseMiFloraPeripheralAdvertisement, SupportedMiFloraMeasurements } from "./miflora-parser";
-import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer";
+import { GatewayError } from "../ble-gateway.js";
+import { Peripheral } from "../../infra/ble-scanner.js";
+import { DeviceMessage, DeviceType } from "../../types.js";
+import { MiFloraGatewayConfiguration } from "../../config.js";
+import { DeviceRegistryService, handleBleAdvertisement } from "../gateway-helpers.js";
+import { DeviceRegistry, DeviceRegistryEntry } from "../device-registry.js";
+import { MiFloraEventBuffer } from "./miflora-event-buffer.js";
+import { parseMiFloraPeripheralAdvertisement, SupportedMiFloraMeasurements } from "./miflora-parser/index.js";
+import { transformMiFloraMeasurementsToDeviceMessage } from "./miflora-measurement-transformer.js";
 import { Effect, Option } from "effect";
 
 export const mifloraGatewayId = 0x95fe;

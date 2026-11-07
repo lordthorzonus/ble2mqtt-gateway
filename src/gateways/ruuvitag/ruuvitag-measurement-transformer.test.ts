@@ -1,16 +1,17 @@
-import { DeviceSensorMessage, MessageType, DeviceType } from "../../types";
-import { RuuviTagSensorData } from "./ruuvitag-parser";
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { DeviceSensorMessage, MessageType, DeviceType } from "../../types.js";
+import { RuuviTagSensorData } from "./ruuvitag-parser/index.js";
 import {
     decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues,
     decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
     EnhancedRuuviTagEnvironmentalSensorData,
     EnhancedRuuviAirSensorData,
-} from "./ruuvitag-sensor-data-decorator";
+} from "./ruuvitag-sensor-data-decorator/index.js";
 import { v4 as uuid } from "uuid";
-import { PeripheralWithManufacturerData } from "../gateway-helpers";
-import { transformRuuviTagSensorDataToDeviceMessage } from "./ruuvitag-measurement-transformer";
+import { PeripheralWithManufacturerData } from "../gateway-helpers.js";
+import { transformRuuviTagSensorDataToDeviceMessage } from "./ruuvitag-measurement-transformer.js";
 import { DateTime, Settings } from "luxon";
-import { DeviceRegistryEntry } from "../device-registry";
+import { DeviceRegistryEntry } from "../device-registry.js";
 import { Option } from "effect";
 import {
     asCelsius,
@@ -24,19 +25,19 @@ import {
     asPM4,
     asRelativeHumidity,
     asVOCIndex,
-} from "../units";
+} from "../units.js";
 
 Settings.defaultZone = "UTC";
 const mockedTime = DateTime.fromISO("2019-10-10T00:00:00.000Z");
 
-jest.mock("./ruuvitag-sensor-data-decorator");
+vi.mock("./ruuvitag-sensor-data-decorator/index.js");
 
-const mockedRuuviTagDecorator = decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues as jest.Mock;
-const mockedRuuviTagAirQualityDecorator = decorateRuuviTagAirQualitySensorDataWithCalculatedValues as jest.Mock;
+const mockedRuuviTagDecorator = decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues as Mock;
+const mockedRuuviTagAirQualityDecorator = decorateRuuviTagAirQualitySensorDataWithCalculatedValues as Mock;
 
-jest.mock("uuid");
+vi.mock("uuid");
 
-const mockedUuid = uuid as jest.Mock;
+const mockedUuid = uuid as Mock;
 
 describe("RuuviTag Measurement Transformer", () => {
     const originalNow = Settings.now;
@@ -48,8 +49,8 @@ describe("RuuviTag Measurement Transformer", () => {
     afterEach(() => {
         Settings.now = originalNow;
 
-        jest.clearAllMocks();
-        jest.restoreAllMocks();
+        vi.clearAllMocks();
+        vi.restoreAllMocks();
     });
     describe("transformPeripheralToRuuviTagMeasurement()", () => {
         const peripheral = {

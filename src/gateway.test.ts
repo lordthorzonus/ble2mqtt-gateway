@@ -1,23 +1,24 @@
-import { Config } from "./config";
-import { gateway } from "./gateway";
-import { Logger } from "./infra/logger";
-import { MqttClient } from "./infra/mqtt-client";
-import { mockLogger, mockMqttClient } from "./test/test-context";
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { Config } from "./config.js";
+import { gateway } from "./gateway.js";
+import { Logger } from "./infra/logger.js";
+import { MqttClient } from "./infra/mqtt-client.js";
+import { mockLogger, mockMqttClient } from "./test/test-context.js";
 import { Settings } from "luxon";
 import { Data, Duration, Effect, Layer, Schedule, Stream } from "effect";
 import { v4 as uuid } from "uuid";
 
-const mockScan = jest.fn();
-const mockedUuid = uuid as jest.Mock;
+const mockScan = vi.fn();
+const mockedUuid = uuid as Mock;
 
-jest.mock("uuid");
+vi.mock("uuid");
 
 // The scanner module is mocked, so its error class is not importable here.
 class ScannerError extends Data.TaggedError("BleScannerError")<{ message: string }> {}
 
-jest.mock("./infra/ble-scanner", () => ({
+vi.mock("./infra/ble-scanner.js", () => ({
     __esModule: true,
-    scan: jest.fn(() => mockScan()),
+    scan: vi.fn(() => mockScan()),
 }));
 
 describe("gateway", () => {
@@ -203,7 +204,7 @@ describe("gateway", () => {
     };
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockScan.mockReset();
         mockMqttClient.publish.mockReset();
         Settings.now = () => new Date("2019-10-10T00:00:00.000Z").valueOf();
@@ -212,7 +213,7 @@ describe("gateway", () => {
     });
 
     afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
         Settings.now = originalNow;
     });
 
@@ -439,13 +440,13 @@ describe("gateway", () => {
     const runGatewayFor = async (durationMs: number, layer = testLayer) => {
         const controller = new AbortController();
         const run = Effect.runPromise(Effect.provide(Effect.scoped(gateway), layer), { signal: controller.signal });
-        await jest.advanceTimersByTimeAsync(durationMs);
+        await vi.advanceTimersByTimeAsync(durationMs);
         controller.abort();
         await expect(run).rejects.toBeDefined();
     };
 
     it("does not retry state messages and logs the publish failure with its cause", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         mockScan.mockReturnValue(Stream.fromIterable([ruuviPeripheral]));
         recordPublishes((message) => message.topic === "test/ruuvitag/aa:aa/state");
 
@@ -466,7 +467,7 @@ describe("gateway", () => {
     });
 
     it("retries retained messages a bounded number of times", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         mockScan.mockReturnValue(Stream.fromIterable([ruuviPeripheral]));
         recordPublishes((message) => message.topic === "test/ruuvitag/aa:aa/availability");
 
@@ -483,7 +484,7 @@ describe("gateway", () => {
     });
 
     it("does not let a retried message overwrite a newer message on the same topic", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         Settings.now = () => Date.now();
         const config = createConfig();
         config.unavailable_devices_check_interval_ms = 100;
@@ -509,7 +510,7 @@ describe("gateway", () => {
     });
 
     it("re-sends availability and discovery with the heartbeat after the availability publish was dropped", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         Settings.now = () => Date.now();
         const config = createConfig();
         const ruuvitagConfig = config.gateways.ruuvitag;
@@ -547,7 +548,7 @@ describe("gateway", () => {
     });
 
     it("restarts the scanner after a scanner failure and logs it", async () => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         let scanAttempts = 0;
         mockScan.mockReturnValue(
             Stream.suspend(() => {

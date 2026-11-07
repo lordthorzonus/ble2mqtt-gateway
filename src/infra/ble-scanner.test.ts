@@ -1,31 +1,36 @@
-import { EventEmitter } from "events";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+// vi.mock factories are hoisted above the imports, so the mock state must be hoisted with them.
+const { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStopScanning, mockNoble } =
+    await vi.hoisted(async () => {
+        const { EventEmitter } = await import("node:events");
+        const mockNobleEventEmitter = new EventEmitter();
+        const mockWaitForPoweredOn = vi.fn();
+        const mockStartScanning = vi.fn();
+        const mockStopScanning = vi.fn();
 
-const mockNobleEventEmitter = new EventEmitter();
-const mockWaitForPoweredOn = jest.fn();
-const mockStartScanning = jest.fn();
-const mockStopScanning = jest.fn();
+        const mockNoble = {
+            waitForPoweredOnAsync: () => mockWaitForPoweredOn(),
+            startScanningAsync: (...args: unknown[]) => mockStartScanning(...args),
+            stopScanningAsync: () => mockStopScanning(),
+            on: (eventName: string, callback: (event: unknown) => unknown) => {
+                mockNobleEventEmitter.on(eventName, callback);
+            },
+        };
 
-const mockNoble = {
-    waitForPoweredOnAsync: () => mockWaitForPoweredOn(),
-    startScanningAsync: (...args: unknown[]) => mockStartScanning(...args),
-    stopScanningAsync: () => mockStopScanning(),
-    on: (eventName: string, callback: (event: unknown) => unknown) => {
-        mockNobleEventEmitter.on(eventName, callback);
-    },
-};
+        return { mockNobleEventEmitter, mockWaitForPoweredOn, mockStartScanning, mockStopScanning, mockNoble };
+    });
 
-jest.mock("@stoprocent/noble", () => ({
-    __esModule: true,
+vi.mock("@stoprocent/noble", () => ({
     default: mockNoble,
 }));
 
 import { Effect, Stream } from "effect";
-import { scan } from "./ble-scanner";
-import { TestContext } from "../test/test-context";
+import { scan } from "./ble-scanner.js";
+import { TestContext } from "../test/test-context.js";
 
 describe("BLE Scanner", () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
         mockWaitForPoweredOn.mockResolvedValue(undefined);
         mockStartScanning.mockResolvedValue(undefined);
         mockStopScanning.mockResolvedValue(undefined);

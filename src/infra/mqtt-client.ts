@@ -1,9 +1,9 @@
 import * as mqtt from "mqtt";
 
-import { MqttMessage } from "../types";
+import { MqttMessage } from "../types.js";
 import { Data, Duration, Effect, Schedule } from "effect";
-import { Logger } from "./logger";
-import { Config } from "../config";
+import { Logger } from "./logger.js";
+import { Config } from "../config.js";
 
 const mqttClient = Effect.gen(function* () {
     const config = yield* Config;

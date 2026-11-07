@@ -1,4 +1,4 @@
-import { OralBModels } from "./gateways/oralb/oralb-sensor-data";
+import { OralBModels } from "./gateways/oralb/oralb-sensor-data.js";
 import { load } from "js-yaml";
 import fs from "fs";
 import { z, ZodError } from "zod";
@@ -117,7 +117,8 @@ export type OralBGatewayConfiguration = z.infer<typeof oralbSchema>;
 export type GlobalConfiguration = z.infer<typeof configSchema>;
 
 const getConfiguration: Effect.Effect<z.infer<typeof configSchema>, ConfigurationError> = Effect.gen(function* () {
-    const configurationFileLocation = process.env.CONFIG_FILE_LOCATION ?? `${__dirname}/../config/configuration.yaml`;
+    const configurationFileLocation =
+        process.env.CONFIG_FILE_LOCATION ?? `${import.meta.dirname}/../config/configuration.yaml`;
 
     const configurationFileContent = yield* Effect.try({
         try: () => fs.readFileSync(configurationFileLocation, "utf-8"),

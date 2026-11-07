@@ -1,4 +1,4 @@
-import { Peripheral } from "../../../infra/ble-scanner";
+import { Peripheral } from "../../../infra/ble-scanner.js";
 import {
     MiFloraMeasurement,
     parseIlluminanceEvent,
@@ -9,7 +9,7 @@ import {
     parseTemperatureEvent,
     InvalidMiFloraDataLengthError,
     MifloraMeasurementEventType,
-} from "./parsing-strategies";
+} from "./parsing-strategies.js";
 import { Data, Effect, Match } from "effect";
 
 export { InvalidMiFloraDataLengthError, MifloraMeasurementEventType };

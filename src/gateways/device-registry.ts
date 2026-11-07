@@ -1,5 +1,5 @@
-import { Device, DeviceType } from "../types";
-import { Peripheral } from "../infra/ble-scanner";
+import { Device, DeviceType } from "../types.js";
+import { Peripheral } from "../infra/ble-scanner.js";
 import { DateTime } from "luxon";
 
 export interface DeviceSettings {

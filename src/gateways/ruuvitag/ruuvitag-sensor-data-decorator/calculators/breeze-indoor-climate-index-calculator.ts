@@ -1,4 +1,4 @@
-import { Celsius, RelativeHumidity } from "../../../units";
+import { Celsius, RelativeHumidity } from "../../../units.js";
 import { Match } from "effect";
 
 export type BreezeIndoorClimateIndexDescription = "excellent" | "fine" | "moderate" | "poor" | "very-poor" | "severe";

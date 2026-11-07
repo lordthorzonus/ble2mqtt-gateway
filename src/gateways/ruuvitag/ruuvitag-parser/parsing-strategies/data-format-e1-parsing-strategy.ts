@@ -1,7 +1,7 @@
-import { asLux, asPM1, asPM10, asPM2_5, asPM4, Lux } from "../../../units";
-import { RuuviAirParsingStrategy, RuuviAirSensorData } from "../index";
+import { asLux, asPM1, asPM10, asPM2_5, asPM4, Lux } from "../../../units.js";
+import { RuuviAirParsingStrategy, RuuviAirSensorData } from "../index.js";
 import { Effect } from "effect";
-import { RuuvitagSensorProtocolDataFormat } from "../data-format";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format.js";
 import {
     parseTemperature,
     parseRelativeHumidity,
@@ -14,7 +14,7 @@ import {
     parseMacAddress48Bit,
     isInvalidMeasurementForUnsigned24BitInteger,
     requireMinimumLength,
-} from "./common-parsing-strategy-utils";
+} from "./common-parsing-strategy-utils.js";
 
 enum DataFormatE1Offset {
     Temperature = 3,

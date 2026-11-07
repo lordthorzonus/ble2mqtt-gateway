@@ -1,7 +1,7 @@
-import { gateway } from "./gateway";
-import { Config } from "./config";
-import { MqttClient } from "./infra/mqtt-client";
-import { Logger } from "./infra/logger";
+import { gateway } from "./gateway.js";
+import { Config } from "./config.js";
+import { MqttClient } from "./infra/mqtt-client.js";
+import { Logger } from "./infra/logger.js";
 import { Effect, Layer } from "effect";
 import { NodeRuntime } from "@effect/platform-node";
 process.stdin.resume();

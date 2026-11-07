@@ -1,4 +1,4 @@
-import { AQI, asAQI, CO2Ppm, PM2_5 } from "../../../units";
+import { AQI, asAQI, CO2Ppm, PM2_5 } from "../../../units.js";
 import { Match } from "effect";
 
 export type RuuviIAQSDescription = "excellent" | "good" | "fair" | "poor" | "very poor";

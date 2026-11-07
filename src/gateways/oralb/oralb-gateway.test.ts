@@ -1,16 +1,17 @@
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { Effect, Layer } from "effect";
-import { makeOralbDeviceRegistry, makeOralbGateway } from "./oralb-gateway";
+import { makeOralbDeviceRegistry, makeOralbGateway } from "./oralb-gateway.js";
 import { Settings } from "luxon";
 import { v4 as uuid } from "uuid";
-import { Peripheral } from "../../infra/ble-scanner";
-import { Logger } from "../../infra/logger";
-import { Config, GlobalConfiguration, OralBGatewayConfiguration } from "../../config";
-import { DeviceRegistryService } from "../gateway-helpers";
-import { getTestConfig } from "../../test/test-context";
-import { DeviceMessage, DeviceType, MessageType, OralBSensorMessage } from "../../types";
+import { Peripheral } from "../../infra/ble-scanner.js";
+import { Logger } from "../../infra/logger.js";
+import { Config, GlobalConfiguration, OralBGatewayConfiguration } from "../../config.js";
+import { DeviceRegistryService } from "../gateway-helpers.js";
+import { getTestConfig } from "../../test/test-context.js";
+import { DeviceMessage, DeviceType, MessageType, OralBSensorMessage } from "../../types.js";
 
-jest.mock("uuid");
-const mockedUuid = uuid as jest.Mock;
+vi.mock("uuid");
+const mockedUuid = uuid as Mock;
 const defaultTimeout = 60000;
 
 const validGatewayConfiguration: GlobalConfiguration["gateways"] = {

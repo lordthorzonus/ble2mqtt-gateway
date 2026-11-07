@@ -1,9 +1,9 @@
+import { describe, expect, it, vi, type Mock } from "vitest";
 import { Effect } from "effect";
-import Mock = jest.Mock;
 
-jest.mock("./parsing-strategies/data-format-3-parsing-strategy");
-jest.mock("./parsing-strategies/data-format-5-parsing-strategy");
-jest.mock("./parsing-strategies/data-format-6-parsing-strategy");
+vi.mock("./parsing-strategies/data-format-3-parsing-strategy.js");
+vi.mock("./parsing-strategies/data-format-5-parsing-strategy.js");
+vi.mock("./parsing-strategies/data-format-6-parsing-strategy.js");
 
 import {
     parse,
@@ -13,10 +13,10 @@ import {
     InvalidRuuviDataLengthError,
     RuuviAirParsingStrategy,
     parseRuuviDataFormat,
-} from "./index";
-import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy";
-import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy";
-import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy";
+} from "./index.js";
+import { DataFormat3ParsingStrategy } from "./parsing-strategies/data-format-3-parsing-strategy.js";
+import { DataFormat5ParsingStrategy } from "./parsing-strategies/data-format-5-parsing-strategy.js";
+import { DataFormat6ParsingStrategy } from "./parsing-strategies/data-format-6-parsing-strategy.js";
 
 describe("RuuviTagParser", () => {
     const ruuviTagDataParsingStrategyMap: [string, RuuviTagParsingStrategy | RuuviAirParsingStrategy][] = [

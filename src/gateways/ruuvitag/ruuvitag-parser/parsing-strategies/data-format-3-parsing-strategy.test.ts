@@ -1,8 +1,9 @@
-import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils";
+import { describe, expect, it } from "vitest";
+import { InvalidRuuviDataLengthError } from "./common-parsing-strategy-utils.js";
 import { Effect } from "effect";
-import { RuuviTagEnvironmentalSensorData } from "../index";
-import { DataFormat3ParsingStrategy } from "./data-format-3-parsing-strategy";
-import { asCelsius, asPascal, asRelativeHumidity } from "../../../units";
+import { RuuviTagEnvironmentalSensorData } from "../index.js";
+import { DataFormat3ParsingStrategy } from "./data-format-3-parsing-strategy.js";
+import { asCelsius, asPascal, asRelativeHumidity } from "../../../units.js";
 
 describe("Data Format 3 Parsing Strategy", () => {
     const testCases: [string, RuuviTagEnvironmentalSensorData][] = [

@@ -1,20 +1,20 @@
-import { Config } from "../config";
-import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag/ruuvitag-gateway";
-import { DeviceAvailabilityMessage, DeviceMessage } from "../types";
+import { Config } from "../config.js";
+import { makeRuuvitagDeviceRegistry, makeRuuvitagGateway } from "./ruuvitag/ruuvitag-gateway.js";
+import { DeviceAvailabilityMessage, DeviceMessage } from "../types.js";
 import {
     isMiFloraPeripheral,
     makeMiFloraDeviceRegistry,
     mifloraGatewayId,
     makeMiFloraGateway,
-} from "./miflora/miflora-gateway";
-import { makeOralbDeviceRegistry, makeOralbGateway } from "./oralb/oralb-gateway";
+} from "./miflora/miflora-gateway.js";
+import { makeOralbDeviceRegistry, makeOralbGateway } from "./oralb/oralb-gateway.js";
 import { Effect, Stream, Option, Data, Duration } from "effect";
-import { DeviceRegistry } from "./device-registry";
-import { DeviceRegistryService, streamAvailabilityHeartbeat, streamUnavailableDevices } from "./gateway-helpers";
-import { Logger } from "../infra/logger";
-import { ruuviTagManufacturerId } from "./ruuvitag/ruuvitag-parser";
-import { oralbManufacturerId } from "./oralb/oralb-parser";
-import { Peripheral } from "../infra/ble-scanner";
+import { DeviceRegistry } from "./device-registry.js";
+import { DeviceRegistryService, streamAvailabilityHeartbeat, streamUnavailableDevices } from "./gateway-helpers.js";
+import { Logger } from "../infra/logger.js";
+import { ruuviTagManufacturerId } from "./ruuvitag/ruuvitag-parser/index.js";
+import { oralbManufacturerId } from "./oralb/oralb-parser.js";
+import { Peripheral } from "../infra/ble-scanner.js";
 
 export interface Gateway {
     mapMessage: MapMessage;

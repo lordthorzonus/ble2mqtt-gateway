@@ -1,4 +1,4 @@
-import { Seconds, SectorNumber } from "../units";
+import { Seconds, SectorNumber } from "../units.js";
 
 /** Oral-B models that can be detected or configured as an override. */
 export const OralBModels = [

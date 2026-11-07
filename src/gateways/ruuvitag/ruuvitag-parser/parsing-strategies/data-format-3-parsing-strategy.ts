@@ -1,8 +1,8 @@
-import { asCelsius, asPascal, asRelativeHumidity, Celsius, Pascal, RelativeHumidity } from "../../../units";
-import { RuuviTagParsingStrategy, RuuviTagEnvironmentalSensorData } from "../index";
+import { asCelsius, asPascal, asRelativeHumidity, Celsius, Pascal, RelativeHumidity } from "../../../units.js";
+import { RuuviTagParsingStrategy, RuuviTagEnvironmentalSensorData } from "../index.js";
 import { Effect } from "effect";
-import { RuuvitagSensorProtocolDataFormat } from "../data-format";
-import { requireMinimumLength } from "./common-parsing-strategy-utils";
+import { RuuvitagSensorProtocolDataFormat } from "../data-format.js";
+import { requireMinimumLength } from "./common-parsing-strategy-utils.js";
 
 enum DataFormatV3Offset {
     Humidity = 3,

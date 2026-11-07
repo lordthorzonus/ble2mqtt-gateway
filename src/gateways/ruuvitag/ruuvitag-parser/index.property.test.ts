@@ -1,5 +1,6 @@
+import { describe, expect, it } from "vitest";
 import { Cause, Effect, Exit, FastCheck as fc, Option } from "effect";
-import { InvalidRuuviDataLengthError, parse, RuuvitagSensorProtocolDataFormat } from "./index";
+import { InvalidRuuviDataLengthError, parse, RuuvitagSensorProtocolDataFormat } from "./index.js";
 
 const RUUVI_MANUFACTURER_ID = [0x99, 0x04];
 

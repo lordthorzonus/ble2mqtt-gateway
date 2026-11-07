@@ -1,42 +1,43 @@
-import type { Peripheral } from "../infra/ble-scanner";
-import { DeviceType, MessageType } from "../types";
-import { Config, GlobalConfiguration } from "../config";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Peripheral } from "../infra/ble-scanner.js";
+import { DeviceType, MessageType } from "../types.js";
+import { Config, GlobalConfiguration } from "../config.js";
 import { Effect, Layer, Stream } from "effect";
 import { DateTime } from "luxon";
 
-const mockRuuvitagMapMessageFn = jest.fn();
-const mockMiFloraMapMessageFn = jest.fn();
-const mockRuuviUnavailableDevices = jest.fn();
-const mockMiFloraUnavailableDevices = jest.fn();
-const mockRuuviRegisterDeviceStatusPublished = jest.fn();
-const mockMiFloraRegisterDeviceStatusPublished = jest.fn();
+const mockRuuvitagMapMessageFn = vi.fn();
+const mockMiFloraMapMessageFn = vi.fn();
+const mockRuuviUnavailableDevices = vi.fn();
+const mockMiFloraUnavailableDevices = vi.fn();
+const mockRuuviRegisterDeviceStatusPublished = vi.fn();
+const mockMiFloraRegisterDeviceStatusPublished = vi.fn();
 
-jest.mock("./ruuvitag/ruuvitag-gateway", () => ({
+vi.mock("./ruuvitag/ruuvitag-gateway.js", () => ({
     __esModule: true,
-    makeRuuvitagGateway: jest.fn().mockImplementation(() => mockRuuvitagMapMessageFn),
-    makeRuuvitagDeviceRegistry: jest.fn().mockImplementation(() => ({
+    makeRuuvitagGateway: vi.fn().mockImplementation(() => mockRuuvitagMapMessageFn),
+    makeRuuvitagDeviceRegistry: vi.fn().mockImplementation(() => ({
         getUnavailableDevices: mockRuuviUnavailableDevices,
         registerDeviceStatusPublished: mockRuuviRegisterDeviceStatusPublished,
     })),
     ruuviTagManufacturerId: 0x0499,
 }));
 
-jest.mock("./miflora/miflora-gateway", () => ({
+vi.mock("./miflora/miflora-gateway.js", () => ({
     __esModule: true,
-    makeMiFloraGateway: jest.fn().mockImplementation(() => mockMiFloraMapMessageFn),
-    makeMiFloraDeviceRegistry: jest.fn().mockImplementation(() => ({
+    makeMiFloraGateway: vi.fn().mockImplementation(() => mockMiFloraMapMessageFn),
+    makeMiFloraDeviceRegistry: vi.fn().mockImplementation(() => ({
         getUnavailableDevices: mockMiFloraUnavailableDevices,
         registerDeviceStatusPublished: mockMiFloraRegisterDeviceStatusPublished,
     })),
     mifloraGatewayId: 0x95fe,
-    isMiFloraPeripheral: jest.fn().mockImplementation((peripheral) => peripheral.uuid === "miflora"),
+    isMiFloraPeripheral: vi.fn().mockImplementation((peripheral) => peripheral.uuid === "miflora"),
 }));
 
-import { makeBleGateway } from "./ble-gateway";
-import { makeRuuvitagGateway, makeRuuvitagDeviceRegistry } from "./ruuvitag/ruuvitag-gateway";
-import { makeMiFloraGateway, makeMiFloraDeviceRegistry } from "./miflora/miflora-gateway";
-import { Logger } from "../infra/logger";
-import { mockLogger } from "../test/test-context";
+import { makeBleGateway } from "./ble-gateway.js";
+import { makeRuuvitagGateway, makeRuuvitagDeviceRegistry } from "./ruuvitag/ruuvitag-gateway.js";
+import { makeMiFloraGateway, makeMiFloraDeviceRegistry } from "./miflora/miflora-gateway.js";
+import { Logger } from "../infra/logger.js";
+import { mockLogger } from "../test/test-context.js";
 
 describe("BLE Gateway", () => {
     const validGatewayConfiguration: GlobalConfiguration["gateways"] = {
@@ -163,7 +164,7 @@ describe("BLE Gateway", () => {
     };
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
     });
 
     const TestLayer = Layer.mergeAll(

@@ -1,4 +1,4 @@
-import { Celsius, RelativeHumidity } from "../../../units";
+import { Celsius, RelativeHumidity } from "../../../units.js";
 
 const HeatIndexConstantsCelsius = {
     c1: -8.78469475556,

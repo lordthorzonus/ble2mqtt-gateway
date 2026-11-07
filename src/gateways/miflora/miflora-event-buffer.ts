@@ -1,6 +1,6 @@
-import { MiFloraMeasurement } from "./miflora-parser/parsing-strategies";
-import { MifloraMeasurementEventType, SupportedMiFloraMeasurements } from "./miflora-parser";
-import { ConfiguredMiFloraSensors } from "./miflora-gateway";
+import { MiFloraMeasurement } from "./miflora-parser/parsing-strategies.js";
+import { MifloraMeasurementEventType, SupportedMiFloraMeasurements } from "./miflora-parser/index.js";
+import { ConfiguredMiFloraSensors } from "./miflora-gateway.js";
 import { DateTime } from "luxon";
 
 export interface MiFloraSensorMeasurementBuffer {

@@ -2,7 +2,7 @@
 
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
-import jestPlugin from "eslint-plugin-jest";
+import vitest from "@vitest/eslint-plugin";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 
@@ -42,22 +42,17 @@ export default tseslint.config(
     },
     {
         files: ["**/*.test.ts"],
-        ...jestPlugin.configs["flat/recommended"],
-        ...jestPlugin.configs["flat/style"],
-        plugins: {
-            jest: jestPlugin,
-        },
+        ...vitest.configs.recommended,
         rules: {
-            ...jestPlugin.configs.recommended.rules,
-            ...jestPlugin.configs.style.rules,
+            ...vitest.configs.recommended.rules,
+            "vitest/prefer-to-be": "error",
+            "vitest/prefer-to-contain": "error",
+            "vitest/prefer-to-have-length": "error",
+            "vitest/expect-expect": "off",
             "@typescript-eslint/no-unsafe-call": "off",
             "@typescript-eslint/no-unsafe-member-access": "off",
             "@typescript-eslint/no-unsafe-assignment": "off",
             "@typescript-eslint/no-unsafe-return": "off",
-            "@typescript-eslint/no-var-requires": "off",
-            "jest/no-done-callback": "off",
-            "jest/expect-expect": "off",
-            "jest/no-export": "off",
         },
     }
 );

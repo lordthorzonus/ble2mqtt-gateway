@@ -1,6 +1,6 @@
 import { createLogger, format, transports } from "winston";
 import { Effect } from "effect";
-import { Config } from "../config";
+import { Config } from "../config.js";
 
 export type LoggerInterface = ReturnType<typeof createLogger>;
 export class Logger extends Effect.Service<Logger>()("Logger", {

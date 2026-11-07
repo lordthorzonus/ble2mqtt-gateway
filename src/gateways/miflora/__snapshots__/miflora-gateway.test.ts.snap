@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Illuminance event as the first advertisement from the sensor 1`] = `
+exports[`MiFlora Gateway > handleBleAdvertisement() > should produce an availability message when receiving Illuminance event as the first advertisement from the sensor 1`] = `
 [
   {
     "device": {
@@ -22,7 +22,7 @@ exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability
 ]
 `;
 
-exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Moisture event as the first advertisement from the sensor 1`] = `
+exports[`MiFlora Gateway > handleBleAdvertisement() > should produce an availability message when receiving Moisture event as the first advertisement from the sensor 1`] = `
 [
   {
     "device": {
@@ -44,7 +44,7 @@ exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability
 ]
 `;
 
-exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Soil Conductivity event as the first advertisement from the sensor 1`] = `
+exports[`MiFlora Gateway > handleBleAdvertisement() > should produce an availability message when receiving Soil Conductivity event as the first advertisement from the sensor 1`] = `
 [
   {
     "device": {
@@ -66,7 +66,7 @@ exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability
 ]
 `;
 
-exports[`MiFlora Gateway handleBleAdvertisement() should produce an availability message when receiving Temperature event as the first advertisement from the sensor 1`] = `
+exports[`MiFlora Gateway > handleBleAdvertisement() > should produce an availability message when receiving Temperature event as the first advertisement from the sensor 1`] = `
 [
   {
     "device": {

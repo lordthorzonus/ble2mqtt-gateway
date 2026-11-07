@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Config Config should return the proper configuration given in the env variable 1`] = `
+exports[`Config > Config > should return the proper configuration given in the env variable 1`] = `
 Config {
   "concurrency": {
     "mqtt_message_production": "unbounded",

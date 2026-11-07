@@ -2,8 +2,8 @@
 
 ## Verification
 
-- Run all tests with `npm test`, or a single file with `npm test -- --runTestsByPath src/config.test.ts`.
-- For code changes, run the affected tests, `npm run build`, and `npm run lint`. Report failures and any checks not run, with reasons.
+- Run all tests with `npm test`, or a single file with `npm test -- src/config.test.ts`. Tests use Vitest.
+- For code changes, run the affected tests, `npm run typecheck`, `npm run build`, and `npm run lint`. Report failures and any checks not run, with reasons.
 - For runtime debugging, see the development modes in `README.md`. These scan real BLE devices but log instead of publishing MQTT messages.
 
 ## Code conventions

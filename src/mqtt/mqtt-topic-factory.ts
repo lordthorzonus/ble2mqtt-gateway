@@ -1,4 +1,4 @@
-import { Device } from "../types";
+import { Device } from "../types.js";
 
 export const getDeviceStateTopic = (device: Device, mqttGatewayBaseTopic: string): string =>
     `${mqttGatewayBaseTopic}/${device.type}/${device.id}/state`;

@@ -4,11 +4,11 @@ import {
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDevice,
-} from "../../../types";
+} from "../../../types.js";
 import {
     EnhancedRuuviAirSensorData,
     EnhancedRuuviTagEnvironmentalSensorData,
-} from "../../../gateways/ruuvitag/ruuvitag-sensor-data-decorator";
+} from "../../../gateways/ruuvitag/ruuvitag-sensor-data-decorator/index.js";
 
 const ruuviTagDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = {
     manufacturer: "Ruuvi Innovations Oy",

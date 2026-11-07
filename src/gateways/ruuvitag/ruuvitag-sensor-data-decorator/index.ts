@@ -1,15 +1,15 @@
-import { RuuviAirSensorData, RuuviTagEnvironmentalSensorData } from "../ruuvitag-parser";
-import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calculator";
-import { RuuviIAQSDescription, calculateRuuviIAQS } from "./calculators/ruuvi-iaqs-calculator";
-import { AtmoTubeAQIDescription, calculateAtmoTubeIAQI } from "./calculators/atmotube-aqi-calculator";
-import { calculateDewPoint } from "./calculators/dew-point-calculator";
-import { calculateHeatIndex } from "./calculators/heat-index-calculator";
-import { calculateHumidex } from "./calculators/humidex-calculator";
+import { RuuviAirSensorData, RuuviTagEnvironmentalSensorData } from "../ruuvitag-parser/index.js";
+import { calculateAbsoluteHumidity } from "./calculators/absolute-humidity-calculator.js";
+import { RuuviIAQSDescription, calculateRuuviIAQS } from "./calculators/ruuvi-iaqs-calculator.js";
+import { AtmoTubeAQIDescription, calculateAtmoTubeIAQI } from "./calculators/atmotube-aqi-calculator.js";
+import { calculateDewPoint } from "./calculators/dew-point-calculator.js";
+import { calculateHeatIndex } from "./calculators/heat-index-calculator.js";
+import { calculateHumidex } from "./calculators/humidex-calculator.js";
 import {
     BreezeIndoorClimateIndexDescription,
     calculateBreezeIndoorClimateIndex,
-} from "./calculators/breeze-indoor-climate-index-calculator";
-import { AQI } from "../../units";
+} from "./calculators/breeze-indoor-climate-index-calculator.js";
+import { AQI } from "../../units.js";
 
 interface SharedEnhancedRuuviTagSensorData {
     humidex: number | null;

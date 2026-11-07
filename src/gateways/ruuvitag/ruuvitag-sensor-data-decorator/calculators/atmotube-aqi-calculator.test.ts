@@ -1,5 +1,6 @@
-import { calculateAtmoTubeIAQI } from "./atmotube-aqi-calculator";
-import { asCO2Ppm, asNOxIndex, asPM1, asPM10, asPM2_5, asVOCIndex } from "../../../units";
+import { describe, expect, it } from "vitest";
+import { calculateAtmoTubeIAQI } from "./atmotube-aqi-calculator.js";
+import { asCO2Ppm, asNOxIndex, asPM1, asPM10, asPM2_5, asVOCIndex } from "../../../units.js";
 
 describe("AtmoTube IAQI Calculator", () => {
     describe("Individual pollutant AQI calculation", () => {

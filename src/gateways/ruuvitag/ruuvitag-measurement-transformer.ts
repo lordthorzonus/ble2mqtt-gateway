@@ -1,16 +1,16 @@
 import { v4 as uuid } from "uuid";
-import { RuuviTagEnvironmentalSensorData, RuuviAirSensorData, RuuviTagSensorData } from "./ruuvitag-parser";
+import { RuuviTagEnvironmentalSensorData, RuuviAirSensorData, RuuviTagSensorData } from "./ruuvitag-parser/index.js";
 import {
     EnhancedRuuviTagSensorData,
     decorateRuuviTagEnvironmentalSensorDataWithCalculatedValues,
     decorateRuuviTagAirQualitySensorDataWithCalculatedValues,
-} from "./ruuvitag-sensor-data-decorator";
-import { MessageType, DeviceType, RuuvitagSensorMessage } from "../../types";
+} from "./ruuvitag-sensor-data-decorator/index.js";
+import { MessageType, DeviceType, RuuvitagSensorMessage } from "../../types.js";
 import { DateTime } from "luxon";
-import { DeviceRegistryEntry } from "../device-registry";
-import { formatEnvironmentalSensorValues, formatAirQualitySensorValues } from "./ruuvitag-measurement-formatter";
+import { DeviceRegistryEntry } from "../device-registry.js";
+import { formatEnvironmentalSensorValues, formatAirQualitySensorValues } from "./ruuvitag-measurement-formatter.js";
 import { Match, Option, pipe } from "effect";
-import { PeripheralWithManufacturerData } from "../gateway-helpers";
+import { PeripheralWithManufacturerData } from "../gateway-helpers.js";
 
 export interface RuuviTag {
     macAddress: string;

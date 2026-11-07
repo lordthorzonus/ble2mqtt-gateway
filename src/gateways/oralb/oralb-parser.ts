@@ -6,8 +6,8 @@ import {
     OralBPressure,
     ResolvedOralBModel,
     UNKNOWN_ORALB_MODEL,
-} from "./oralb-sensor-data";
-import { asSeconds, asSectorNumber } from "../units";
+} from "./oralb-sensor-data.js";
+import { asSeconds, asSectorNumber } from "../units.js";
 
 /** Bluetooth company identifier used by Oral-B toothbrushes (Procter & Gamble). */
 export const oralbManufacturerId = 220; // 0x00DC

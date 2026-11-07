@@ -1,9 +1,5 @@
-const mockGetConfiguration = jest.fn();
-
-jest.mock("../config", () => ({
-    __esModule: true,
-    getConfiguration: mockGetConfiguration,
-}));
+import { describe, expect, it } from "vitest";
+import { formatNumericSensorValue } from "./numeric-sensor-value-formatter.js";
 
 describe("formatNumericSensorValue", () => {
     const testCases = [
@@ -17,27 +13,16 @@ describe("formatNumericSensorValue", () => {
         // prettier-ignore
         [1.00, 2, 1],
         [-1.2346, 4, -1.23456789],
-    ];
-
-    afterEach(() => {
-        jest.resetAllMocks();
-        jest.resetModules();
-    });
+    ] as const;
 
     it.each(testCases)(
         "should format the value to %d when the decimal precision is %d",
         (expectedValue, decimalPrecision, givenValue) => {
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            const formatNumericSensorValue = require("./numeric-sensor-value-formatter").formatNumericSensorValue;
-
             expect(formatNumericSensorValue(givenValue, decimalPrecision)).toBe(expectedValue);
         }
     );
 
     it("should handle zero and null", () => {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const formatNumericSensorValue = require("./numeric-sensor-value-formatter").formatNumericSensorValue;
-
         expect(formatNumericSensorValue(0, 2)).toBe(0);
         expect(formatNumericSensorValue(null, 2)).toBeNull();
     });

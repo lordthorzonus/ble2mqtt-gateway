@@ -3,8 +3,8 @@ import {
     HomeAssistantMQTTComponent,
     HomeAssistantSensorConfiguration,
     HomeAssistantSensorConfigurationForDevice,
-} from "../../../types";
-import { OralBSensorData } from "../../../gateways/oralb/oralb-sensor-data";
+} from "../../../types.js";
+import { OralBSensorData } from "../../../gateways/oralb/oralb-sensor-data.js";
 
 const oralbDeviceConfiguration: HomeAssistantSensorConfiguration["device"] = {
     manufacturer: "Oral-B",

@@ -1,4 +1,4 @@
-import { AQI, asAQI, CO2Ppm, NOxIndex, PM1, PM10, PM2_5, VOCIndex } from "../../../units";
+import { AQI, asAQI, CO2Ppm, NOxIndex, PM1, PM10, PM2_5, VOCIndex } from "../../../units.js";
 import { Match } from "effect";
 
 export type AtmoTubeAQIDescription = "good" | "moderate" | "polluted" | "very-polluted" | "severely-polluted";

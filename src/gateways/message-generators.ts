@@ -1,6 +1,6 @@
-import { DeviceRegistryEntry } from "./device-registry";
-import { Peripheral } from "../infra/ble-scanner";
-import { DeviceAvailabilityMessage, MessageType } from "../types";
+import { DeviceRegistryEntry } from "./device-registry.js";
+import { Peripheral } from "../infra/ble-scanner.js";
+import { DeviceAvailabilityMessage, MessageType } from "../types.js";
 import { v4 as uuid } from "uuid";
 import { DateTime } from "luxon";
 

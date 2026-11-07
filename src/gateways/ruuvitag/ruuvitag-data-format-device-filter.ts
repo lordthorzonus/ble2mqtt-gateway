@@ -1,4 +1,4 @@
-import { RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser";
+import { RuuvitagSensorProtocolDataFormat } from "./ruuvitag-parser/index.js";
 import { DateTime, Duration } from "luxon";
 
 const PACKET_DEDUPLICATION_TTL = Duration.fromObject({
