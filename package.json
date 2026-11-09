@@ -52,7 +52,7 @@
         "@types/ws": "8.18.2",
         "@vitest/coverage-v8": "5.1.0",
         "fast-check": "4.10.2",
-        "oxfmt": "0.77.0",
+        "oxfmt": "0.78.0",
         "oxlint": "1.92.0",
         "oxlint-tsgolint": "7.0.2006",
         "tsx": "4.23.15",
