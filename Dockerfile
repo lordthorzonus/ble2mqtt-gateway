@@ -1,4 +1,4 @@
-ARG NODE_VERSION=22.23.4-alpine
+ARG NODE_VERSION=22.23.5-alpine
 
 FROM node:${NODE_VERSION} as base
 RUN apk add --no-cache --update \
