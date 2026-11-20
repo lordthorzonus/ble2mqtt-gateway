@@ -41,7 +41,7 @@
         "zod": "4.6.7"
     },
     "devDependencies": {
-        "@effect/tsgo": "0.70.0",
+        "@effect/tsgo": "0.73.2",
         "@oxlint/plugins": "1.94.0",
         "@types/js-yaml": "4.0.9",
         "@types/lodash": "4.17.27",
