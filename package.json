@@ -41,7 +41,7 @@
         "zod": "4.6.7"
     },
     "devDependencies": {
-        "@effect/tsgo": "0.73.2",
+        "@effect/tsgo": "0.73.4",
         "@oxlint/plugins": "1.94.0",
         "@types/js-yaml": "4.0.9",
         "@types/lodash": "4.17.27",
@@ -54,7 +54,7 @@
         "fast-check": "4.11.0",
         "oxfmt": "0.79.0",
         "oxlint": "1.94.0",
-        "oxlint-tsgolint": "7.0.2007",
+        "oxlint-tsgolint": "7.0.2008",
         "tsx": "4.23.15",
         "typescript": "7.0.2",
         "vitest": "5.1.1"
